@@ -136,6 +136,28 @@ static std::string stripFxColors(const std::string& s) {
     return out;
 }
 
+static std::string cleanDynamicHostname(const std::string& raw) {
+    std::string name = trim(stripFxColors(raw));
+    if (name.empty() || iequals(name, "default FXServer") ||
+        iequals(name, "FXServer, but unconfigured"))
+        return "";
+    return name;
+}
+
+std::string FiveMDumper::probeDynamicHostname(const std::string& baseUrl, int timeoutMs) {
+    HttpClient hc;
+    hc.setHeader("User-Agent", "CitizenFX/1");
+    hc.setTimeouts(timeoutMs, timeoutMs, timeoutMs, timeoutMs);
+    auto resp = hc.get(baseUrl + "/dynamic.json");
+    if (!resp.ok()) return "";
+    try {
+        Json js = Json::parse(std::string(resp.body.begin(), resp.body.end()));
+        return cleanDynamicHostname(js.strAt("hostname", ""));
+    } catch (const std::exception&) {
+        return "";
+    }
+}
+
 bool FiveMDumper::fetchDynamicHostname() {
     auto resp = http_.get(baseUrl_ + "/dynamic.json");
     if (!resp.ok()) {
@@ -150,9 +172,8 @@ bool FiveMDumper::fetchDynamicHostname() {
         LOG(std::string("dynamic.json parse error: ") + e.what(), LogLevel::WARNING);
         return false;
     }
-    std::string name = trim(stripFxColors(js.strAt("hostname", "")));
-    if (name.empty() || iequals(name, "default FXServer") ||
-        iequals(name, "FXServer, but unconfigured")) {
+    std::string name = cleanDynamicHostname(js.strAt("hostname", ""));
+    if (name.empty()) {
         LOG("dynamic.json: no usable hostname in response", LogLevel::WARNING);
         return false;
     }

@@ -3,6 +3,7 @@
 #include <string>
 #include <cstdlib>
 #include <memory>
+#include <future>
 #include <vector>
 #include <filesystem>
 
@@ -102,11 +103,25 @@ int main(int argc, char** argv) {
                 ip = trim(in);
             } else {
                 std::cout << "\n[+] Found " << ips.size() << " IP(s) in memory:\n";
+                std::cout << "[*] Servernevek lekérdezése (/dynamic.json)...\n";
+                std::vector<std::future<std::string>> nameProbes;
+                nameProbes.reserve(ips.size());
+                for (auto& candidate : ips) {
+                    std::string cached = getCachedServerName(candidate);
+                    if (!cached.empty() && cached != candidate) {
+                        nameProbes.push_back(std::async(std::launch::deferred, [candidate, cached]() { return cached; }));
+                    } else {
+                        std::string url = "http://" + candidate;
+                        nameProbes.push_back(std::async(std::launch::async,
+                            [url]() { return FiveMDumper::probeDynamicHostname(url, 5000); }));
+                    }
+                }
                 std::cout << std::string(60, '-') << "\n";
                 for (size_t i = 0; i < ips.size(); ++i) {
-                    std::string cached = getCachedServerName(ips[i]);
+                    std::string name = nameProbes[i].get();
+                    if (!name.empty() && name != getCachedServerName(ips[i])) saveServerName(ips[i], name);
                     std::cout << "  [" << (i + 1) << "] " << ips[i];
-                    if (!cached.empty()) std::cout << "  (" << cached << ")";
+                    if (!name.empty()) std::cout << "  (" << name << ")";
                     std::cout << "\n";
                 }
                 std::cout << "  [0] Manual IP entry\n" << std::string(60, '-') << "\n";

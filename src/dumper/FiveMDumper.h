@@ -34,6 +34,10 @@ public:
     // Sets hostname_ on success. Returns true when a usable name was found.
     bool fetchDynamicHostname();
 
+    // Stateless variant for probing servers not selected yet (IP list labels):
+    // own short-timeout HTTP client; returns cleaned name or "".
+    static std::string probeDynamicHostname(const std::string& baseUrl, int timeoutMs);
+
     // Download a single resource (files + streamFiles) into Unpacked/Temp dirs.
     void fetchResource(const ResourceInfo& res);
 
