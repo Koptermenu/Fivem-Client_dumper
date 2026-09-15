@@ -145,10 +145,8 @@ static std::string cleanDynamicHostname(const std::string& raw) {
 }
 
 std::string FiveMDumper::probeDynamicHostname(const std::string& baseUrl, int timeoutMs) {
-    HttpClient hc;
-    hc.setHeader("User-Agent", "CitizenFX/1");
-    hc.setTimeouts(timeoutMs, timeoutMs, timeoutMs, timeoutMs);
-    auto resp = hc.get(baseUrl + "/dynamic.json");
+    auto resp = HttpClient::plainGetRaw(baseUrl + "/dynamic.json", {{"User-Agent", "CitizenFX/1"}},
+                                        timeoutMs, timeoutMs);
     if (!resp.ok()) return "";
     try {
         Json js = Json::parse(std::string(resp.body.begin(), resp.body.end()));

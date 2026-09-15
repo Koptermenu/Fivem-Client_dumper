@@ -35,6 +35,13 @@ public:
                      const std::map<std::string, std::string>& headers = {},
                      const ByteProgress& onProgress = nullptr);
 
+    // One-shot plain-HTTP GET over raw Winsock with hard connect/receive
+    // deadlines (no WinHTTP connect-retry overshoot). For short anonymous
+    // probes like /dynamic.json. Returns error for https urls.
+    static HttpResponse plainGetRaw(const std::string& url,
+                                    const std::map<std::string, std::string>& headers,
+                                    int connectMs, int recvMs);
+
     void setHeader(const std::string& key, const std::string& value);
 
     // resolve, connect, send, receive timeouts in ms (default 15/30/30/30 s)

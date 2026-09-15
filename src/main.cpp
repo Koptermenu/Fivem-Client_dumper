@@ -113,7 +113,7 @@ int main(int argc, char** argv) {
                     } else {
                         std::string url = "http://" + candidate;
                         nameProbes.push_back(std::async(std::launch::async,
-                            [url]() { return FiveMDumper::probeDynamicHostname(url, 5000); }));
+                            [url]() { return FiveMDumper::probeDynamicHostname(url, 3000); }));
                     }
                 }
                 std::cout << std::string(60, '-') << "\n";

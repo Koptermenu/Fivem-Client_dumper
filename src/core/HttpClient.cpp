@@ -5,6 +5,7 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <cctype>
+#include <chrono>
 #include <cstdlib>
 #include <cstring>
 #include <mutex>
@@ -76,23 +77,29 @@ std::string wideToUtf8(const std::wstring& w) {
     return s;
 }
 
-// Plain-HTTP POST over raw Winsock, written as ONE TCP segment. Some
-// (older/custom) FXServer builds never answer when the request body arrives
-// in a separate segment from the headers, which is what WinHTTP always does.
-HttpResponse httpPostRaw(const std::string& host, INTERNET_PORT port, const std::string& path,
-                         const std::map<std::string, std::string>& headers,
-                         const std::vector<uint8_t>& body, int connectMs, int recvMs) {
+// Plain-HTTP GET/POST over raw Winsock, written as ONE TCP segment with hard
+// connect/receive deadlines. Some (older/custom) FXServer builds never answer
+// when the request body arrives in a separate segment from the headers, which
+// is what WinHTTP always does; WinHTTP also retries TCP connect internally and
+// can overshoot any configured timeout by ~20s on blackholed IPs.
+HttpResponse httpRawRequest(const std::string& method, const std::string& host, INTERNET_PORT port,
+                            const std::string& path, const std::map<std::string, std::string>& headers,
+                            const std::vector<uint8_t>* body, int connectMs, int recvMs) {
     HttpResponse resp;
     ensureWinsock();
+    auto started = std::chrono::steady_clock::now();
 
-    std::string req = "POST " + path + " HTTP/1.1\r\nHost: " + host + ":" + std::to_string(port) + "\r\n";
+    std::string req = method + " " + path + " HTTP/1.1\r\nHost: " + host + ":" + std::to_string(port) + "\r\n";
     for (const auto& kv : headers) {
         std::string value;
         for (char c : kv.second) if (c != '\r' && c != '\n') value += c;
         req += kv.first + ": " + value + "\r\n";
     }
-    req += "Content-Length: " + std::to_string(body.size()) + "\r\nConnection: close\r\n\r\n";
-    req.append(reinterpret_cast<const char*>(body.data()), body.size());
+    if (body) {
+        req += "Content-Length: " + std::to_string(body->size()) + "\r\n";
+    }
+    req += "Connection: close\r\n\r\n";
+    if (body) req.append(reinterpret_cast<const char*>(body->data()), body->size());
 
     addrinfo hints{};
     hints.ai_family = AF_UNSPEC;
@@ -106,6 +113,10 @@ HttpResponse httpPostRaw(const std::string& host, INTERNET_PORT port, const std:
 
     SOCKET s = INVALID_SOCKET;
     for (addrinfo* ai = res; ai; ai = ai->ai_next) {
+        long connectRemain = static_cast<long>(connectMs) -
+            std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::steady_clock::now() - started).count();
+        if (connectRemain < 100) { connectRemain = 100; }
         s = ::socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
         if (s == INVALID_SOCKET) continue;
         u_long nonblk = 1;
@@ -116,7 +127,8 @@ HttpResponse httpPostRaw(const std::string& host, INTERNET_PORT port, const std:
             fd_set wf;
             FD_ZERO(&wf);
             FD_SET(s, &wf);
-            timeval tv{connectMs / 1000, (connectMs % 1000) * 1000};
+            timeval tv{static_cast<long>(connectRemain / 1000),
+                       static_cast<long>((connectRemain % 1000) * 1000)};
             if (select(0, nullptr, &wf, nullptr, &tv) == 1) {
                 int err = 0;
                 int len = sizeof(err);
@@ -139,7 +151,16 @@ HttpResponse httpPostRaw(const std::string& host, INTERNET_PORT port, const std:
         return resp;
     }
 
-    DWORD tv = static_cast<DWORD>(recvMs);
+    // connectMs and recvMs are phases of ONE total deadline.
+    auto elapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(
+                         std::chrono::steady_clock::now() - started).count();
+    long remain = static_cast<long>(recvMs) - static_cast<long>(elapsedMs);
+    if (remain < 100) {
+        resp.error = "connect failed: " + host;
+        closesocket(s);
+        return resp;
+    }
+    DWORD tv = static_cast<DWORD>(remain);
     setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, reinterpret_cast<const char*>(&tv), sizeof(tv));
 
     auto fail = [&](const std::string& msg) {
@@ -256,8 +277,8 @@ HttpResponse HttpClient::request(const std::string& method, const std::string& u
     if (body && !parts.https) {
         auto merged = defaultHeaders_;
         for (const auto& kv : headers) merged[kv.first] = kv.second;
-        return httpPostRaw(wideToUtf8(parts.host), parts.port, wideToUtf8(parts.path),
-                           merged, *body, timeouts_[1], timeouts_[3]);
+        return httpRawRequest("POST", wideToUtf8(parts.host), parts.port, wideToUtf8(parts.path),
+                              merged, body, timeouts_[1], timeouts_[3]);
     }
 
     HINTERNET connect = WinHttpConnect(static_cast<HINTERNET>(session_), parts.host.c_str(),
@@ -347,6 +368,19 @@ HttpResponse HttpClient::postForm(const std::string& url, const std::string& for
 HttpResponse HttpClient::get(const std::string& url, const std::map<std::string, std::string>& headers,
                              const ByteProgress& onProgress) {
     return request("GET", url, nullptr, headers, onProgress);
+}
+
+HttpResponse HttpClient::plainGetRaw(const std::string& url,
+                                     const std::map<std::string, std::string>& headers,
+                                     int connectMs, int recvMs) {
+    HttpResponse resp;
+    UrlParts parts;
+    if (!parseUrl(url, parts) || parts.https) {
+        resp.error = "plainGetRaw requires a plain http url: " + url;
+        return resp;
+    }
+    return httpRawRequest("GET", wideToUtf8(parts.host), parts.port, wideToUtf8(parts.path),
+                          headers, nullptr, connectMs, recvMs);
 }
 
 } // namespace fivem
