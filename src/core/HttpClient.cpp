@@ -2,13 +2,27 @@
 
 #include <windows.h>
 #include <winhttp.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#include <cctype>
+#include <cstdlib>
 #include <cstring>
+#include <mutex>
 
 #pragma comment(lib, "winhttp.lib")
+#pragma comment(lib, "ws2_32.lib")
 
 namespace fivem {
 
 namespace {
+
+void ensureWinsock() {
+    static std::once_flag once;
+    std::call_once(once, [] {
+        WSADATA d;
+        WSAStartup(MAKEWORD(2, 2), &d);
+    });
+}
 
 struct UrlParts {
     bool https = false;
@@ -62,6 +76,153 @@ std::string wideToUtf8(const std::wstring& w) {
     return s;
 }
 
+// Plain-HTTP POST over raw Winsock, written as ONE TCP segment. Some
+// (older/custom) FXServer builds never answer when the request body arrives
+// in a separate segment from the headers, which is what WinHTTP always does.
+HttpResponse httpPostRaw(const std::string& host, INTERNET_PORT port, const std::string& path,
+                         const std::map<std::string, std::string>& headers,
+                         const std::vector<uint8_t>& body, int connectMs, int recvMs) {
+    HttpResponse resp;
+    ensureWinsock();
+
+    std::string req = "POST " + path + " HTTP/1.1\r\nHost: " + host + ":" + std::to_string(port) + "\r\n";
+    for (const auto& kv : headers) {
+        std::string value;
+        for (char c : kv.second) if (c != '\r' && c != '\n') value += c;
+        req += kv.first + ": " + value + "\r\n";
+    }
+    req += "Content-Length: " + std::to_string(body.size()) + "\r\nConnection: close\r\n\r\n";
+    req.append(reinterpret_cast<const char*>(body.data()), body.size());
+
+    addrinfo hints{};
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_protocol = IPPROTO_TCP;
+    addrinfo* res = nullptr;
+    if (getaddrinfo(host.c_str(), std::to_string(port).c_str(), &hints, &res) != 0 || !res) {
+        resp.error = "resolve failed: " + host;
+        return resp;
+    }
+
+    SOCKET s = INVALID_SOCKET;
+    for (addrinfo* ai = res; ai; ai = ai->ai_next) {
+        s = ::socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
+        if (s == INVALID_SOCKET) continue;
+        u_long nonblk = 1;
+        ioctlsocket(s, FIONBIO, &nonblk);
+        int rc = ::connect(s, ai->ai_addr, (int)ai->ai_addrlen);
+        bool ready = (rc == 0);
+        if (!ready && WSAGetLastError() == WSAEWOULDBLOCK) {
+            fd_set wf;
+            FD_ZERO(&wf);
+            FD_SET(s, &wf);
+            timeval tv{connectMs / 1000, (connectMs % 1000) * 1000};
+            if (select(0, nullptr, &wf, nullptr, &tv) == 1) {
+                int err = 0;
+                int len = sizeof(err);
+                getsockopt(s, SOL_SOCKET, SO_ERROR, reinterpret_cast<char*>(&err), &len);
+                ready = (err == 0);
+            }
+        }
+        if (!ready) {
+            closesocket(s);
+            s = INVALID_SOCKET;
+            continue;
+        }
+        u_long blk = 0;
+        ioctlsocket(s, FIONBIO, &blk);
+        break;
+    }
+    freeaddrinfo(res);
+    if (s == INVALID_SOCKET) {
+        resp.error = "connect failed: " + host;
+        return resp;
+    }
+
+    DWORD tv = static_cast<DWORD>(recvMs);
+    setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, reinterpret_cast<const char*>(&tv), sizeof(tv));
+
+    auto fail = [&](const std::string& msg) {
+        resp.error = msg;
+        closesocket(s);
+        return resp;
+    };
+
+    size_t off = 0;
+    while (off < req.size()) {
+        int n = ::send(s, req.data() + off, static_cast<int>(req.size() - off), 0);
+        if (n == SOCKET_ERROR) return fail("send failed (" + std::to_string(WSAGetLastError()) + ")");
+        off += static_cast<size_t>(n);
+    }
+
+    auto pull = [&](std::string& buf) -> int {
+        char tmp[8192];
+        int n = ::recv(s, tmp, sizeof(tmp), 0);
+        if (n > 0) buf.append(tmp, static_cast<size_t>(n));
+        return n;
+    };
+
+    std::string buf;
+    size_t hdrEnd = std::string::npos;
+    while (hdrEnd == std::string::npos) {
+        int n = pull(buf);
+        if (n <= 0) return fail(n < 0 ? "receive failed (" + std::to_string(WSAGetLastError()) + ")"
+                                      : "empty response from server");
+        hdrEnd = buf.find("\r\n\r\n");
+        if (hdrEnd == std::string::npos && buf.size() > (1u << 20)) return fail("response headers too large");
+    }
+    hdrEnd += 4;
+
+    std::string head = buf.substr(0, hdrEnd);
+    if (head.rfind("HTTP/", 0) != 0) return fail("malformed response");
+    size_t sp1 = head.find(' ');
+    if (sp1 != std::string::npos) resp.status = std::atoi(head.c_str() + sp1 + 1);
+
+    std::string lower;
+    for (char c : head) lower += static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+    bool chunked = lower.find("transfer-encoding:") != std::string::npos &&
+                   lower.find("chunked") != std::string::npos;
+    bool haveLen = false;
+    size_t contentLen = 0;
+    if (auto p = lower.find("content-length:"); p != std::string::npos) {
+        contentLen = static_cast<size_t>(std::strtoull(head.c_str() + p + 15, nullptr, 10));
+        haveLen = true;
+    }
+
+    std::string payload = buf.substr(hdrEnd);
+    if (chunked) {
+        std::string out;
+        size_t pos = 0;
+        for (;;) {
+            size_t eol;
+            while ((eol = payload.find("\r\n", pos)) == std::string::npos)
+                if (pull(payload) <= 0) return fail("chunked stream truncated");
+            size_t csz = static_cast<size_t>(std::strtoul(payload.c_str() + pos, nullptr, 16));
+            pos = eol + 2;
+            if (csz == 0) break;
+            while (payload.size() < pos + csz + 2)
+                if (pull(payload) <= 0) return fail("chunked stream truncated");
+            out.append(payload, pos, csz);
+            pos += csz + 2;
+        }
+        payload = std::move(out);
+    } else if (haveLen) {
+        while (payload.size() < contentLen) {
+            int n = pull(payload);
+            if (n <= 0) {
+                if (n < 0) return fail("receive failed (" + std::to_string(WSAGetLastError()) + ")");
+                break;
+            }
+        }
+    } else {
+        while (pull(payload) > 0) {}
+    }
+
+    closesocket(s);
+    resp.body.assign(payload.begin(), payload.end());
+    return resp;
+}
+
 } // namespace
 
 HttpClient::HttpClient() {
@@ -86,6 +247,16 @@ HttpResponse HttpClient::request(const std::string& method, const std::string& u
     if (!parseUrl(url, parts)) {
         resp.error = "bad url: " + url;
         return resp;
+    }
+
+    // Plain HTTP requests with a body (the /client POST) go through raw Winsock
+    // so headers and body arrive in one TCP segment; WinHTTP splits them and
+    // some FXServer builds then never respond.
+    if (body && !parts.https) {
+        auto merged = defaultHeaders_;
+        for (const auto& kv : headers) merged[kv.first] = kv.second;
+        return httpPostRaw(wideToUtf8(parts.host), parts.port, wideToUtf8(parts.path),
+                           merged, *body, timeouts_[1], timeouts_[3]);
     }
 
     HINTERNET connect = WinHttpConnect(static_cast<HINTERNET>(session_), parts.host.c_str(),
