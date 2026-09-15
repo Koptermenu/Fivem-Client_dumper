@@ -1,11 +1,15 @@
 #pragma once
 
 #include <cstdint>
+#include <functional>
 #include <map>
 #include <string>
 #include <vector>
 
 namespace fivem {
+
+// Reports bytes as they arrive (cumulative per call, across retries).
+using ByteProgress = std::function<void(size_t)>;
 
 struct HttpResponse {
     int status = 0;
@@ -25,9 +29,11 @@ public:
     HttpResponse postForm(const std::string& url, const std::string& formBody,
                           const std::map<std::string, std::string>& headers = {});
 
-    // GET binary content
+    // GET binary content; onProgress (optional) receives byte counts as they
+    // arrive, so callers can show live speed on heavily throttled servers.
     HttpResponse get(const std::string& url,
-                     const std::map<std::string, std::string>& headers = {});
+                     const std::map<std::string, std::string>& headers = {},
+                     const ByteProgress& onProgress = nullptr);
 
     void setHeader(const std::string& key, const std::string& value);
 
@@ -40,7 +46,8 @@ public:
 private:
     HttpResponse request(const std::string& method, const std::string& url,
                          const std::vector<uint8_t>* body,
-                         const std::map<std::string, std::string>& headers);
+                         const std::map<std::string, std::string>& headers,
+                         const ByteProgress& onProgress);
 
     void* session_ = nullptr;  // HINTERNET
     std::map<std::string, std::string> defaultHeaders_;

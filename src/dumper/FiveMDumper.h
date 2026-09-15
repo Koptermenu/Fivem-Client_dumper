@@ -56,7 +56,8 @@ private:
     // Download, verify checksum, decrypt, write. Throws std::runtime_error on failure.
     void downloadAndDecrypt(const std::string& url, const std::vector<uint8_t>& key,
                             const std::vector<uint8_t>& iv, const std::string& outPath,
-                            const std::string& expectedChecksum);
+                            const std::string& expectedChecksum,
+                            const ByteProgress& onBytes = nullptr);
 
     // Best-effort fetch: GET once, ignore 404/decrypt errors, never throws.
     // Returns true if a file was written. Used to backfill fxmanifest when an RPF

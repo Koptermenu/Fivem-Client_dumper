@@ -241,7 +241,8 @@ void HttpClient::setHeader(const std::string& key, const std::string& value) {
 
 HttpResponse HttpClient::request(const std::string& method, const std::string& url,
                                  const std::vector<uint8_t>* body,
-                                 const std::map<std::string, std::string>& headers) {
+                                 const std::map<std::string, std::string>& headers,
+                                 const ByteProgress& onProgress) {
     HttpResponse resp;
     UrlParts parts;
     if (!parseUrl(url, parts)) {
@@ -328,6 +329,7 @@ HttpResponse HttpClient::request(const std::string& method, const std::string& u
         if (!WinHttpReadData(request, chunk.data(), avail, &read)) break;
         chunk.resize(read);
         resp.body.insert(resp.body.end(), chunk.begin(), chunk.end());
+        if (onProgress && read) onProgress(read);
     }
 
     WinHttpCloseHandle(request);
@@ -339,11 +341,12 @@ HttpResponse HttpClient::postForm(const std::string& url, const std::string& for
     std::map<std::string, std::string> h = headers;
     h["Content-Type"] = "application/x-www-form-urlencoded";
     std::vector<uint8_t> body(formBody.begin(), formBody.end());
-    return request("POST", url, &body, h);
+    return request("POST", url, &body, h, nullptr);
 }
 
-HttpResponse HttpClient::get(const std::string& url, const std::map<std::string, std::string>& headers) {
-    return request("GET", url, nullptr, headers);
+HttpResponse HttpClient::get(const std::string& url, const std::map<std::string, std::string>& headers,
+                             const ByteProgress& onProgress) {
+    return request("GET", url, nullptr, headers, onProgress);
 }
 
 } // namespace fivem

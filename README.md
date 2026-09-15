@@ -67,6 +67,7 @@ build\Release\fivem_dumper.exe
 | `DUMPER_SERVER_IP` | fix szerver (interaktív kerdezes nelkul) |
 | `DUMPER_SERVER_NAME` | fix mappa/szerver nev |
 | `DUMPER_RESOURCE` | csak ez az egy resource |
+| `DUMPER_WORKERS` | parhuzamos letoltesok szama (1-64, alapertelmezett 24) |
 | `DUMPER_TEST_MODE=1` | nem interaktív mod |
 
 ## Konyvtarszerkezet

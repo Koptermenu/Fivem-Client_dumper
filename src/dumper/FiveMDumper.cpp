@@ -10,6 +10,7 @@
 #include <windows.h>
 #include <algorithm>
 #include <atomic>
+#include <cstdlib>
 #include <filesystem>
 #include <map>
 #include <fstream>
@@ -31,6 +32,10 @@ FiveMDumper::FiveMDumper(std::string baseUrl, std::string token,
       serverName_(std::move(serverName)), checkpoint_(checkpoint) {
     http_.setHeader("X-CitizenFX-Token", token_);
     http_.setHeader("User-Agent", "CitizenFX/1");
+    if (const char* w = getenv("DUMPER_WORKERS")) {
+        int v = atoi(w);
+        if (v >= 1 && v <= 64) maxWorkers_ = v;
+    }
     setServerName(serverName_);
 }
 
@@ -59,6 +64,15 @@ bool FiveMDumper::getConfiguration() {
         js = Json::parse(std::string(resp.body.begin(), resp.body.end()));
     } catch (const std::exception& e) {
         LOG(std::string("JSON parse error: ") + e.what(), LogLevel::ERROR);
+        return false;
+    }
+
+    // The server answers 200 with {"error":"..."} when the token does not
+    // belong to a client currently connected to THIS server (per-server
+    // session token). Treat it as a validation failure, not an empty list.
+    if (js.has("error") && js.at("error").isString() && !js.has("resources")) {
+        LOG("Server rejected the token: " + js.at("error").asString() +
+            " - connect in FiveM to this exact server first.", LogLevel::ERROR);
         return false;
     }
 
@@ -148,11 +162,12 @@ bool FiveMDumper::fetchDynamicHostname() {
 
 void FiveMDumper::downloadAndDecrypt(const std::string& url, const std::vector<uint8_t>& key,
                                      const std::vector<uint8_t>& iv, const std::string& outPath,
-                                     const std::string& expectedChecksum) {
+                                     const std::string& expectedChecksum,
+                                     const ByteProgress& onBytes) {
     static const int maxRetries = 3;
     HttpResponse resp;
     for (int attempt = 0; attempt < maxRetries; ++attempt) {
-        resp = http_.get(url);
+        resp = http_.get(url, {}, onBytes);
         if (resp.ok()) break;
         LOG("Download retry " + std::to_string(attempt + 1) + "/" + std::to_string(maxRetries) +
             " for " + outPath + ": " + resp.error, LogLevel::WARNING);
@@ -369,7 +384,8 @@ void FiveMDumper::fetchResource(const ResourceInfo& res) {
                 if (i >= tasks.size()) break;
                 const Task& t = tasks[i];
                 try {
-                    downloadAndDecrypt(t.url, t.key, iv, t.outPath, t.hash);
+                    downloadAndDecrypt(t.url, t.key, iv, t.outPath, t.hash,
+                                       [&bar](size_t n) { bar.addBytes(n); });
                     if (t.rpf) {
                         std::lock_guard<std::mutex> lock(rpfMtx);
                         rpfFiles.push_back(t.outPath);
