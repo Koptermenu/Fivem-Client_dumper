@@ -1,0 +1,200 @@
+#include <windows.h>
+#include <iostream>
+#include <string>
+#include <cstdlib>
+#include <memory>
+#include <vector>
+#include <filesystem>
+
+#include "core/Logger.h"
+#include "core/Checkpoint.h"
+#include "core/ProcessScanner.h"
+#include "core/HttpClient.h"
+#include "dumper/FiveMDumper.h"
+#include "dumper/Decryptor.h"
+#include "utils/Str.h"
+#include "utils/Json.h"
+
+namespace fs = std::filesystem;
+
+using namespace fivem;
+
+static const char* TEST_SERVER_IP = "play.popcornrp.city:30120";
+
+// Read a line, returning false on EOF (non-interactive).
+static bool readLine(std::string& out) {
+    if (!std::getline(std::cin, out)) return false;
+    return true;
+}
+
+int main(int argc, char** argv) {
+    SetConsoleOutputCP(CP_UTF8);
+
+    std::cout << "==============================================\n";
+    std::cout << "   FiveM Dumper C++ v1.0 - AllInOne\n";
+    std::cout << "==============================================\n";
+    std::cout << "[*] Parsing Server Info...\n";
+
+    bool testMode = getenv("DUMPER_TEST_MODE") != nullptr;
+
+    // ---- Token ----
+    std::string token;
+    const char* envToken = getenv("DUMPER_TOKEN");
+    if (envToken && *envToken) {
+        token = envToken;
+        std::cout << "[*] Using token from DUMPER_TOKEN env var.\n";
+    } else {
+        token = findFiveMToken();
+    }
+    if (token.empty()) {
+        if (!testMode) {
+            std::cerr << "Error: Token not found. Make sure FiveM is running "
+                         "and connected to the server. Run as administrator.\n";
+            return 1;
+        }
+        std::cerr << "Error: Token not found in test mode. Set DUMPER_TOKEN.\n";
+        return 1;
+    }
+    if (!token.empty()) {
+        auto nl = token.find_first_of("\r\n");
+        if (nl != std::string::npos) token = token.substr(0, nl);
+        token = trim(token);
+    }
+
+    // ---- Server IP ----
+    std::string ip, serverName, baseUrl;
+    const char* envIp = getenv("DUMPER_SERVER_IP");
+    std::vector<std::string> ips;
+    bool ipsScanned = false;
+
+    Checkpoint checkpoint;
+    checkpoint.load();
+    std::unique_ptr<FiveMDumper> dumper;  // single config fetch, reused for validation + run
+    const char* envName = getenv("DUMPER_SERVER_NAME");
+
+    for (;;) {
+        // Build a candidate IP
+        if (testMode) {
+            ip = (envIp && *envIp) ? envIp : TEST_SERVER_IP;
+            std::cout << "[*] TEST MODE: Using IP " << ip << "\n";
+        } else {
+            if (!ipsScanned) {
+                std::cout << "[*] Scanning GTAProcess processes for all IPs...\n";
+                ips = findIpsInMemory();
+                ipsScanned = true;
+            }
+            if (ips.empty()) {
+                std::cout << "[!] No IP found in memory. Enter IP (ip:port): ";
+                std::string in;
+                if (!readLine(in) || trim(in).empty()) {
+                    std::cerr << "No server IP provided.\n"; return 1;
+                }
+                ip = trim(in);
+            } else {
+                std::cout << "\n[+] Found " << ips.size() << " IP(s) in memory:\n";
+                std::cout << std::string(60, '-') << "\n";
+                for (size_t i = 0; i < ips.size(); ++i) {
+                    std::string cached = getCachedServerName(ips[i]);
+                    std::cout << "  [" << (i + 1) << "] " << ips[i];
+                    if (!cached.empty()) std::cout << "  (" << cached << ")";
+                    std::cout << "\n";
+                }
+                std::cout << "  [0] Manual IP entry\n" << std::string(60, '-') << "\n";
+                std::cout << "[*] Choose IP (number) or type ip:port: ";
+                std::string choice;
+                if (!readLine(choice)) {  // EOF -> first IP
+                    ip = ips[0];
+                    std::cout << "[*] Non-interactive, using first IP.\n";
+                } else {
+                    choice = trim(choice);
+                    bool isNum = !choice.empty() &&
+                                 choice.find_first_not_of("0123456789") == std::string::npos;
+                    if (isNum && std::stoi(choice) >= 1 && std::stoi(choice) <= (int)ips.size()) {
+                        ip = ips[std::stoi(choice) - 1];
+                    } else if (choice == "0" || choice.empty()) {
+                        std::cout << "[*] Enter server IP (ip:port): ";
+                        std::string in;
+                        if (!readLine(in) || trim(in).empty()) {
+                            std::cerr << "No server IP provided.\n"; return 1;
+                        }
+                        ip = trim(in);
+                    } else {
+                        ip = choice;  // typed ip:port or hostname:port
+                    }
+                }
+            }
+        }
+        if (ip.empty()) { std::cerr << "No server IP.\n"; return 1; }
+        // clean protocol/slash
+        if (startsWith(ip, "https://")) ip = ip.substr(8);
+        else if (startsWith(ip, "http://")) ip = ip.substr(7);
+        while (!ip.empty() && ip.back() == '/') ip.pop_back();
+
+        baseUrl = "http://" + ip;
+        std::cout << "[+] Selected server IP: " << ip << "\n";
+
+        // ---- Validate + fetch server name in ONE config call ----
+        dumper = std::make_unique<FiveMDumper>(baseUrl, token, "", checkpoint);
+        if (dumper->getConfiguration()) {
+            // The /client endpoint does not expose a display name (only resources/
+            // grants/fileServer), so the name comes from: config hostname -> env ->
+            // cache -> user prompt. Folder naming stays stable across runs via cache.
+            serverName = dumper->hostname();
+            std::string cached = getCachedServerName(ip);
+            if (serverName.empty() && envName && *envName) serverName = envName;
+            if (serverName.empty() && !cached.empty() && cached != ip) serverName = cached;
+            if (serverName.empty() && !testMode) {
+                std::cout << "[?] Adj nevet a szervernek (mappanév, Enter = IP): ";
+                std::string in;
+                if (readLine(in) && !trim(in).empty()) serverName = trim(in);
+            }
+            if (serverName.empty()) serverName = ip;
+            saveServerName(ip, serverName);
+            dumper->setServerName(serverName);  // dirs follow the real name now
+            std::cout << "[+] Server Name: " << serverName << "\n";
+            break;
+        }
+
+        std::string cached = getCachedServerName(ip);
+        std::cout << "[!] Ez az IP nem valaszol a /client vegponton"
+                  << (cached.empty() ? "" : (" (utoljara: " + cached + ")")) << ".\n";
+        std::cout << "    Ellenorizd, hogy a jatek Csatlakoztatva van ehhez a szerverhez.\n\n";
+
+        if (testMode) {
+            std::cerr << "Test-mode server unreachable; aborting.\n";
+            return 1;
+        }
+    }
+
+    std::string filterRes = testMode
+        ? std::string(getenv("DUMPER_RESOURCE") ? getenv("DUMPER_RESOURCE") : "pma-voice")
+        : "";
+
+    if (!checkpoint.completed_resources.empty()) {
+        std::cout << "[*] Found checkpoint: " << checkpoint.completed_resources.size()
+                  << " resources already completed. Resuming...\n";
+    }
+
+    std::cout << "\n--- PHASE 1: Download ---\n";
+    if (!dumper->run(filterRes)) {
+        std::cerr << "Download phase failed.\n";
+        return 1;
+    }
+
+    // ---- Decrypt ----
+    std::cout << "\n--- PHASE 2: Decrypt ---\n";
+    Decryptor decryptor(dumper->serverDir);
+    decryptor.runAll();
+
+    std::cout << "\n==============================================\n";
+    std::cout << " Done! Output: Servers/" << dumper->serverDir << "/Output\n";
+    std::cout << "==============================================\n";
+
+    // ---- Cleanup temp dirs ----
+    std::error_code ec;
+    fs::remove_all("Servers/" + dumper->serverDir + "/Temp", ec);
+    fs::remove_all("Servers/" + dumper->serverDir + "/TempCompiled", ec);
+    fs::remove_all("Servers/" + dumper->serverDir + "/Unpacked", ec);
+
+    return 0;
+}

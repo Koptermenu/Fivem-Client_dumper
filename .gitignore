@@ -1,0 +1,9 @@
+Bin/
+build/
+Servers/
+*.7z
+*.zip
+*.log
+checkpoint.json
+server_name.txt
+.zcode/
