@@ -148,10 +148,17 @@ int main(int argc, char** argv) {
         if (dumper->getConfiguration()) {
             // The /client endpoint does not expose a display name (only resources/
             // grants/fileServer), so the name comes from: config hostname -> env ->
-            // cache -> user prompt. Folder naming stays stable across runs via cache.
+            // anonymous /dynamic.json -> cache -> user prompt. Folder naming stays
+            // stable across runs via cache.
             serverName = dumper->hostname();
-            std::string cached = getCachedServerName(ip);
             if (serverName.empty() && envName && *envName) serverName = envName;
+            if (serverName.empty()) {
+                std::cout << "[*] Szervernev lekerese a /dynamic.json vegpontbol...\n";
+                if (dumper->fetchDynamicHostname()) {
+                    serverName = dumper->hostname();
+                }
+            }
+            std::string cached = getCachedServerName(ip);
             if (serverName.empty() && !cached.empty() && cached != ip) serverName = cached;
             if (serverName.empty() && !testMode) {
                 std::cout << "[?] Adj nevet a szervernek (mappanév, Enter = IP): ";

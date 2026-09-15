@@ -40,7 +40,12 @@ build\Release\fivem_dumper.exe
   reszesiti).
 - Interaktív resource-kivalaszto (index / range / nev, reszleges egyezessel)
 - Validacios ciklus: nem valaszolo IP nem crashel, ujra kerdez
-- Szervernev-cache (`server_name.txt`) — a lista mutatasi a nevet
+- **Automatikus szervernev**: a név a névtelen `GET /dynamic.json` végpont
+  `hostname` mezőjéből jön (`sv_hostname`) — nem kell begépelni. FX-color
+  jelölés (^0-^9, ^^, ^s) eltávolítva; a `default FXServer` /
+  `FXServer, but unconfigured` placeholder neveket nem fogadja el.
+- Szervernev-cache (`server_name.txt`) — a lista mutatasi a nevet, és a
+  dynamic.json sikertelensége esetén ez a fallback a prompt előtt
 - Progressbar toltodesnel es dekodolasnel
 - Checkpoint (`checkpoint.json`) — Ctrl-C / kick / timeout utan folytatas
 - Szerverneves mappa: `Servers/<nev>/Output/...`

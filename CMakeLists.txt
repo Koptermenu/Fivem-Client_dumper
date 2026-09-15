@@ -110,6 +110,14 @@ file(GLOB_RECURSE SOURCES "src/*.cpp")
 
 add_executable(fivem_dumper ${SOURCES} "${CMAKE_BINARY_DIR}/payload.rc")
 
+# UTF-8 process code page: server names from /dynamic.json (accents, emoji)
+# must convert correctly through narrow std::string -> filesystem paths.
+if(MSVC)
+    target_link_options(fivem_dumper PRIVATE
+        "/MANIFEST:EMBED"
+        "/MANIFESTINPUT:${CMAKE_SOURCE_DIR}/cmake/app.manifest")
+endif()
+
 target_link_libraries(fivem_dumper
     PRIVATE
     winhttp

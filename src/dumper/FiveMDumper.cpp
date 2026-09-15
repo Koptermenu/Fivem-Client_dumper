@@ -107,6 +107,45 @@ bool FiveMDumper::getConfiguration() {
     return true;
 }
 
+static std::string stripFxColors(const std::string& s) {
+    std::string out;
+    out.reserve(s.size());
+    for (size_t i = 0; i < s.size(); ++i) {
+        if (s[i] == '^' && i + 1 < s.size()) {
+            char n = s[i + 1];
+            if (n >= '0' && n <= '9') { ++i; continue; }
+            if (n == 's') { ++i; continue; }
+            if (n == '^') { ++i; out += '^'; continue; }
+        }
+        out += s[i];
+    }
+    return out;
+}
+
+bool FiveMDumper::fetchDynamicHostname() {
+    auto resp = http_.get(baseUrl_ + "/dynamic.json");
+    if (!resp.ok()) {
+        LOG("dynamic.json fetch failed: " + resp.error + " (status " + std::to_string(resp.status) + ")",
+            LogLevel::WARNING);
+        return false;
+    }
+    Json js;
+    try {
+        js = Json::parse(std::string(resp.body.begin(), resp.body.end()));
+    } catch (const std::exception& e) {
+        LOG(std::string("dynamic.json parse error: ") + e.what(), LogLevel::WARNING);
+        return false;
+    }
+    std::string name = trim(stripFxColors(js.strAt("hostname", "")));
+    if (name.empty() || iequals(name, "default FXServer") ||
+        iequals(name, "FXServer, but unconfigured")) {
+        LOG("dynamic.json: no usable hostname in response", LogLevel::WARNING);
+        return false;
+    }
+    hostname_ = name;
+    return true;
+}
+
 void FiveMDumper::downloadAndDecrypt(const std::string& url, const std::vector<uint8_t>& key,
                                      const std::vector<uint8_t>& iv, const std::string& outPath,
                                      const std::string& expectedChecksum) {

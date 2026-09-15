@@ -29,6 +29,11 @@ public:
     // Fetch /client configuration and populate members. Returns resource list.
     bool getConfiguration();
 
+    // Query the anonymous /dynamic.json endpoint for the display name
+    // (sv_hostname), strip FX color markup and reject default placeholders.
+    // Sets hostname_ on success. Returns true when a usable name was found.
+    bool fetchDynamicHostname();
+
     // Download a single resource (files + streamFiles) into Unpacked/Temp dirs.
     void fetchResource(const ResourceInfo& res);
 
