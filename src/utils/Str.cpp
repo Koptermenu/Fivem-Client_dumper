@@ -1,5 +1,7 @@
 #include "Str.h"
 
+#include "../core/Bundler.h"
+
 #include <algorithm>
 #include <cctype>
 #include <filesystem>
@@ -51,6 +53,13 @@ std::string resolveTool(const std::string& relative) {
         std::string cand = norm(r) + "/" + relative;
         if (fsx::exists(cand, ec)) return cand;
     }
+
+    std::string perr;
+    if (fivem::ensurePayload(perr)) {
+        std::string cand = norm(payloadRoot()) + "/" + relative;
+        if (fsx::exists(cand, ec)) return cand;
+    }
+
     return relative;  // not found: caller's error message shows what was tried
 }
 

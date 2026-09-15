@@ -31,6 +31,13 @@ build\Release\fivem_dumper.exe
 
 ### Feature-k
 
+- **Onallo exe**: a teljes `Bin/` mappa (Unpacker + FXServer komponensek) es a
+  kulso VC++ runtime DLL-ek az exe-be vannak agyazva (RCDATA). Elso futaskor
+  a `%LOCALAPPDATA%\FiveMDumper\payload` konyvtarba kicsomagolodnak, meret +
+  SHA256 alapot ellenorizve; ha pl. antivirus torol/nyul hozza, automatikusan
+  ujracsomagolodik. A kesz `fivem_dumper.exe` barmely gepen elindithato meg
+  kulon fajlok nelkul (a projektgyokerben levo `Bin/` mappot egyebkent elonyben
+  reszesiti).
 - Interaktív resource-kivalaszto (index / range / nev, reszleges egyezessel)
 - Validacios ciklus: nem valaszolo IP nem crashel, ujra kerdez
 - Szervernev-cache (`server_name.txt`) — a lista mutatasi a nevet
@@ -63,12 +70,14 @@ build\Release\fivem_dumper.exe
 Servers/<szervernev>/
   Resources/Grants.txt
   Output/<resource>/...      <- a kesz, dekodolt fajlok
-Bin/Unpacker.exe             <- RPF kitomorigeto (kell!)
-Tools/Decompile/unluac54.jar <- Lua decompiler (Java kell hozza!)
+%LOCALAPPDATA%/FiveMDumper/payload/   <- az exe-bol kicsomagolt Bin/ es jar
+                                        (onallo exe: nem kell kulon letolteni)
 ```
 
-## Megjegyzesek
+## Megjegyzések
 
-- Az `unluac` Lua-dekompilacioshoz Java kell.
+- Az `unluac` jar az exe-ben van, de a Lua-dekompilacioshoz a gepen futtathato
+  **Java** kell (a jar onmaga nem hivatalos vegrehajthato).
+- A beagyazott payload merete ~215 MB, igy a kesz exe ~217 MB.
 - Titkositas nelkuli szervertol minden siman kimetszodik; `.fxap`-os
   resource-oknal a grants-token hatarozza meg, melyik kulcs kell.

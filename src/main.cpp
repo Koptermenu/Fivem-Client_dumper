@@ -7,6 +7,7 @@
 #include <filesystem>
 
 #include "core/Logger.h"
+#include "core/Bundler.h"
 #include "core/Checkpoint.h"
 #include "core/ProcessScanner.h"
 #include "core/HttpClient.h"
@@ -29,6 +30,15 @@ static bool readLine(std::string& out) {
 
 int main(int argc, char** argv) {
     SetConsoleOutputCP(CP_UTF8);
+
+    if (getenv("DUMPER_SELFPATH")) {
+        std::string err;
+        bool ok = fivem::ensurePayload(err);
+        std::cout << "payload: " << (ok ? "OK" : ("HIBA: " + err)) << "\n";
+        std::cout << "Unpacker: " << resolveTool("Bin/Unpacker.exe") << "\n";
+        std::cout << "Jar:      " << resolveTool("Tools/Decompile/unluac54.jar") << "\n";
+        return 0;
+    }
 
     std::cout << "==============================================\n";
     std::cout << "   FiveM Dumper C++ v1.0 - AllInOne\n";
