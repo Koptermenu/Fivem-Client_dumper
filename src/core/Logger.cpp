@@ -1,4 +1,5 @@
 #include "Logger.h"
+#include "../utils/Term.h"
 #include <iostream>
 #include <filesystem>
 
@@ -34,17 +35,19 @@ std::string Logger::levelToString(LogLevel level) {
 void Logger::log(const std::string& message, LogLevel level) {
     std::lock_guard<std::mutex> lock(mutex_);
 
-    std::string logLine = "[" + timestamp() + "] [" + levelToString(level) + "] " + message;
+    std::string prefix = "[" + timestamp() + "] [" + levelToString(level) + "] ";
+    std::string logLine = prefix + message;
 
-    // Console output (WARNING and above only, INFO and SUCCESS too verbose)
+    // Console output. Warnings go to the file only; INFO shows with a dim
+    // timestamp prefix; ERROR/SUCCESS are colored (no-op when colors are off).
     if (level == LogLevel::WARNING) {
-        // Warnings go only to file, not console
+        // file only
     } else if (level == LogLevel::ERROR) {
-        std::cout << "\033[31m" << logLine << "\033[0m\n";
+        std::cout << CLR(term::RED) << logLine << CLR(term::RESET) << "\n";
     } else if (level == LogLevel::SUCCESS) {
-        std::cout << "\033[32m" << logLine << "\033[0m\n";
+        std::cout << CLR(term::GREEN) << logLine << CLR(term::RESET) << "\n";
     } else {
-        std::cout << logLine << "\n";
+        std::cout << CLR(term::DIM) << prefix << CLR(term::RESET) << message << "\n";
     }
 
     // Always write to file

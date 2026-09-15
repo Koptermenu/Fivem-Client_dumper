@@ -5,6 +5,7 @@
 #include "../crypto/ChaCha20.h"
 #include "../crypto/AesCbc.h"
 #include "../utils/Str.h"
+#include "../utils/Term.h"
 #include "../utils/Json.h"
 #include "../utils/ProgressBar.h"
 
@@ -317,7 +318,8 @@ void Decryptor::runAll() {
         // Nothing is encrypted: don't load grants, don't touch files, don't run
         // any crypto. Move the already-decrypted resource folders to Output as-is
         // (fs::rename = instant metadata move; per-file copy is only a fallback).
-        std::cout << "[*] Nincs titkositott ereforras - a dekodolasi fazis kihagyva.\n";
+        std::cout << CLR(term::CYAN) << "[*]" << CLR(term::RESET)
+                  << " Nincs titkositott ereforras - a dekodolasi fazis kihagyva.\n";
         LOG("No encrypted resources - skipping decryption phase", LogLevel::INFO);
 
         size_t moved = 0, fileCount = 0;

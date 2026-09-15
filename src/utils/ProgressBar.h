@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Term.h"
+
 #include <cstdint>
 #include <string>
 #include <chrono>
@@ -46,22 +48,26 @@ private:
         double secs = std::chrono::duration<double>(now - start_).count();
         double kbs = secs > 0.5 ? static_cast<double>(bytes_.load()) / 1024.0 / secs : 0.0;
 
-        char bar[32];
+        std::string bar;
         int i = 0;
-        for (; i < filled && i < 30; ++i) bar[i] = '#';
-        for (; i < 30; ++i) bar[i] = '-';
-        bar[30] = 0;
+        std::string fill;
+        for (; i < filled && i < 30; ++i) fill += '#';
+        std::string rest;
+        for (; i < 30; ++i) rest += '-';
+        bar += CLR(term::GREEN) + fill + CLR(term::DIM) + rest + CLR(term::RESET);
 
-        char speed[32] = "";
+        char speed[48] = "";
         uint64_t b = bytes_.load();
         if (b > 0)
             std::snprintf(speed, sizeof(speed), " | %llu B @ %.1f KB/s",
                           static_cast<unsigned long long>(b), kbs);
 
-        std::printf("\r%s [%s] %3.0f%% (%llu/%llu) %.1fs%s",
-                    label_.c_str(), bar, frac * 100.0,
+        std::printf("\r%s%s [%s] %s%3.0f%%%s (%llu/%llu) %.1fs%s%s%s",
+                    CLR(term::DIM), label_.c_str(), bar.c_str(),
+                    CLR(term::GREEN), frac * 100.0, CLR(term::RESET),
                     static_cast<unsigned long long>(done_.load()),
-                    static_cast<unsigned long long>(total_), secs, speed);
+                    static_cast<unsigned long long>(total_), secs,
+                    CLR(term::DIM), speed, CLR(term::RESET));
         std::fflush(stdout);
     }
 

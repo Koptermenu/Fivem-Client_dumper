@@ -4,6 +4,7 @@
 #include "../crypto/Sha256.h"
 #include "../crypto/ChaCha20.h"
 #include "../utils/Str.h"
+#include "../utils/Term.h"
 #include "../utils/Json.h"
 #include "../utils/ProgressBar.h"
 
@@ -492,14 +493,16 @@ bool FiveMDumper::run(const std::string& filterResource) {
             if (safeName(r.name) == safeName(filterResource)) chosen.push_back(r);
     } else {
         // Interactive: list all resources and let the user pick.
-        std::cout << "\nAvailable Resources\n";
-        std::cout << std::string(60, '-') << "\n";
+        std::cout << "\n" << CLR(term::BOLD) << CLR(term::CYAN) << "Available Resources" << CLR(term::RESET) << "\n";
+        std::cout << CLR(term::DIM) << std::string(60, '-') << CLR(term::RESET) << "\n";
         for (size_t i = 0; i < sorted.size(); ++i) {
-            std::cout << "[" << std::setw(4) << (i + 1) << "] " << sorted[i].name << "\n";
+            std::cout << CLR(term::CYAN) << "[" << std::setw(4) << (i + 1) << "]" << CLR(term::RESET)
+                      << " " << sorted[i].name << "\n";
         }
-        std::cout << std::string(60, '-') << "\n";
+        std::cout << CLR(term::DIM) << std::string(60, '-') << CLR(term::RESET) << "\n";
         std::cout << "Enter resources: indices (1,3), ranges (5-8), NAMES (pma-voice, ox_lib),\n";
-        std::cout << "mixed ok; 'all' or Enter = mind; 'q' = kilép: ";
+        std::cout << "mixed ok; " << CLR(term::GREEN) << "'all'" << CLR(term::RESET)
+                  << " or Enter = mind; " << CLR(term::YELLOW) << "'q'" << CLR(term::RESET) << " = kilép: ";
 
         // quick name -> resource lookup (case-insensitive)
         std::map<std::string, const ResourceInfo*> byName;
@@ -507,7 +510,7 @@ bool FiveMDumper::run(const std::string& filterResource) {
 
         std::string line;
         if (!std::getline(std::cin, line)) {
-            std::cout << "[*] Non-interactive, selecting all.\n";
+            std::cout << CLR(term::CYAN) << "[*]" << CLR(term::RESET) << " Non-interactive, selecting all.\n";
             chosen = sorted;
         } else {
             line = trim(line);
@@ -533,7 +536,7 @@ bool FiveMDumper::run(const std::string& filterResource) {
                     if (tok.find_first_not_of("0123456789") == std::string::npos) {
                         int idx = std::stoi(tok);
                         if (idx >= 1 && idx <= (int)sorted.size()) chosen.push_back(sorted[idx - 1]);
-                        else std::cout << "[!] Ignoring out-of-range: " << tok << "\n";
+                        else std::cout << CLR(term::YELLOW) << "[!] Ignoring out-of-range: " << tok << CLR(term::RESET) << "\n";
                         continue;
                     }
                     // by name (exact, case-insensitive)
@@ -545,10 +548,11 @@ bool FiveMDumper::run(const std::string& filterResource) {
                         if (toLower(r.name).find(toLower(tok)) != std::string::npos) part.push_back(&r);
                     if (part.size() == 1) chosen.push_back(*part[0]);
                     else if (part.size() > 1) {
-                        std::cout << "[?] '" << tok << "' tobbsze illeszkedik: ";
+                        std::cout << CLR(term::YELLOW) << "[?] '" << tok << "' tobbsze illeszkedik: ";
                         for (auto* p : part) std::cout << p->name << "  ";
-                        std::cout << "\n";
-                    } else std::cout << "[!] Nem leelheto resource: " << tok << "\n";
+                        std::cout << CLR(term::RESET) << "\n";
+                    } else std::cout << CLR(term::YELLOW) << "[!] Nem leelheto resource: " << tok
+                                     << CLR(term::RESET) << "\n";
                 }
             }
         }
