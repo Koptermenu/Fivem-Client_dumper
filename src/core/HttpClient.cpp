@@ -109,7 +109,7 @@ HttpResponse httpRawRequest(const std::string& method, const std::string& host, 
 
     SOCKET s = INVALID_SOCKET;
     for (addrinfo* ai = res; ai; ai = ai->ai_next) {
-        long connectRemain = static_cast<long>(connectMs) -
+        long long connectRemain = static_cast<long long>(connectMs) -
             std::chrono::duration_cast<std::chrono::milliseconds>(
                 std::chrono::steady_clock::now() - started).count();
         if (connectRemain < 100) { connectRemain = 100; }
@@ -147,9 +147,9 @@ HttpResponse httpRawRequest(const std::string& method, const std::string& host, 
         return resp;
     }
 
-    auto elapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(
-                         std::chrono::steady_clock::now() - started).count();
-    long remain = static_cast<long>(recvMs) - static_cast<long>(elapsedMs);
+    long long elapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(
+                              std::chrono::steady_clock::now() - started).count();
+    long long remain = static_cast<long long>(recvMs) - elapsedMs;
     if (remain < 100) {
         resp.error = "connect failed: " + host;
         closesocket(s);

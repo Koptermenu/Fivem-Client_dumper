@@ -199,11 +199,12 @@ bool FiveMDumper::fetchDynamicHostname() {
 void FiveMDumper::downloadAndDecrypt(const std::string& url, const std::vector<uint8_t>& key,
                                      const std::vector<uint8_t>& iv, const std::string& outPath,
                                      const std::string& expectedChecksum,
-                                     const ByteProgress& onBytes) {
+                                     const ByteProgress& onBytes,
+                                     const SizeCallback& onStart) {
     static const int maxRetries = 3;
     HttpResponse resp;
     for (int attempt = 0; attempt < maxRetries; ++attempt) {
-        resp = http_.get(url, {}, onBytes);
+        resp = http_.get(url, {}, onBytes, onStart);
         if (resp.ok()) break;
         LOG("Download retry " + std::to_string(attempt + 1) + "/" + std::to_string(maxRetries) +
             " for " + outPath + ": " + resp.error, LogLevel::WARNING);
@@ -411,7 +412,8 @@ void FiveMDumper::fetchResource(const ResourceInfo& res) {
                 const Task& t = tasks[i];
                 try {
                     downloadAndDecrypt(t.url, t.key, iv, t.outPath, t.hash,
-                                       [&bar](size_t n) { bar.addBytes(n); });
+                                       [&bar](size_t n) { bar.addBytes(n); },
+                                       [&bar](size_t n) { bar.addExpected(n); });
                     if (t.rpf) {
                         std::lock_guard<std::mutex> lock(rpfMtx);
                         rpfFiles.push_back(t.outPath);

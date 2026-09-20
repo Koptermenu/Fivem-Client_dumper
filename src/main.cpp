@@ -24,7 +24,6 @@ using namespace fivem;
 
 static const char* TEST_SERVER_IP = "play.popcornrp.city:30120";
 
-// Read a line, returning false on EOF (non-interactive).
 static bool readLine(std::string& out) {
     if (!std::getline(std::cin, out)) return false;
     return true;
@@ -50,7 +49,6 @@ int main(int argc, char** argv) {
 
     bool testMode = getenv("DUMPER_TEST_MODE") != nullptr;
 
-    // ---- Token ----
     std::string token;
     const char* envToken = getenv("DUMPER_TOKEN");
     if (envToken && *envToken) {
@@ -74,7 +72,6 @@ int main(int argc, char** argv) {
         token = trim(token);
     }
 
-    // ---- Server IP ----
     std::string ip, serverName, baseUrl;
     const char* envIp = getenv("DUMPER_SERVER_IP");
     std::vector<std::string> ips;
@@ -82,11 +79,10 @@ int main(int argc, char** argv) {
 
     Checkpoint checkpoint;
     checkpoint.load();
-    std::unique_ptr<FiveMDumper> dumper;  // single config fetch, reused for validation + run
+    std::unique_ptr<FiveMDumper> dumper;
     const char* envName = getenv("DUMPER_SERVER_NAME");
 
     for (;;) {
-        // Build a candidate IP
         if (testMode) {
             ip = (envIp && *envIp) ? envIp : TEST_SERVER_IP;
             std::cout << CLR(term::CYAN) << "[*]" << CLR(term::RESET) << " TEST MODE: Using IP " << ip << "\n";
@@ -122,7 +118,10 @@ int main(int argc, char** argv) {
                 std::cout << CLR(term::DIM) << std::string(60, '-') << CLR(term::RESET) << "\n";
                 for (size_t i = 0; i < ips.size(); ++i) {
                     std::string name = nameProbes[i].get();
-                    if (!name.empty() && name != getCachedServerName(ips[i])) saveServerName(ips[i], name);
+                    if (!name.empty() && name != "ismeretlen" &&
+                        name != getCachedServerName(ips[i])) {
+                        saveServerName(ips[i], name);
+                    }
                     std::cout << "  " << CLR(term::CYAN) << "[" << (i + 1) << "]" << CLR(term::RESET) << " " << ips[i];
                     if (!name.empty()) std::cout << "  " << CLR(term::GREEN) << "(" << name << ")" << CLR(term::RESET);
                     std::cout << "\n";
@@ -131,7 +130,7 @@ int main(int argc, char** argv) {
                           << CLR(term::DIM) << std::string(60, '-') << CLR(term::RESET) << "\n";
                 std::cout << CLR(term::CYAN) << "[*]" << CLR(term::RESET) << " Choose IP (number) or type ip:port: ";
                 std::string choice;
-                if (!readLine(choice)) {  // EOF -> first IP
+                if (!readLine(choice)) {
                     ip = ips[0];
                     std::cout << CLR(term::CYAN) << "[*]" << CLR(term::RESET) << " Non-interactive, using first IP.\n";
                 } else {
@@ -148,13 +147,12 @@ int main(int argc, char** argv) {
                         }
                         ip = trim(in);
                     } else {
-                        ip = choice;  // typed ip:port or hostname:port
+                        ip = choice;
                     }
                 }
             }
         }
         if (ip.empty()) { std::cerr << CLR(term::RED) << "No server IP." << CLR(term::RESET) << "\n"; return 1; }
-        // clean protocol/slash
         if (startsWith(ip, "https://")) ip = ip.substr(8);
         else if (startsWith(ip, "http://")) ip = ip.substr(7);
         while (!ip.empty() && ip.back() == '/') ip.pop_back();
@@ -162,33 +160,39 @@ int main(int argc, char** argv) {
         baseUrl = "http://" + ip;
         std::cout << CLR(term::GREEN) << "[+]" << CLR(term::RESET) << " Selected server IP: " << ip << "\n";
 
-        // ---- Validate + fetch server name in ONE config call ----
         dumper = std::make_unique<FiveMDumper>(baseUrl, token, "", checkpoint);
         if (dumper->getConfiguration()) {
-            // The /client endpoint does not expose a display name (only resources/
-            // grants/fileServer), so the name comes from: config hostname -> env ->
-            // anonymous /dynamic.json -> cache -> user prompt. Folder naming stays
-            // stable across runs via cache.
             serverName = dumper->hostname();
             if (serverName.empty() && envName && *envName) serverName = envName;
+
+            bool gotDynamicResponse = false;
             if (serverName.empty()) {
-                std::cout << CLR(term::CYAN) << "[*]" << CLR(term::RESET) << " Szervernev lekerese a /dynamic.json vegpontbol...\n";
-                if (dumper->fetchDynamicHostname()) {
-                    serverName = dumper->hostname();
-                }
+                std::cout << CLR(term::CYAN) << "[*]" << CLR(term::RESET)
+                          << " Szervernev lekerese a /dynamic.json vegpontbol...\n";
+                gotDynamicResponse = dumper->fetchDynamicHostname();
+                if (gotDynamicResponse) serverName = dumper->hostname();
             }
+
             std::string cached = getCachedServerName(ip);
             if (serverName.empty() && !cached.empty() && cached != ip) serverName = cached;
-            if (serverName.empty() && !testMode) {
-                std::cout << CLR(term::YELLOW) << "[?]" << CLR(term::RESET) << " Adj nevet a szervernek (mappanév, Enter = IP): ";
+
+            if (serverName.empty() && !testMode && gotDynamicResponse) {
+                std::cout << CLR(term::YELLOW) << "[?]" << CLR(term::RESET)
+                          << " Adj nevet a szervernek (mappanév, Enter = IP): ";
                 std::string in;
                 if (readLine(in) && !trim(in).empty()) serverName = trim(in);
             }
             if (serverName.empty()) serverName = ip;
-            saveServerName(ip, serverName);
-            dumper->setServerName(serverName);  // dirs follow the real name now
-            std::cout << CLR(term::GREEN) << "[+]" << CLR(term::RESET) << " Server Name: "
-                      << CLR(term::BOLD) << serverName << CLR(term::RESET) << "\n";
+
+            if (serverName != ip && serverName != "ismeretlen") {
+                saveServerName(ip, serverName);
+            }
+            dumper->setServerName(serverName);
+
+            if (serverName != ip) {
+                std::cout << CLR(term::GREEN) << "[+]" << CLR(term::RESET) << " Server Name: "
+                          << CLR(term::BOLD) << serverName << CLR(term::RESET) << "\n";
+            }
             break;
         }
 
@@ -219,7 +223,6 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    // ---- Decrypt ----
     std::cout << "\n" << CLR(term::BOLD) << CLR(term::CYAN) << "--- PHASE 2: Decrypt ---" << CLR(term::RESET) << "\n";
     Decryptor decryptor(dumper->serverDir);
     decryptor.runAll();
@@ -229,7 +232,6 @@ int main(int argc, char** argv) {
     std::cout << " Done! Output: Servers/" << dumper->serverDir << "/Output\n";
     std::cout << "==============================================" << CLR(term::RESET) << "\n";
 
-    // ---- Cleanup temp dirs ----
     std::error_code ec;
     fs::remove_all("Servers/" + dumper->serverDir + "/Temp", ec);
     fs::remove_all("Servers/" + dumper->serverDir + "/TempCompiled", ec);
