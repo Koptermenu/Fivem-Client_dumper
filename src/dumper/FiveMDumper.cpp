@@ -27,6 +27,27 @@ namespace fs = std::filesystem;
 
 namespace fivem {
 
+static std::string truncateForPath(const std::string& s, size_t maxBytes) {
+    if (s.size() <= maxBytes) return s;
+    size_t i = 0, lastGood = 0;
+    while (i < s.size() && i < maxBytes) {
+        unsigned char c = static_cast<unsigned char>(s[i]);
+        size_t len;
+        if ((c & 0x80) == 0x00) len = 1;
+        else if ((c & 0xE0) == 0xC0) len = 2;
+        else if ((c & 0xF0) == 0xE0) len = 3;
+        else if ((c & 0xF8) == 0xF0) len = 4;
+        else { ++i; continue; }
+        if (i + len > maxBytes) break;
+        i += len;
+        lastGood = i;
+    }
+    std::string out = s.substr(0, lastGood);
+    while (!out.empty() && (out.back() == '.' || out.back() == ' '))
+        out.pop_back();
+    return out;
+}
+
 FiveMDumper::FiveMDumper(std::string baseUrl, std::string token,
                          std::string serverName, Checkpoint& checkpoint)
     : baseUrl_(std::move(baseUrl)), token_(std::move(token)),
@@ -42,18 +63,19 @@ FiveMDumper::FiveMDumper(std::string baseUrl, std::string token,
 
 void FiveMDumper::setServerName(const std::string& name) {
     serverName_ = name;
-    serverDir = safeName(name.empty() ? baseUrl_ : name);
+    std::string safe = safeName(name.empty() ? baseUrl_ : name);
+    safe = truncateForPath(safe, 80);
+    serverDir = safe.empty() ? "server" : safe;
     resourcesDir = "Servers/" + serverDir + "/Resources";
     unpackedDir = "Servers/" + serverDir + "/Unpacked";
     tempDir = "Servers/" + serverDir + "/Temp";
-    // Re-point already-fetched artifacts (Grants.txt) at the final server dir.
     if (configFetched_ && !grants_.empty()) {
         writeTextFile(resourcesDir + "/Grants.txt", grants_);
     }
 }
 
 bool FiveMDumper::getConfiguration() {
-    if (configFetched_) return true;  // already fetched (probe reused the result)
+    if (configFetched_) return true;
     auto resp = http_.postForm(baseUrl_ + "/client", "method=getConfiguration");
     if (!resp.ok()) {
         LOG("getConfiguration failed: " + resp.error + " (status " + std::to_string(resp.status) + ")",
@@ -68,9 +90,6 @@ bool FiveMDumper::getConfiguration() {
         return false;
     }
 
-    // The server answers 200 with {"error":"..."} when the token does not
-    // belong to a client currently connected to THIS server (per-server
-    // session token). Treat it as a validation failure, not an empty list.
     if (js.has("error") && js.at("error").isString() && !js.has("resources")) {
         LOG("Server rejected the token: " + js.at("error").asString() +
             " - connect in FiveM to this exact server first.", LogLevel::ERROR);
@@ -79,10 +98,7 @@ bool FiveMDumper::getConfiguration() {
 
     std::string grants = js.strAt("grants_token", "");
     grants_ = grants;
-    // Grants.txt is written by setServerName() once the final server dir is known,
-    // so we don't litter the pre-rename directory here.
 
-    // Extract display name (FiveM uses "hostname" or "serverName")
     for (const char* key : {"hostname", "serverName", "name"}) {
         std::string v = js.strAt(key, "");
         if (!v.empty()) { hostname_ = v; break; }
@@ -198,7 +214,6 @@ void FiveMDumper::downloadAndDecrypt(const std::string& url, const std::vector<u
         throw std::runtime_error("Failed to download " + outPath + ": " + resp.error);
     }
 
-    // decrypt (12-byte nonce first, then 8-byte like python's fallback)
     std::vector<uint8_t> dec;
     bool decrypted = false;
     for (int nonceLen = 12; nonceLen >= 8; nonceLen -= 4) {
@@ -219,8 +234,6 @@ void FiveMDumper::downloadAndDecrypt(const std::string& url, const std::vector<u
         throw std::runtime_error("Invalid RPF header for " + outPath);
     }
 
-    // Checksum verification is best-effort: the hash from the server manifest
-    // is not always a plain SHA256 of raw/decrypted bytes; warn only.
     if (!expectedChecksum.empty()) {
         std::string rawHex = sha256Hex(resp.body);
         std::string decHex = sha256Hex(dec);
@@ -258,7 +271,6 @@ bool FiveMDumper::downloadQuiet(const std::string& url, const std::vector<uint8_
     return false;
 }
 
-// Does the unpacked resource tree already contain a manifest?
 static bool hasManifest(const std::string& dir) {
     std::error_code ec;
     if (!fs::exists(dir, ec)) return false;
@@ -270,7 +282,6 @@ static bool hasManifest(const std::string& dir) {
     return false;
 }
 
-// Count regular files in a dir tree (0 on errors/missing).
 static size_t countTree(const std::string& dir) {
     std::error_code ec;
     if (!fs::exists(dir, ec)) return 0;
@@ -281,16 +292,13 @@ static size_t countTree(const std::string& dir) {
 }
 
 bool FiveMDumper::unpackRpf(const std::string& rpfPath, const std::string& outDir) {
-    // Search cwd AND exe-dir + parents: the user may run from build/Release where
-    // "Bin/Unpacker.exe" does not exist relative to the working directory.
     std::string unpackerRel = resolveTool("Bin/Unpacker.exe");
     if (!fs::exists(unpackerRel)) {
         LOG("Unpacker.exe NOT FOUND (keresve: cwd + exe kornyezek) - " + outDir +
-            " RPF-ei kitomorigatas nelkul maradnak!", LogLevel::ERROR);
+            " RPF-ei kitomorigatas nelkul maradnak!", LogLevel::WARNING);
         return false;
     }
 
-    // Absolute paths with backslashes (the Unpacker expects Windows paths).
     auto makeAbs = [](const std::string& p) {
         char buf[4096];
         DWORD n = GetFullPathNameA(p.c_str(), sizeof(buf), buf, nullptr);
@@ -318,7 +326,7 @@ bool FiveMDumper::unpackRpf(const std::string& rpfPath, const std::string& outDi
     if (!CreateProcessW(nullptr, wcmd.data(), nullptr, nullptr, FALSE,
                         CREATE_NO_WINDOW, nullptr, nullptr, &si, &pi)) {
         LOG("Failed to launch Unpacker (err " + std::to_string(GetLastError()) + "): " + cmd,
-            LogLevel::ERROR);
+            LogLevel::WARNING);
         return false;
     }
     WaitForSingleObject(pi.hProcess, 120000);
@@ -330,7 +338,7 @@ bool FiveMDumper::unpackRpf(const std::string& rpfPath, const std::string& outDi
     size_t after = countTree(out);
     if (after <= before) {
         LOG("Unpacker produced NO new files for " + fs::path(rpfPath).filename().generic_string() +
-            " (exit " + std::to_string(exitCode) + ") - nyers RPF megmentese...", LogLevel::ERROR);
+            " (exit " + std::to_string(exitCode) + ") - nyers RPF megmentese...", LogLevel::WARNING);
         return false;
     }
     return true;
@@ -347,7 +355,6 @@ void FiveMDumper::fetchResource(const ResourceInfo& res) {
     std::string tempRes = tempDir + "/" + resName;
     std::string unpackedRes = unpackedDir + "/" + resName;
 
-    // Parse URI: base64decode after '#'; iv = uri[53:61]; xor key from uri[19:]
     auto hashPos = res.uri.find('#');
     if (hashPos == std::string::npos) {
         LOG("Resource has malformed uri: " + resName, LogLevel::ERROR);
@@ -365,7 +372,6 @@ void FiveMDumper::fetchResource(const ResourceInfo& res) {
 
     std::string fileBase = res.fileServer.empty() ? (baseUrl_ + "/files") : res.fileServer;
 
-    // Build task list: (url, key, outPath, expectedHash, isRpf)
     struct Task { std::string url, outPath, hash; std::vector<uint8_t> key; bool rpf; };
     std::vector<Task> tasks;
     tasks.reserve(res.files.size() + res.streamFiles.size());
@@ -435,9 +441,6 @@ void FiveMDumper::fetchResource(const ResourceInfo& res) {
             } catch (...) { failedRpbs.push_back(rpf); }
         }
 
-        // Keep any RPF that could not be extracted: otherwise it lives only in
-        // Temp/ and gets deleted at the end, so the user loses the asset AND
-        // everything inside it (scripts, fxmanifest, ...).
         if (!failedRpbs.empty()) {
             std::error_code ec;
             fs::create_directories(unpackedRes, ec);
@@ -448,12 +451,10 @@ void FiveMDumper::fetchResource(const ResourceInfo& res) {
             }
             LOG(resName + ": " + std::to_string(failedRpbs.size()) +
                 " RPF kitomorigatase sikertelen - a nyers .rpf(ok) az Outputban!",
-                LogLevel::ERROR);
+                LogLevel::WARNING);
         }
     }
 
-    // Backfill the manifest directly from the /files endpoint if neither the
-    // resource's own files[] nor a successful RPF unpack surfaced one.
     if (!hasManifest(unpackedRes)) {
         for (const char* cand : {"fxmanifest.lua", "__resource.lua"}) {
             std::string url = fileBase + "/" + res.name + "/" + urlQuote(cand);
@@ -465,7 +466,7 @@ void FiveMDumper::fetchResource(const ResourceInfo& res) {
         }
         if (!hasManifest(unpackedRes)) {
             LOG(resName + ": fxmanifest NEM nyelheto el (benne van az RPF-ben, ami nem"
-                " bomthat ki; probald masik kitomorigetovel)", LogLevel::ERROR);
+                " bomthat ki; probald masik kitomorigetovel)", LogLevel::WARNING);
         }
     }
 
@@ -475,8 +476,6 @@ void FiveMDumper::fetchResource(const ResourceInfo& res) {
 
 bool FiveMDumper::run(const std::string& filterResource) {
     if (!getConfiguration()) return false;
-    // Ensure grants are on disk in the FINAL server dir (setServerName may or may
-    // not have been called depending on the caller's flow).
     if (configFetched_ && !grants_.empty())
         writeTextFile(resourcesDir + "/Grants.txt", grants_);
 
@@ -488,11 +487,9 @@ bool FiveMDumper::run(const std::string& filterResource) {
     std::vector<ResourceInfo> chosen;
 
     if (!filterResource.empty()) {
-        // Test/filter mode: only the named resource.
         for (auto& r : sorted)
             if (safeName(r.name) == safeName(filterResource)) chosen.push_back(r);
     } else {
-        // Interactive: list all resources and let the user pick.
         std::cout << "\n" << CLR(term::BOLD) << CLR(term::CYAN) << "Available Resources" << CLR(term::RESET) << "\n";
         std::cout << CLR(term::DIM) << std::string(60, '-') << CLR(term::RESET) << "\n";
         for (size_t i = 0; i < sorted.size(); ++i) {
@@ -504,7 +501,6 @@ bool FiveMDumper::run(const std::string& filterResource) {
         std::cout << "mixed ok; " << CLR(term::GREEN) << "'all'" << CLR(term::RESET)
                   << " or Enter = mind; " << CLR(term::YELLOW) << "'q'" << CLR(term::RESET) << " = kilép: ";
 
-        // quick name -> resource lookup (case-insensitive)
         std::map<std::string, const ResourceInfo*> byName;
         for (auto& r : sorted) byName[toLower(r.name)] = &r;
 
@@ -539,10 +535,8 @@ bool FiveMDumper::run(const std::string& filterResource) {
                         else std::cout << CLR(term::YELLOW) << "[!] Ignoring out-of-range: " << tok << CLR(term::RESET) << "\n";
                         continue;
                     }
-                    // by name (exact, case-insensitive)
                     auto it = byName.find(toLower(tok));
                     if (it != byName.end()) { chosen.push_back(*it->second); continue; }
-                    // partial match fallback
                     std::vector<const ResourceInfo*> part;
                     for (auto& r : sorted)
                         if (toLower(r.name).find(toLower(tok)) != std::string::npos) part.push_back(&r);

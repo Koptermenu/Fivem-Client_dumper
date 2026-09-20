@@ -77,14 +77,10 @@ std::string wideToUtf8(const std::wstring& w) {
     return s;
 }
 
-// Plain-HTTP GET/POST over raw Winsock, written as ONE TCP segment with hard
-// connect/receive deadlines. Some (older/custom) FXServer builds never answer
-// when the request body arrives in a separate segment from the headers, which
-// is what WinHTTP always does; WinHTTP also retries TCP connect internally and
-// can overshoot any configured timeout by ~20s on blackholed IPs.
 HttpResponse httpRawRequest(const std::string& method, const std::string& host, INTERNET_PORT port,
                             const std::string& path, const std::map<std::string, std::string>& headers,
-                            const std::vector<uint8_t>* body, int connectMs, int recvMs) {
+                            const std::vector<uint8_t>* body, int connectMs, int recvMs,
+                            const SizeCallback& onStart) {
     HttpResponse resp;
     ensureWinsock();
     auto started = std::chrono::steady_clock::now();
@@ -151,7 +147,6 @@ HttpResponse httpRawRequest(const std::string& method, const std::string& host, 
         return resp;
     }
 
-    // connectMs and recvMs are phases of ONE total deadline.
     auto elapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(
                          std::chrono::steady_clock::now() - started).count();
     long remain = static_cast<long>(recvMs) - static_cast<long>(elapsedMs);
@@ -208,6 +203,8 @@ HttpResponse httpRawRequest(const std::string& method, const std::string& host, 
     if (auto p = lower.find("content-length:"); p != std::string::npos) {
         contentLen = static_cast<size_t>(std::strtoull(head.c_str() + p + 15, nullptr, 10));
         haveLen = true;
+        resp.contentLength = contentLen;
+        if (onStart) onStart(contentLen);
     }
 
     std::string payload = buf.substr(hdrEnd);
@@ -263,7 +260,8 @@ void HttpClient::setHeader(const std::string& key, const std::string& value) {
 HttpResponse HttpClient::request(const std::string& method, const std::string& url,
                                  const std::vector<uint8_t>* body,
                                  const std::map<std::string, std::string>& headers,
-                                 const ByteProgress& onProgress) {
+                                 const ByteProgress& onProgress,
+                                 const SizeCallback& onStart) {
     HttpResponse resp;
     UrlParts parts;
     if (!parseUrl(url, parts)) {
@@ -271,14 +269,11 @@ HttpResponse HttpClient::request(const std::string& method, const std::string& u
         return resp;
     }
 
-    // Plain HTTP requests with a body (the /client POST) go through raw Winsock
-    // so headers and body arrive in one TCP segment; WinHTTP splits them and
-    // some FXServer builds then never respond.
     if (body && !parts.https) {
         auto merged = defaultHeaders_;
         for (const auto& kv : headers) merged[kv.first] = kv.second;
         return httpRawRequest("POST", wideToUtf8(parts.host), parts.port, wideToUtf8(parts.path),
-                              merged, body, timeouts_[1], timeouts_[3]);
+                              merged, body, timeouts_[1], timeouts_[3], onStart);
     }
 
     HINTERNET connect = WinHttpConnect(static_cast<HINTERNET>(session_), parts.host.c_str(),
@@ -341,6 +336,15 @@ HttpResponse HttpClient::request(const std::string& method, const std::string& u
                         WINHTTP_HEADER_NAME_BY_INDEX, &status, &size, WINHTTP_NO_HEADER_INDEX);
     resp.status = static_cast<int>(status);
 
+    {
+        DWORD clen = 0, csize = sizeof(clen);
+        if (WinHttpQueryHeaders(request, WINHTTP_QUERY_CONTENT_LENGTH | WINHTTP_QUERY_FLAG_NUMBER,
+                                WINHTTP_HEADER_NAME_BY_INDEX, &clen, &csize, WINHTTP_NO_HEADER_INDEX)) {
+            resp.contentLength = clen;
+            if (onStart) onStart(static_cast<size_t>(clen));
+        }
+    }
+
     for (;;) {
         DWORD avail = 0;
         if (!WinHttpQueryDataAvailable(request, &avail)) break;
@@ -362,12 +366,12 @@ HttpResponse HttpClient::postForm(const std::string& url, const std::string& for
     std::map<std::string, std::string> h = headers;
     h["Content-Type"] = "application/x-www-form-urlencoded";
     std::vector<uint8_t> body(formBody.begin(), formBody.end());
-    return request("POST", url, &body, h, nullptr);
+    return request("POST", url, &body, h, nullptr, nullptr);
 }
 
 HttpResponse HttpClient::get(const std::string& url, const std::map<std::string, std::string>& headers,
-                             const ByteProgress& onProgress) {
-    return request("GET", url, nullptr, headers, onProgress);
+                             const ByteProgress& onProgress, const SizeCallback& onStart) {
+    return request("GET", url, nullptr, headers, onProgress, onStart);
 }
 
 HttpResponse HttpClient::plainGetRaw(const std::string& url,
@@ -380,7 +384,7 @@ HttpResponse HttpClient::plainGetRaw(const std::string& url,
         return resp;
     }
     return httpRawRequest("GET", wideToUtf8(parts.host), parts.port, wideToUtf8(parts.path),
-                          headers, nullptr, connectMs, recvMs);
+                          headers, nullptr, connectMs, recvMs, nullptr);
 }
 
 } // namespace fivem

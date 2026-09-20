@@ -1,82 +1,145 @@
 #pragma once
 
-#include "Term.h"
-
-#include <cstdint>
-#include <string>
-#include <chrono>
 #include <atomic>
-#include <cstdio>
+#include <chrono>
+#include <cstddef>
+#include <iomanip>
+#include <iostream>
+#include <mutex>
+#include <sstream>
+#include <string>
+
+#include "Term.h"
 
 namespace fivem {
 
-// Simple thread-safe console progress bar (tqdm-style).
 class ProgressBar {
 public:
-    ProgressBar(const std::string& label, uint64_t total)
-        : label_(label), total_(total) {
+    ProgressBar(std::string label, size_t total)
+        : label_(std::move(label)), total_(total ? total : 1) {
         start_ = std::chrono::steady_clock::now();
+        lastRender_ = start_;
         render();
     }
 
-    void tick() {
-        ++done_;
-        render();
+    ~ProgressBar() {
+        if (!finished_) finish();
     }
 
     void addBytes(size_t n) {
-        bytes_ += n;
+        bytes_.fetch_add(n, std::memory_order_relaxed);
+    }
+
+    void addExpected(size_t n) {
+        expectedBytes_.fetch_add(n, std::memory_order_relaxed);
+        std::lock_guard<std::mutex> lock(mtx_);
+        if (!finished_) render();
+    }
+
+    void tick() {
+        done_.fetch_add(1, std::memory_order_relaxed);
+        std::lock_guard<std::mutex> lock(mtx_);
+        if (finished_) return;
+        auto now = std::chrono::steady_clock::now();
+        auto since = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastRender_).count();
+        if (since < 100 && done_.load() < total_) return;
+        lastRender_ = now;
         render();
     }
 
     void finish() {
-        done_ = total_;
+        std::lock_guard<std::mutex> lock(mtx_);
+        if (finished_) return;
+        finished_ = true;
         render();
-        std::printf("\n");
-        std::fflush(stdout);
+        std::cout << "\n" << std::flush;
     }
 
 private:
+    static std::string formatBytes(double bytes) {
+        static const char* units[] = {"B", "KB", "MB", "GB", "TB", "PB"};
+        int u = 0;
+        while (bytes >= 1024.0 && u < 5) {
+            bytes /= 1024.0;
+            ++u;
+        }
+        std::ostringstream ss;
+        if (u == 0) {
+            ss << static_cast<long long>(bytes) << " B";
+        } else {
+            ss << std::fixed << std::setprecision(2) << bytes << " " << units[u];
+        }
+        return ss.str();
+    }
+
+    static std::string formatSpeed(double bytesPerSec) {
+        return formatBytes(bytesPerSec) + "/s";
+    }
+
+    static std::string formatDuration(double seconds) {
+        if (seconds < 10.0) {
+            std::ostringstream ss;
+            ss << std::fixed << std::setprecision(1) << seconds << "s";
+            return ss.str();
+        }
+        long long s = static_cast<long long>(seconds);
+        long long h = s / 3600;
+        long long m = (s % 3600) / 60;
+        s %= 60;
+        std::ostringstream ss;
+        if (h > 0) ss << h << "h " << m << "m " << s << "s";
+        else if (m > 0) ss << m << "m " << s << "s";
+        else ss << s << "s";
+        return ss.str();
+    }
+
     void render() {
+        size_t done = done_.load();
+        double pct = total_ ? (100.0 * static_cast<double>(done) / static_cast<double>(total_)) : 0.0;
+        if (pct > 100.0) pct = 100.0;
+
         auto now = std::chrono::steady_clock::now();
-        // Throttle to ~20fps
-        if (now - lastRender_ < std::chrono::milliseconds(50) && done_ < total_) return;
-        lastRender_ = now;
+        double elapsed = std::chrono::duration<double>(now - start_).count();
+        double speed = elapsed > 0.0 ? static_cast<double>(bytes_.load()) / elapsed : 0.0;
 
-        double frac = total_ ? static_cast<double>(done_) / static_cast<double>(total_) : 1.0;
-        int filled = static_cast<int>(30 * frac);
-        double secs = std::chrono::duration<double>(now - start_).count();
-        double kbs = secs > 0.5 ? static_cast<double>(bytes_.load()) / 1024.0 / secs : 0.0;
+        const int width = 30;
+        int filled = static_cast<int>(pct / 100.0 * width);
+        if (filled < 0) filled = 0;
+        if (filled > width) filled = width;
+        std::string bar(static_cast<size_t>(filled), '#');
+        bar.append(static_cast<size_t>(width - filled), '-');
 
-        std::string bar;
-        int i = 0;
-        std::string fill;
-        for (; i < filled && i < 30; ++i) fill += '#';
-        std::string rest;
-        for (; i < 30; ++i) rest += '-';
-        bar += CLR(term::GREEN) + fill + CLR(term::DIM) + rest + CLR(term::RESET);
+        size_t expected = expectedBytes_.load();
 
-        char speed[48] = "";
-        uint64_t b = bytes_.load();
-        if (b > 0)
-            std::snprintf(speed, sizeof(speed), " | %llu B @ %.1f KB/s",
-                          static_cast<unsigned long long>(b), kbs);
+        std::ostringstream ss;
+        ss << "\r"
+           << CLR(term::CYAN) << label_ << CLR(term::RESET) << " ["
+           << CLR(term::GREEN) << bar << CLR(term::RESET) << "] "
+           << std::setw(3) << static_cast<int>(pct) << "% "
+           << "(" << done << "/" << total_ << ") "
+           << formatDuration(elapsed) << " | "
+           << formatBytes(static_cast<double>(bytes_.load()));
+        if (expected > 0) {
+            ss << " / " << formatBytes(static_cast<double>(expected));
+        }
+        ss << " @ " << formatSpeed(speed);
 
-        std::printf("\r%s%s [%s] %s%3.0f%%%s (%llu/%llu) %.1fs%s%s%s",
-                    CLR(term::DIM), label_.c_str(), bar.c_str(),
-                    CLR(term::GREEN), frac * 100.0, CLR(term::RESET),
-                    static_cast<unsigned long long>(done_.load()),
-                    static_cast<unsigned long long>(total_), secs,
-                    CLR(term::DIM), speed, CLR(term::RESET));
-        std::fflush(stdout);
+        std::string line = ss.str();
+        const size_t maxLen = 220;
+        if (line.size() > maxLen) line = line.substr(0, maxLen - 3) + "...";
+
+        std::cout << line << std::flush;
     }
 
     std::string label_;
-    uint64_t total_;
-    std::atomic<uint64_t> done_{0};
-    std::atomic<uint64_t> bytes_{0};
+    size_t total_;
+    std::atomic<size_t> done_{0};
+    std::atomic<size_t> bytes_{0};
+    std::atomic<size_t> expectedBytes_{0};
     std::chrono::steady_clock::time_point start_;
-    std::chrono::steady_clock::time_point lastRender_{};
+    std::chrono::steady_clock::time_point lastRender_;
+    std::mutex mtx_;
+    bool finished_ = false;
 };
 
 } // namespace fivem
