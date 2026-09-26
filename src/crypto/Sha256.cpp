@@ -20,6 +20,8 @@ static const uint32_t K[64] = {
     0x90befffau, 0xa4506cebu, 0xbef9a3f7u, 0xc67178f2u
 };
 
+constexpr char kDigits[] = "0123456789abcdef";
+
 inline uint32_t rotr(uint32_t x, uint32_t n) { return (x >> n) | (x << (32 - n)); }
 
 void transform(uint32_t h[8], const uint8_t chunk[64]) {
@@ -71,15 +73,12 @@ std::vector<uint8_t> sha256Impl(const uint8_t* msg, size_t len) {
 
 std::vector<uint8_t> sha256(const uint8_t* data, size_t len) { return sha256Impl(data, len); }
 std::vector<uint8_t> sha256(const std::vector<uint8_t>& data) { return sha256Impl(data.data(), data.size()); }
-std::vector<uint8_t> sha256(const std::string& data) {
-    return sha256Impl(reinterpret_cast<const uint8_t*>(data.data()), data.size());
-}
 
 std::string sha256Hex(const std::vector<uint8_t>& data) {
-    static const char* digits = "0123456789abcdef";
     auto h = sha256(data);
     std::string out;
-    for (uint8_t b : h) { out += digits[b >> 4]; out += digits[b & 0xF]; }
+    out.reserve(64);
+    for (uint8_t b : h) { out += kDigits[b >> 4]; out += kDigits[b & 0xF]; }
     return out;
 }
 

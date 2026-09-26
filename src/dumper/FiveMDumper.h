@@ -61,8 +61,6 @@ private:
     HttpClient http_;
     Checkpoint& checkpoint_;
     std::vector<ResourceInfo> resources_;
-    std::vector<uint8_t> iv_;
-    std::vector<uint8_t> hmacKey_;
     int maxWorkers_ = 24;
 };
 

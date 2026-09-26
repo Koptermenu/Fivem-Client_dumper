@@ -6,10 +6,14 @@ Windows beepitett API vagy sajat implementacio.
 ## Felepites
 
 ```bash
-cmake -B build -S .
-cmake --build build --config Release
+cmake -B build -G "Visual Studio 17 2022"
+cmake --build build --config Release --parallel
 build\Release\fivem_dumper.exe
 ```
+
+A `build.bat` ugyanezt hajtja vegre (`Release`, `--parallel`). A configure lepset
+nem szabad kihagyni: a beagyazott payload es a SHA-256 manifest a configure
+idoben keletkezik, ezert egy mar meglevo build faban is ujra kell futnia.
 
 | komponens | forras |
 |-----------|--------|
@@ -84,6 +88,8 @@ Servers/<szervernev>/
 
 - Az `unluac` jar az exe-ben van, de a Lua-dekompilacioshoz a gepen futtathato
   **Java** kell (a jar onmaga nem hivatalos vegrehajthato).
-- A beagyazott payload merete ~215 MB, igy a kesz exe ~217 MB.
+- A beagyazott payload merete megközelitoleg ~215 MB, igy a kesz exe megközelitoleg
+  ~217 MB. A pontos meret az aktualis `Bin/` tartalmatol fugg (a `Bin/` nem resze a
+  git reponek).
 - Titkositas nelkuli szervertol minden siman kimetszodik; `.fxap`-os
   resource-oknal a grants-token hatarozza meg, melyik kulcs kell.

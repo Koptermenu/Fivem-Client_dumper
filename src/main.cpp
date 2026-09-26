@@ -29,6 +29,17 @@ static bool readLine(std::string& out) {
     return true;
 }
 
+static bool parseDigits(const std::string& s, unsigned long long& out) {
+    if (s.empty() || s.size() > 18) return false;
+    unsigned long long v = 0;
+    for (char c : s) {
+        if (c < '0' || c > '9') return false;
+        v = v * 10 + static_cast<unsigned long long>(c - '0');
+    }
+    out = v;
+    return true;
+}
+
 int main(int argc, char** argv) {
     SetConsoleOutputCP(CP_UTF8);
     fivem::term::enableColors();
@@ -137,9 +148,16 @@ int main(int argc, char** argv) {
                     choice = trim(choice);
                     bool isNum = !choice.empty() &&
                                  choice.find_first_not_of("0123456789") == std::string::npos;
-                    if (isNum && std::stoi(choice) >= 1 && std::stoi(choice) <= (int)ips.size()) {
-                        ip = ips[std::stoi(choice) - 1];
-                    } else if (choice == "0" || choice.empty()) {
+                    unsigned long long sel = 0;
+                    bool selOk = isNum && parseDigits(choice, sel);
+                    if (isNum && choice != "0" &&
+                        (!selOk || sel < 1 || sel > (unsigned long long)ips.size())) {
+                        std::cout << CLR(term::YELLOW) << "[!] Érvénytelen válasz: " << choice
+                                  << CLR(term::RESET) << "\n";
+                    }
+                    if (selOk && sel >= 1 && sel <= (unsigned long long)ips.size()) {
+                        ip = ips[sel - 1];
+                    } else if (choice == "0" || choice.empty() || isNum) {
                         std::cout << CLR(term::CYAN) << "[*]" << CLR(term::RESET) << " Enter server IP (ip:port): ";
                         std::string in;
                         if (!readLine(in) || trim(in).empty()) {

@@ -25,7 +25,6 @@ struct PayloadItem {
 #include "payload_manifest_gen.h"
 
 const PayloadItem kItems[] = FIVEM_PAYLOAD_ITEMS;
-constexpr size_t kItemCount = sizeof(kItems) / sizeof(kItems[0]);
 
 std::wstring g_rootW;
 std::string g_rootU8;
@@ -58,14 +57,6 @@ std::wstring localAppDataDir() {
     return L"";
 }
 
-std::string hexOf(const std::vector<uint8_t>& bytes) {
-    static const char* d = "0123456789abcdef";
-    auto h = sha256(bytes);
-    std::string out;
-    for (uint8_t b : h) { out += d[b >> 4]; out += d[b & 0xF]; }
-    return out;
-}
-
 bool itemVerified(const std::wstring& root, const PayloadItem& it) {
     fs::path p = fs::path(root) / fs::path(toWide(it.name));
     std::error_code ec;
@@ -74,7 +65,7 @@ bool itemVerified(const std::wstring& root, const PayloadItem& it) {
     std::ifstream f(p, std::ios::binary);
     if (!f) return false;
     std::vector<uint8_t> data((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
-    return hexOf(data) == it.sha256;
+    return sha256Hex(data) == it.sha256;
 }
 
 bool extractItem(const std::wstring& root, const PayloadItem& it, std::string& err) {

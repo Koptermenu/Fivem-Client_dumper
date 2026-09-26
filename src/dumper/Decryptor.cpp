@@ -114,11 +114,23 @@ void Decryptor::processLuaFile(const std::vector<uint8_t>& buf, const std::strin
     std::replace(jarWin.begin(), jarWin.end(), '/', '\\');
     std::string cmd = "java -jar \"" + jarWin + "\" \"" + tmpWin + "\"";
     std::string stdoutContent;
+    const size_t maxOutput = 64u * 1024u * 1024u;
+    bool overflow = false;
     int rc = -1;
     if (FILE* pipe = _popen(cmd.c_str(), "r")) {
         char buffer[4096];
-        while (fgets(buffer, sizeof(buffer), pipe)) stdoutContent += buffer;
+        while (fgets(buffer, sizeof(buffer), pipe)) {
+            if (stdoutContent.size() < maxOutput) stdoutContent += buffer;
+            else overflow = true;
+        }
         rc = _pclose(pipe);
+    }
+
+    if (overflow) {
+        LOG("Lua decompilation FAILED for " + relFile + " (unluac output exceeds 64 MB)",
+            LogLevel::WARNING);
+        ++failed_;
+        return;
     }
 
     fs::path p(outPath);
@@ -160,8 +172,9 @@ void Decryptor::decryptResourceFile(const std::string& resourcePath, const std::
 
         if (endsWith(toLower(relFile), ".lua")) {
             std::string luaType = detectLuaType(resourcePath, relFile);
-            std::vector<uint8_t> dec = decryptBuffer(stage1,
-                luaType == "client" ? altKey : decryptKey);
+            const std::vector<uint8_t>& firstKey = (luaType == "client" && !altKey.empty())
+                                                       ? altKey : decryptKey;
+            std::vector<uint8_t> dec = decryptBuffer(stage1, firstKey);
 
             // Check Lua 5.4 header by hex-prefix match (same as python)
             bool isLua = false;
@@ -183,8 +196,10 @@ void Decryptor::decryptResourceFile(const std::string& resourcePath, const std::
                     if (!alt.empty()) { processLuaFile(alt, outputPath, resourceName, relFile); return; }
                 } catch (...) {}
             }
-            auto alt2 = decryptBuffer(stage1, altKey);
-            if (!alt2.empty()) { processLuaFile(alt2, outputPath, resourceName, relFile); return; }
+            if (!altKey.empty()) {
+                auto alt2 = decryptBuffer(stage1, altKey);
+                if (!alt2.empty()) { processLuaFile(alt2, outputPath, resourceName, relFile); return; }
+            }
 
             // fallback raw
             writeFileBytes(outputPath, dec);
@@ -208,9 +223,15 @@ void Decryptor::decryptResource(const std::string& resourcePath, const std::stri
     std::string fxapPath = resourcePath + "/.fxap";
     if (!fs::exists(fxapPath)) {
         // copy all
+        std::error_code itErr;
         std::vector<fs::path> files;
-        for (auto& e : fs::recursive_directory_iterator(resourcePath))
+        for (auto& e : fs::recursive_directory_iterator(resourcePath, itErr))
             if (e.is_regular_file()) files.push_back(e.path());
+        if (itErr) {
+            LOG(resourceName + ": figyelmeztetes - a konyvtarbejaras hiba miatt megszakadt: " +
+                itErr.message() + " - a fajlalista reszleges", LogLevel::WARNING);
+            ++failed_;
+        }
         ProgressBar bar("  " + resourceName, files.size());
         for (auto& f : files) {
             std::string rel = std::filesystem::relative(f, resourcePath).generic_string();
@@ -233,9 +254,15 @@ void Decryptor::decryptResource(const std::string& resourcePath, const std::stri
     std::string idStr = std::to_string(resourceId);
     if (grantsMap_.find(idStr) == grantsMap_.end()) {
         LOG("No grant for " + resourceName + " - copying as-is", LogLevel::WARNING);
+        std::error_code itErr;
         std::vector<fs::path> files;
-        for (auto& e : fs::recursive_directory_iterator(resourcePath))
+        for (auto& e : fs::recursive_directory_iterator(resourcePath, itErr))
             if (e.is_regular_file() && e.path().filename() != ".fxap") files.push_back(e.path());
+        if (itErr) {
+            LOG(resourceName + ": figyelmeztetes - a konyvtarbejaras hiba miatt megszakadt: " +
+                itErr.message() + " - a fajlalista reszleges", LogLevel::WARNING);
+            ++failed_;
+        }
         ProgressBar bar("  " + resourceName, files.size());
         for (auto& f : files) {
             std::string rel = fs::relative(f, resourcePath).generic_string();
@@ -253,26 +280,44 @@ void Decryptor::decryptResource(const std::string& resourcePath, const std::stri
     auto keyHex = grantsMap_[idStr].first;
     auto clkHex = grantsMap_[idStr].second;
     std::vector<uint8_t> decryptKey = hexDecode(keyHex);
+    if (decryptKey.size() != 32) {
+        LOG("Invalid grant key for " + resourceName + ": expected 32 bytes, got " +
+            std::to_string(decryptKey.size()) + " - resource skipped", LogLevel::WARNING);
+        ++failed_;
+        return;
+    }
     std::vector<uint8_t> altKey;
     if (!clkHex.empty()) {
         std::vector<uint8_t> clk = hexDecode(clkHex);
-        if (clk.size() > 16) {
+        if (clk.size() < 32) {
+            LOG("Invalid grants_clk for " + resourceName + ": expected at least 32 bytes, got " +
+                std::to_string(clk.size()) + " - alt key disabled", LogLevel::WARNING);
+        } else {
             std::vector<uint8_t> iv(clk.begin(), clk.begin() + 16);
             std::vector<uint8_t> enc(clk.begin() + 16, clk.end());
-            if (enc.size() % 16 == 0) {
-                aesCbc256DecryptPkcs7(AES_KEY, iv, enc, altKey);
+            bool ok = enc.size() % 16 == 0 &&
+                      aesCbc256DecryptPkcs7(AES_KEY, iv, enc, altKey) && altKey.size() == 32;
+            if (!ok) {
+                altKey.clear();
+                LOG("grants_clk unusable for " + resourceName +
+                    " (bad length or undecryptable) - alt key disabled", LogLevel::WARNING);
             }
         }
     }
 
     // Gather non-fxap files
+    std::error_code itErr;
     std::vector<fs::path> files;
-    for (auto& e : fs::recursive_directory_iterator(resourcePath))
+    for (auto& e : fs::recursive_directory_iterator(resourcePath, itErr))
         if (e.is_regular_file() && e.path().filename() != ".fxap") files.push_back(e.path());
+    if (itErr) {
+        LOG(resourceName + ": figyelmeztetes - a konyvtarbejaras hiba miatt megszakadt: " +
+            itErr.message() + " - a fajlalista reszleges", LogLevel::WARNING);
+        ++failed_;
+    }
 
     ProgressBar bar("  " + resourceName, files.size());
     std::atomic<size_t> next{0};
-    std::mutex mtx;
     int workers = 6;
     std::vector<std::thread> pool;
     for (int w = 0; w < workers; ++w) {
@@ -280,9 +325,18 @@ void Decryptor::decryptResource(const std::string& resourcePath, const std::stri
             for (;;) {
                 size_t i = next.fetch_add(1);
                 if (i >= files.size()) break;
-                std::string rel = fs::relative(files[i], resourcePath).generic_string();
-                try { decryptResourceFile(resourcePath, rel, decryptKey, resourceName, altKey); }
-                catch (const std::exception& e) { LOG("File error: " + std::string(e.what()), LogLevel::WARNING); }
+                std::string rel;
+                try {
+                    rel = fs::relative(files[i], resourcePath).generic_string();
+                    decryptResourceFile(resourcePath, rel, decryptKey, resourceName, altKey);
+                } catch (const std::exception& e) {
+                    LOG("File error (" + rel + "): " + std::string(e.what()), LogLevel::WARNING);
+                    ++failed_;
+                } catch (...) {
+                    LOG("File error (" + rel + "): unknown exception while processing a file of " +
+                        resourceName, LogLevel::WARNING);
+                    ++failed_;
+                }
                 bar.tick();
             }
         });
@@ -298,8 +352,15 @@ void Decryptor::runAll() {
     }
 
     std::vector<std::string> dirs;
-    for (auto& e : fs::directory_iterator(unpackedDir))
+    std::error_code itErr;
+    for (auto& e : fs::directory_iterator(unpackedDir, itErr))
         if (e.is_directory()) dirs.push_back(e.path().generic_string());
+    if (itErr) {
+        LOG("figyelmeztetes - a " + unpackedDir +
+            " konyvtarbejarasa hiba miatt megszakadt: " + itErr.message() +
+            " - az eroforrlista reszleges", LogLevel::WARNING);
+        ++failed_;
+    }
     std::sort(dirs.begin(), dirs.end());
 
     if (dirs.empty()) {
@@ -340,8 +401,13 @@ void Decryptor::runAll() {
             }
             if (!ec) {
                 ++moved;
-                for (auto& f : fs::recursive_directory_iterator(dest))
+                std::error_code walkErr;
+                for (auto& f : fs::recursive_directory_iterator(dest, walkErr))
                     if (f.is_regular_file()) ++fileCount;
+                if (walkErr) {
+                    LOG("figyelmeztetes - " + name + ": a fajlszamlalas megszakadt: " +
+                        walkErr.message() + " - a bejelentett fajlszam csak reszleges", LogLevel::WARNING);
+                }
             } else {
                 LOG("Move failed for " + name + ": " + ec.message(), LogLevel::ERROR);
                 ++failed_;
@@ -363,8 +429,8 @@ void Decryptor::runAll() {
         decryptResource(d, fs::path(d).filename().string(), "");
     }
 
-    LOG("Decryption stats - ok:" + std::to_string(decryptedOk_) +
-        " copied:" + std::to_string(copied_) + " failed:" + std::to_string(failed_),
+    LOG("Decryption stats - ok:" + std::to_string(decryptedOk_.load()) +
+        " copied:" + std::to_string(copied_.load()) + " failed:" + std::to_string(failed_.load()),
         LogLevel::SUCCESS);
 }
 

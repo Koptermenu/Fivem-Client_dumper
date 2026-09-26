@@ -1,5 +1,8 @@
 #include "ChaCha20.h"
 
+#include "../utils/Str.h"
+
+#include <algorithm>
 #include <cstring>
 #include <stdexcept>
 
@@ -37,11 +40,6 @@ void blockKeystream(const uint32_t state[16], uint8_t out[64]) {
         out[i * 4 + 2] = static_cast<uint8_t>(v >> 16);
         out[i * 4 + 3] = static_cast<uint8_t>(v >> 24);
     }
-}
-
-uint32_t le32(const uint8_t* p) {
-    return static_cast<uint32_t>(p[0]) | (static_cast<uint32_t>(p[1]) << 8) |
-           (static_cast<uint32_t>(p[2]) << 16) | (static_cast<uint32_t>(p[3]) << 24);
 }
 
 } // namespace

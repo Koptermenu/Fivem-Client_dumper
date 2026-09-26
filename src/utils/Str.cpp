@@ -63,14 +63,38 @@ std::string resolveTool(const std::string& relative) {
     return relative;  // not found: caller's error message shows what was tried
 }
 
+static bool isWindowsReservedName(const std::string& name) {
+    std::string stem = name.substr(0, name.find('.'));
+    std::string up;
+    up.reserve(stem.size());
+    for (char c : stem) up += static_cast<char>(std::toupper(static_cast<unsigned char>(c)));
+    static const char* reserved[] = {
+        "CON", "PRN", "AUX", "NUL",
+        "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9",
+        "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"
+    };
+    for (const char* r : reserved)
+        if (up == r) return true;
+    return false;
+}
+
 std::string safeName(const std::string& name) {
     std::string out = name;
     for (char& c : out) {
-        if (c == '<' || c == '>' || c == ':' || c == '"' || c == '/' ||
-            c == '\\' || c == '|' || c == '?' || c == '*') {
+        unsigned char u = static_cast<unsigned char>(c);
+        if (u < 0x20 || c == '<' || c == '>' || c == ':' || c == '"' ||
+            c == '/' || c == '\\' || c == '|' || c == '?' || c == '*') {
             c = '_';
         }
     }
+    // A name made only of dots ('.', '..', ...) would resolve to the parent dir.
+    if (!out.empty() && out.find_first_not_of('.') == std::string::npos)
+        std::fill(out.begin(), out.end(), '_');
+    while (!out.empty() && (out.back() == '.' || out.back() == ' ')) out.pop_back();
+    // Prefix, not suffix: 'CON.txt' and 'CON' are both the console device, and
+    // only the part before the first dot is checked.
+    if (isWindowsReservedName(out)) out = "_" + out;
+    if (out.empty() && !name.empty()) out = "_";
     return out;
 }
 

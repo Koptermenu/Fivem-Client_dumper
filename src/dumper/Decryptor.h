@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <string>
 #include <vector>
 #include <map>
@@ -35,7 +36,7 @@ private:
     std::map<std::string, std::pair<std::string, std::string>> grantsMap_;  // id -> (key_hex, clk_hex)
     bool loadGrants();
 
-    int decryptedOk_ = 0, failed_ = 0, copied_ = 0;
+    std::atomic<int> decryptedOk_{0}, failed_{0}, copied_{0};
 };
 
 } // namespace fivem

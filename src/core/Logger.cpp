@@ -17,8 +17,10 @@ Logger::~Logger() {
 
 std::string Logger::timestamp() {
     auto now = std::time(nullptr);
+    std::tm tmValue{};
+    if (localtime_s(&tmValue, &now) != 0) return "";
     std::stringstream ss;
-    ss << std::put_time(std::localtime(&now), "%Y-%m-%d %H:%M:%S");
+    ss << std::put_time(&tmValue, "%Y-%m-%d %H:%M:%S");
     return ss.str();
 }
 
@@ -43,11 +45,11 @@ void Logger::log(const std::string& message, LogLevel level) {
     if (level == LogLevel::WARNING) {
         // file only
     } else if (level == LogLevel::ERROR) {
-        std::cout << CLR(term::RED) << logLine << CLR(term::RESET) << "\n";
+        std::cout << CLR(term::RED) << logLine << CLR(term::RESET) << "\n" << std::flush;
     } else if (level == LogLevel::SUCCESS) {
-        std::cout << CLR(term::GREEN) << logLine << CLR(term::RESET) << "\n";
+        std::cout << CLR(term::GREEN) << logLine << CLR(term::RESET) << "\n" << std::flush;
     } else {
-        std::cout << CLR(term::DIM) << prefix << CLR(term::RESET) << message << "\n";
+        std::cout << CLR(term::DIM) << prefix << CLR(term::RESET) << message << "\n" << std::flush;
     }
 
     // Always write to file
@@ -63,6 +65,9 @@ void Logger::setLogFile(const std::string& filename) {
         logFile_.close();
     }
     logFile_.open(filename, std::ios::app);
+    if (!logFile_.is_open()) {
+        std::cerr << "Failed to open log file: " << filename << "\n" << std::flush;
+    }
 }
 
 } // namespace fivem

@@ -6,6 +6,7 @@
 #include <ws2tcpip.h>
 #include <cctype>
 #include <chrono>
+#include <cstdint>
 #include <cstdlib>
 #include <cstring>
 #include <mutex>
@@ -32,13 +33,27 @@ struct UrlParts {
     std::wstring path;
 };
 
+constexpr size_t kMaxChunkedResponseBytes = 512u * 1024u * 1024u;
+
+bool startsWithNoCase(const std::string& s, const char* prefix) {
+    size_t n = std::strlen(prefix);
+    if (s.size() < n) return false;
+    for (size_t i = 0; i < n; ++i) {
+        if (std::tolower(static_cast<unsigned char>(s[i])) !=
+            std::tolower(static_cast<unsigned char>(prefix[i]))) {
+            return false;
+        }
+    }
+    return true;
+}
+
 bool parseUrl(const std::string& url, UrlParts& parts) {
     std::string s = url;
-    if (s.rfind("https://", 0) == 0) {
+    if (startsWithNoCase(s, "https://")) {
         parts.https = true;
         s = s.substr(8);
         parts.port = INTERNET_DEFAULT_HTTPS_PORT;
-    } else if (s.rfind("http://", 0) == 0) {
+    } else if (startsWithNoCase(s, "http://")) {
         parts.https = false;
         s = s.substr(7);
         parts.port = INTERNET_DEFAULT_HTTP_PORT;
@@ -52,8 +67,17 @@ bool parseUrl(const std::string& url, UrlParts& parts) {
     std::string hostStr = hostport;
     if (colon != std::string::npos) {
         hostStr = hostport.substr(0, colon);
-        parts.port = static_cast<INTERNET_PORT>(std::stoi(hostport.substr(colon + 1)));
+        std::string portStr = hostport.substr(colon + 1);
+        if (portStr.empty() || portStr.size() > 5) return false;
+        unsigned long port = 0;
+        for (char c : portStr) {
+            if (c < '0' || c > '9') return false;
+            port = port * 10 + static_cast<unsigned long>(c - '0');
+        }
+        if (port == 0 || port > 65535) return false;
+        parts.port = static_cast<INTERNET_PORT>(port);
     }
+    if (hostStr.empty()) return false;
     parts.host.assign(hostStr.begin(), hostStr.end());
     parts.path.assign(rest.begin(), rest.end());
     return true;
@@ -201,7 +225,25 @@ HttpResponse httpRawRequest(const std::string& method, const std::string& host, 
     bool haveLen = false;
     size_t contentLen = 0;
     if (auto p = lower.find("content-length:"); p != std::string::npos) {
-        contentLen = static_cast<size_t>(std::strtoull(head.c_str() + p + 15, nullptr, 10));
+        const size_t headSize = head.size();
+        size_t q = p + 15;
+        while (q < headSize && (head[q] == ' ' || head[q] == '\t')) ++q;
+        const size_t digitsBegin = q;
+        while (q < headSize && head[q] >= '0' && head[q] <= '9') ++q;
+        if (q == digitsBegin) return fail("malformed content-length");
+        size_t after = q;
+        while (after < headSize && (head[after] == ' ' || head[after] == '\t')) ++after;
+        if (after >= headSize || (head[after] != '\r' && head[after] != '\n')) {
+            return fail("malformed content-length");
+        }
+        unsigned long long value = 0;
+        for (size_t i = digitsBegin; i < q; ++i) {
+            const unsigned digit = static_cast<unsigned>(head[i] - '0');
+            if (value > (SIZE_MAX - digit) / 10) return fail("content-length too large");
+            value = value * 10 + digit;
+        }
+        if (value == 0) return fail("malformed content-length: zero length");
+        contentLen = static_cast<size_t>(value);
         haveLen = true;
         resp.contentLength = contentLen;
         if (onStart) onStart(contentLen);
@@ -213,12 +255,25 @@ HttpResponse httpRawRequest(const std::string& method, const std::string& host, 
         size_t pos = 0;
         for (;;) {
             size_t eol;
-            while ((eol = payload.find("\r\n", pos)) == std::string::npos)
+            while ((eol = payload.find("\r\n", pos)) == std::string::npos) {
+                if (payload.size() - pos > (1u << 20)) return fail("chunked size line too large");
                 if (pull(payload) <= 0) return fail("chunked stream truncated");
-            size_t csz = static_cast<size_t>(std::strtoul(payload.c_str() + pos, nullptr, 16));
+            }
+            size_t tok = eol - pos;
+            size_t semi = payload.find(';', pos);
+            if (semi != std::string::npos && semi < eol) tok = semi - pos;
+            if (tok == 0) return fail("malformed chunk size");
+            const char* p = payload.c_str() + pos;
+            char* end = nullptr;
+            unsigned long long raw = std::strtoull(p, &end, 16);
+            if (end != p + tok) return fail("malformed chunk size");
+            if (raw > kMaxChunkedResponseBytes) return fail("chunked response too large");
+            size_t csz = static_cast<size_t>(raw);
             pos = eol + 2;
             if (csz == 0) break;
-            while (payload.size() < pos + csz + 2)
+            if (csz > kMaxChunkedResponseBytes - out.size()) return fail("chunked response too large");
+            if (csz > SIZE_MAX - pos - 2) return fail("chunked response too large");
+            while (payload.size() - pos < csz + 2)
                 if (pull(payload) <= 0) return fail("chunked stream truncated");
             out.append(payload, pos, csz);
             pos += csz + 2;
@@ -229,11 +284,16 @@ HttpResponse httpRawRequest(const std::string& method, const std::string& host, 
             int n = pull(payload);
             if (n <= 0) {
                 if (n < 0) return fail("receive failed (" + std::to_string(WSAGetLastError()) + ")");
+                resp.error = "truncated response (" + std::to_string(payload.size()) + " of " +
+                             std::to_string(contentLen) + " bytes)";
                 break;
             }
         }
     } else {
-        while (pull(payload) > 0) {}
+        for (;;) {
+            if (payload.size() > kMaxChunkedResponseBytes) return fail("response too large");
+            if (pull(payload) <= 0) break;
+        }
     }
 
     closesocket(s);
@@ -295,13 +355,16 @@ HttpResponse HttpClient::request(const std::string& method, const std::string& u
     }
 
     if (parts.https) {
-        DWORD sec = SECURITY_FLAG_IGNORE_UNKNOWN_CA | SECURITY_FLAG_IGNORE_CERT_CN_INVALID |
-                    SECURITY_FLAG_IGNORE_CERT_DATE_INVALID | SECURITY_FLAG_IGNORE_CERT_WRONG_USAGE;
-        WinHttpSetOption(request, WINHTTP_OPTION_SECURITY_FLAGS, &sec, sizeof(sec));
+        DWORD sec = 0;
+        if (!WinHttpSetOption(request, WINHTTP_OPTION_SECURITY_FLAGS, &sec, sizeof(sec))) {
+            DWORD e = GetLastError();
+            WinHttpCloseHandle(request);
+            resp.error = "security options failed (" + std::to_string(e) + "): " + url;
+            return resp;
+        }
     }
 
-    DWORD timeouts[] = {15000, 30000, 30000, 30000};
-    WinHttpSetTimeouts(request, timeouts[0], timeouts[1], timeouts[2], timeouts[3]);
+    WinHttpSetTimeouts(request, timeouts_[0], timeouts_[1], timeouts_[2], timeouts_[3]);
 
     std::wstring headerStr;
     auto merged = defaultHeaders_;
@@ -345,16 +408,35 @@ HttpResponse HttpClient::request(const std::string& method, const std::string& u
         }
     }
 
+    std::vector<uint8_t> chunk;
     for (;;) {
         DWORD avail = 0;
-        if (!WinHttpQueryDataAvailable(request, &avail)) break;
+        if (!WinHttpQueryDataAvailable(request, &avail)) {
+            DWORD e = GetLastError();
+            resp.error = "read failed (" + std::to_string(e) + "): " + url;
+            break;
+        }
         if (avail == 0) break;
-        std::vector<uint8_t> chunk(avail);
+        if (avail > chunk.size()) chunk.resize(avail);
         DWORD read = 0;
-        if (!WinHttpReadData(request, chunk.data(), avail, &read)) break;
-        chunk.resize(read);
-        resp.body.insert(resp.body.end(), chunk.begin(), chunk.end());
+        if (!WinHttpReadData(request, chunk.data(), avail, &read)) {
+            DWORD e = GetLastError();
+            resp.error = "read failed (" + std::to_string(e) + "): " + url;
+            break;
+        }
+        if (read > kMaxChunkedResponseBytes - resp.body.size()) {
+            resp.error = "response too large: " + url;
+            break;
+        }
+        resp.body.insert(resp.body.end(), chunk.begin(), chunk.begin() + read);
         if (onProgress && read) onProgress(read);
+    }
+
+    if (resp.error.empty() && resp.status >= 200 && resp.status < 300 &&
+        resp.status != 204 && resp.status != 304 && resp.contentLength != 0 &&
+        resp.body.size() < resp.contentLength) {
+        resp.error = "truncated response (" + std::to_string(resp.body.size()) + " of " +
+                     std::to_string(resp.contentLength) + " bytes): " + url;
     }
 
     WinHttpCloseHandle(request);
@@ -379,7 +461,11 @@ HttpResponse HttpClient::plainGetRaw(const std::string& url,
                                      int connectMs, int recvMs) {
     HttpResponse resp;
     UrlParts parts;
-    if (!parseUrl(url, parts) || parts.https) {
+    if (!parseUrl(url, parts)) {
+        resp.error = "bad url: " + url;
+        return resp;
+    }
+    if (parts.https) {
         resp.error = "plainGetRaw requires a plain http url: " + url;
         return resp;
     }

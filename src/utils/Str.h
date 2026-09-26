@@ -52,7 +52,7 @@ bool writeTextFile(const std::string& path, const std::string& text);
 uint32_t be32(const uint8_t* p);
 uint32_t le32(const uint8_t* p);
 
-// Directory of the running executable (forward slashes), "" if unavailable.
+// Directory of the running executable (backslashes), "" if unavailable.
 std::string exeDir();
 
 // Resolve a project-relative tool path (e.g. "Bin/Unpacker.exe") independent of

@@ -10,7 +10,7 @@ namespace fivem {
 // Returns true when the payload is ready. errOut carries the failure reason.
 bool ensurePayload(std::string& errOut);
 
-// UTF-8 payload root (forward slashes); empty until ensurePayload succeeded.
+// UTF-8 payload root (backslashes); empty until ensurePayload succeeded.
 std::string payloadRoot();
 
 } // namespace fivem

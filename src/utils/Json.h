@@ -17,7 +17,6 @@ public:
     Json() = default;
 
     static Json parse(const std::string& text);
-    static Json parse(const std::string& text, size_t& pos);
 
     Type type() const { return type_; }
     bool isNull() const { return type_ == Type::Null; }

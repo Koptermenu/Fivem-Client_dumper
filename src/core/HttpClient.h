@@ -25,6 +25,11 @@ public:
     HttpClient();
     ~HttpClient();
 
+    HttpClient(const HttpClient&) = delete;
+    HttpClient& operator=(const HttpClient&) = delete;
+
+    // Thread safety: get()/postForm() are safe to call concurrently on one instance, but
+    // setHeader() must not be called while requests are in flight.
     HttpResponse postForm(const std::string& url, const std::string& formBody,
                           const std::map<std::string, std::string>& headers = {});
 
@@ -38,11 +43,6 @@ public:
                                     int connectMs, int recvMs);
 
     void setHeader(const std::string& key, const std::string& value);
-
-    void setTimeouts(int resolveMs, int connectMs, int sendMs, int recvMs) {
-        timeouts_[0] = resolveMs; timeouts_[1] = connectMs;
-        timeouts_[2] = sendMs; timeouts_[3] = recvMs;
-    }
 
 private:
     HttpResponse request(const std::string& method, const std::string& url,

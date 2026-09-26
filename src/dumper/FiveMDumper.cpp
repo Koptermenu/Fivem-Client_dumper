@@ -27,22 +27,60 @@ namespace fs = std::filesystem;
 
 namespace fivem {
 
-static std::string truncateForPath(const std::string& s, size_t maxBytes) {
-    if (s.size() <= maxBytes) return s;
-    size_t i = 0, lastGood = 0;
-    while (i < s.size() && i < maxBytes) {
-        unsigned char c = static_cast<unsigned char>(s[i]);
-        size_t len;
-        if ((c & 0x80) == 0x00) len = 1;
-        else if ((c & 0xE0) == 0xC0) len = 2;
-        else if ((c & 0xF0) == 0xE0) len = 3;
-        else if ((c & 0xF8) == 0xF0) len = 4;
-        else { ++i; continue; }
-        if (i + len > maxBytes) break;
-        i += len;
-        lastGood = i;
+static bool isSafeRelPath(const std::string& rel) {
+    if (rel.empty()) return false;
+    if (rel.front() == '/' || rel.front() == '\\') return false;
+    if (rel.find(':') != std::string::npos) return false;
+    for (char c : rel)
+        if (static_cast<unsigned char>(c) < 0x20 || c == '<' || c == '>' || c == '"' ||
+            c == '|' || c == '?' || c == '*')
+            return false;
+    size_t start = 0;
+    for (;;) {
+        size_t end = rel.find_first_of("/\\", start);
+        if (rel.compare(start, end == std::string::npos ? std::string::npos : end - start, "..") == 0)
+            return false;
+        if (end == std::string::npos) break;
+        start = end + 1;
     }
-    std::string out = s.substr(0, lastGood);
+    // Win32 silently strips trailing dots/spaces, so 'fxmanifest.lua.' would
+    // alias onto 'fxmanifest.lua' and two downloads would race on one path. A
+    // name made only of dots ('...') strips to nothing and aliases onto nothing.
+    if ((rel.back() == '.' || rel.back() == ' ') &&
+        rel.find_first_not_of('.') != std::string::npos)
+        return false;
+    return true;
+}
+
+static bool parseDigits(const std::string& s, unsigned long long& out) {
+    if (s.empty() || s.size() > 18) return false;
+    unsigned long long v = 0;
+    for (char c : s) {
+        if (c < '0' || c > '9') return false;
+        v = v * 10 + static_cast<unsigned long long>(c - '0');
+    }
+    out = v;
+    return true;
+}
+
+static std::string truncateForPath(const std::string& s, size_t maxBytes) {
+    std::string out = s;
+    if (s.size() > maxBytes) {
+        size_t i = 0, lastGood = 0;
+        while (i < s.size() && i < maxBytes) {
+            unsigned char c = static_cast<unsigned char>(s[i]);
+            size_t len;
+            if ((c & 0x80) == 0x00) len = 1;
+            else if ((c & 0xE0) == 0xC0) len = 2;
+            else if ((c & 0xF0) == 0xE0) len = 3;
+            else if ((c & 0xF8) == 0xF0) len = 4;
+            else { ++i; continue; }
+            if (i + len > maxBytes) break;
+            i += len;
+            lastGood = i;
+        }
+        out = s.substr(0, lastGood);
+    }
     while (!out.empty() && (out.back() == '.' || out.back() == ' '))
         out.pop_back();
     return out;
@@ -204,12 +242,17 @@ void FiveMDumper::downloadAndDecrypt(const std::string& url, const std::vector<u
     static const int maxRetries = 3;
     HttpResponse resp;
     for (int attempt = 0; attempt < maxRetries; ++attempt) {
-        resp = http_.get(url, {}, onBytes, onStart);
+        SizeCallback firstAttempt = (attempt == 0) ? onStart : SizeCallback();
+        resp = http_.get(url, {}, onBytes, firstAttempt);
         if (resp.ok()) break;
-        LOG("Download retry " + std::to_string(attempt + 1) + "/" + std::to_string(maxRetries) +
-            " for " + outPath + ": " + resp.error, LogLevel::WARNING);
-        if (attempt < maxRetries - 1)
+        if (attempt < maxRetries - 1) {
+            LOG("Download retry " + std::to_string(attempt + 1) + "/" + std::to_string(maxRetries) +
+                " for " + outPath + ": " + resp.error, LogLevel::WARNING);
             std::this_thread::sleep_for(std::chrono::seconds(1 << attempt));
+        } else {
+            LOG("Download failed after " + std::to_string(maxRetries) + " attempts for " +
+                outPath + ": " + resp.error, LogLevel::WARNING);
+        }
     }
     if (!resp.ok()) {
         throw std::runtime_error("Failed to download " + outPath + ": " + resp.error);
@@ -319,6 +362,11 @@ bool FiveMDumper::unpackRpf(const std::string& rpfPath, const std::string& outDi
     std::string cmd = "\"" + unpacker + "\" \"" + rpf + "\" \"" + out + "\"";
     std::wstring wcmd;
     int len = MultiByteToWideChar(CP_UTF8, 0, cmd.c_str(), -1, nullptr, 0);
+    if (len <= 0) {
+        LOG("Unpacker command conversion failed (err " + std::to_string(GetLastError()) + ")",
+            LogLevel::WARNING);
+        return false;
+    }
     wcmd.resize(len - 1);
     MultiByteToWideChar(CP_UTF8, 0, cmd.c_str(), -1, wcmd.data(), len);
 
@@ -330,11 +378,29 @@ bool FiveMDumper::unpackRpf(const std::string& rpfPath, const std::string& outDi
             LogLevel::WARNING);
         return false;
     }
-    WaitForSingleObject(pi.hProcess, 120000);
+    DWORD wait = WaitForSingleObject(pi.hProcess, 120000);
+    bool timedOut = (wait == WAIT_TIMEOUT);
+    if (timedOut) {
+        TerminateProcess(pi.hProcess, 1);
+        WaitForSingleObject(pi.hProcess, 5000);
+    }
     DWORD exitCode = 0;
     GetExitCodeProcess(pi.hProcess, &exitCode);
     CloseHandle(pi.hThread);
     CloseHandle(pi.hProcess);
+
+    if (wait != WAIT_OBJECT_0) {
+        LOG("Unpacker wait failed (result " + std::to_string(wait) + ") for " +
+            fs::path(rpfPath).filename().generic_string() +
+            " - a folyamat allapotat nem sikerult megallapitani.", LogLevel::WARNING);
+        return false;
+    }
+
+    if (timedOut) {
+        LOG("Unpacker TIMEOUT (120s) for " + fs::path(rpfPath).filename().generic_string() +
+            " - a folyamat leallitva.", LogLevel::WARNING);
+        return false;
+    }
 
     size_t after = countTree(out);
     if (after <= before) {
@@ -373,11 +439,19 @@ void FiveMDumper::fetchResource(const ResourceInfo& res) {
 
     std::string fileBase = res.fileServer.empty() ? (baseUrl_ + "/files") : res.fileServer;
 
+    std::atomic<size_t> rejected{0};
+
     struct Task { std::string url, outPath, hash; std::vector<uint8_t> key; bool rpf; };
     std::vector<Task> tasks;
     tasks.reserve(res.files.size() + res.streamFiles.size());
 
     for (const auto& f : res.files) {
+        if (!isSafeRelPath(f.name)) {
+            LOG(resName + ": figyelmeztetes - unsafe file name megtagadva: '" + f.name + "'",
+                LogLevel::WARNING);
+            ++rejected;
+            continue;
+        }
         Task t;
         t.url = fileBase + "/" + res.name + "/" + urlQuote(f.name) + "?hash=" + f.hash;
         t.key = hmacSha256(hmacKey, f.name);
@@ -387,6 +461,12 @@ void FiveMDumper::fetchResource(const ResourceInfo& res) {
         tasks.push_back(std::move(t));
     }
     for (const auto& f : res.streamFiles) {
+        if (!isSafeRelPath(f.name)) {
+            LOG(resName + ": figyelmeztetes - unsafe stream file name megtagadva: '" + f.name + "'",
+                LogLevel::WARNING);
+            ++rejected;
+            continue;
+        }
         Task t;
         t.url = fileBase + "/" + res.name + "/" + urlQuote(f.name) + "?hash=" + f.hash;
         t.key = hmacSha256(hmacKey, f.name);
@@ -432,6 +512,11 @@ void FiveMDumper::fetchResource(const ResourceInfo& res) {
     if (errors > 0) {
         LOG(resName + ": " + std::to_string(errors) + " file(s) failed", LogLevel::WARNING);
     }
+    if (rejected > 0) {
+        LOG(resName + ": " + std::to_string(rejected) +
+            " file(s) megtagadva (biztonsagtalan fajlnev) - a resource NEM lett kesznek jelolve, "
+            "a kovetkezo futas ujra letolli", LogLevel::ERROR);
+    }
 
     if (!rpfFiles.empty()) {
         LOG("Unpacking " + std::to_string(rpfFiles.size()) + " RPF files for " + resName,
@@ -459,6 +544,11 @@ void FiveMDumper::fetchResource(const ResourceInfo& res) {
 
     if (!hasManifest(unpackedRes)) {
         for (const char* cand : {"fxmanifest.lua", "__resource.lua"}) {
+            if (!isSafeRelPath(cand)) {
+                LOG(resName + ": figyelmeztetes - unsafe manifest name megtagadva: '" +
+                    std::string(cand) + "'", LogLevel::WARNING);
+                continue;
+            }
             std::string url = fileBase + "/" + res.name + "/" + urlQuote(cand);
             std::vector<uint8_t> ckey = hmacSha256(hmacKey, cand);
             if (downloadQuiet(url, ckey, iv, unpackedRes + "/" + cand)) {
@@ -471,6 +561,8 @@ void FiveMDumper::fetchResource(const ResourceInfo& res) {
                 " bomthat ki; probald masik kitomorigetovel)", LogLevel::WARNING);
         }
     }
+
+    if (rejected > 0) return;
 
     checkpoint_.completed_resources.push_back(resName);
     checkpoint_.save();
@@ -525,15 +617,22 @@ bool FiveMDumper::run(const std::string& filterResource) {
                     if (dash != std::string::npos &&
                         tok.find_first_not_of("0123456789-") == std::string::npos) {
                         std::string a = trim(tok.substr(0, dash)), b = trim(tok.substr(dash + 1));
-                        int lo = std::stoi(a), hi = std::stoi(b);
+                        unsigned long long lo = 0, hi = 0;
+                        if (!parseDigits(a, lo) || !parseDigits(b, hi)) {
+                            std::cout << CLR(term::YELLOW) << "[!] Ignoring out-of-range: " << tok << CLR(term::RESET) << "\n";
+                            continue;
+                        }
                         if (lo > hi) std::swap(lo, hi);
-                        for (int i = lo; i <= hi; ++i)
-                            if (i >= 1 && i <= (int)sorted.size()) chosen.push_back(sorted[i - 1]);
+                        if (lo < 1) lo = 1;
+                        if (hi > sorted.size()) hi = sorted.size();
+                        for (unsigned long long i = lo; i <= hi; ++i)
+                            chosen.push_back(sorted[i - 1]);
                         continue;
                     }
                     if (tok.find_first_not_of("0123456789") == std::string::npos) {
-                        int idx = std::stoi(tok);
-                        if (idx >= 1 && idx <= (int)sorted.size()) chosen.push_back(sorted[idx - 1]);
+                        unsigned long long idx = 0;
+                        if (parseDigits(tok, idx) && idx >= 1 && idx <= sorted.size())
+                            chosen.push_back(sorted[idx - 1]);
                         else std::cout << CLR(term::YELLOW) << "[!] Ignoring out-of-range: " << tok << CLR(term::RESET) << "\n";
                         continue;
                     }
