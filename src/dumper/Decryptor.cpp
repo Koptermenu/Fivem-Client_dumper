@@ -10,6 +10,7 @@
 #include "../utils/ProgressBar.h"
 
 #include <algorithm>
+#include <cctype>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -30,7 +31,7 @@ static const std::vector<uint8_t> AES_KEY = {
     0x7A, 0xBA, 0x8D, 0x53, 0x25, 0x5B, 0x0E, 0xFD, 0x16, 0xBD, 0x35, 0x22, 0xA0, 0xB9, 0x26, 0xA5,
     0x61, 0x83, 0x2E, 0xEC, 0xA2, 0x4B, 0xFD, 0x56, 0x9E, 0xC0, 0x1D, 0x8F, 0x38, 0x40, 0x54, 0x6D
 };
-static const std::string LUA_HEADER_HEX = "1b4c7561540019930d0a1a0a040808785";
+static const std::string LUA_HEADER_HEX = "1b4c7561540019930d0a1a0a0408087856";
 
 Decryptor::Decryptor(std::string serverDir)
     : serverDir_(std::move(serverDir)) {
@@ -86,17 +87,209 @@ std::vector<uint8_t> Decryptor::decryptBuffer(const std::vector<uint8_t>& data,
     return chacha20Xor(key, iv, enc);
 }
 
-std::string Decryptor::detectLuaType(const std::string& resourcePath,
-                                     const std::string& relFile) const {
-    std::string manifest = resourcePath + "/fxmanifest.lua";
-    if (!fs::exists(manifest)) manifest = resourcePath + "/__resource.lua";
-    auto data = readFileBytes(manifest);
-    if (!data) return "unknown";
-    std::string text = toLower(std::string(data->begin(), data->end()));
-    std::string rel = toLower(relFile);
-    if (text.find(rel) == std::string::npos) return "unknown";
-    if (text.find("client_script") != std::string::npos) return "client";
-    if (text.find("server_script") != std::string::npos) return "server";
+namespace {
+
+// Canonical form used for both sides of the comparison: lowercase, '/' separators,
+// no './' prefix and no empty segments.
+std::string normalizeRelPath(const std::string& path) {
+    std::string low = toLower(path);
+    std::replace(low.begin(), low.end(), '\\', '/');
+    std::vector<std::string> parts;
+    for (const std::string& seg : split(low, '/'))
+        if (!seg.empty() && seg != ".") parts.push_back(seg);
+    std::string out;
+    for (size_t i = 0; i < parts.size(); ++i) {
+        if (i) out += '/';
+        out += parts[i];
+    }
+    return out;
+}
+
+bool isNameStart(char c) {
+    return c == '_' || std::isalpha(static_cast<unsigned char>(c)) != 0;
+}
+
+bool isNameChar(char c) {
+    return c == '_' || std::isalnum(static_cast<unsigned char>(c)) != 0;
+}
+
+// End offset of the Lua long bracket (string or comment) opening at pos, 0 if none.
+size_t longBracketEnd(const std::string& text, size_t pos) {
+    if (pos >= text.size() || text[pos] != '[') return 0;
+    size_t q = pos + 1;
+    while (q < text.size() && text[q] == '=') ++q;
+    if (q >= text.size() || text[q] != '[') return 0;
+    std::string close = "]" + std::string(q - pos - 1, '=') + "]";
+    size_t e = text.find(close, q + 1);
+    return e == std::string::npos ? text.size() : e + close.size();
+}
+
+// Match the 17-byte Lua 5.4 header prefix: signature, version, format, LUAC_DATA, the
+// three sizeof size bytes (04 08 08 on stock x64 Windows) and the low byte of LUAC_INT (0x5678).
+bool hasLuaHeader(const std::vector<uint8_t>& data) {
+    const size_t headerLen = (LUA_HEADER_HEX.size() + 1) / 2;
+    if (data.size() < headerLen) return false;
+    std::string hex = hexEncode(std::vector<uint8_t>(data.begin(), data.begin() + headerLen));
+    return hex.rfind(LUA_HEADER_HEX, 0) == 0;
+}
+
+// One path segment against one pattern segment: '?' is one character, '*' any run.
+bool segmentMatch(const std::string& pattern, const std::string& text) {
+    size_t p = 0, t = 0, star = std::string::npos, backtrack = 0;
+    while (t < text.size()) {
+        if (p < pattern.size() && (pattern[p] == '?' || pattern[p] == text[t])) { ++p; ++t; }
+        else if (p < pattern.size() && pattern[p] == '*') { star = p++; backtrack = t; }
+        else if (star != std::string::npos) { p = star + 1; t = ++backtrack; }
+        else return false;
+    }
+    while (p < pattern.size() && pattern[p] == '*') ++p;
+    return p == pattern.size();
+}
+
+bool globMatchSegments(const std::vector<std::string>& pattern, size_t pi,
+                       const std::vector<std::string>& text, size_t ti) {
+    if (pi == pattern.size()) return ti == text.size();
+    if (pattern[pi] == "**") {
+        for (size_t k = ti; k <= text.size(); ++k)
+            if (globMatchSegments(pattern, pi + 1, text, k)) return true;
+        return false;
+    }
+    if (ti == text.size()) return false;
+    if (!segmentMatch(pattern[pi], text[ti])) return false;
+    return globMatchSegments(pattern, pi + 1, text, ti + 1);
+}
+
+bool globMatch(const std::string& pattern, const std::string& path) {
+    return globMatchSegments(split(pattern, '/'), 0, split(path, '/'), 0);
+}
+
+// Literal membership first, then the stored globs. A pattern-free entry therefore
+// still matches only itself, which keeps this a strict superset of set lookup.
+bool matchesManifestSet(const std::set<std::string>& files, const std::string& rel) {
+    if (files.count(rel)) return true;
+    for (const std::string& entry : files) {
+        if (entry.find('*') == std::string::npos && entry.find('?') == std::string::npos) continue;
+        if (globMatch(entry, rel)) return true;
+    }
+    return false;
+}
+
+} // namespace
+
+// Parses the resource manifest once and collects the paths each side receives.
+// Recognised: client_script(s), server_script(s), shared_script(s), the files /
+// file block and the top-level server_only flag. Script directives may use globs,
+// which detectLuaType matches too. files entries default to the client, because a
+// resource ships its assets to the client; a shared entry is stored in both sets,
+// while an explicit server_script entry is also recorded in serverScriptFiles so
+// that it outranks a files membership. Anything unlisted stays unclassified.
+Decryptor::LuaManifest Decryptor::parseLuaManifest(const std::string& resourcePath) {
+    enum Side { SideNone, SideClient, SideServer, SideBoth };
+    LuaManifest manifest;
+
+    auto data = readFileBytes(resourcePath + "/fxmanifest.lua");
+    if (!data) data = readFileBytes(resourcePath + "/__resource.lua");
+    if (!data) return manifest;
+
+    const std::string text(data->begin(), data->end());
+    const size_t n = text.size();
+    size_t i = 0;
+
+    auto add = [&](const std::string& raw, Side side) {
+        std::string p = normalizeRelPath(raw);
+        if (p.empty()) return;
+        if (side == SideClient || side == SideBoth) manifest.clientFiles.insert(p);
+        if (side == SideServer || side == SideBoth) manifest.serverFiles.insert(p);
+        if (side == SideServer) manifest.serverScriptFiles.insert(p);
+    };
+    auto readQuoted = [&]() {
+        char q = text[i++];
+        std::string value;
+        while (i < n && text[i] != q) value += text[i++];
+        if (i < n) ++i;
+        return value;
+    };
+    auto skipBlanks = [&]() {
+        while (i < n && (text[i] == ' ' || text[i] == '\t' || text[i] == '\r' || text[i] == '\n')) ++i;
+    };
+
+    while (i < n) {
+        // Quoted strings and comments may hold anything, never parse them as directives.
+        if (text[i] == '\'' || text[i] == '"') { readQuoted(); continue; }
+        if (text[i] == '-' && i + 1 < n && text[i + 1] == '-') {
+            size_t e = longBracketEnd(text, i + 2);
+            if (e) { i = e; continue; }
+            while (i < n && text[i] != '\n') ++i;
+            continue;
+        }
+        size_t lb = longBracketEnd(text, i);
+        if (lb) { i = lb; continue; }
+        if (!isNameStart(text[i])) { ++i; continue; }
+
+        size_t start = i;
+        while (i < n && isNameChar(text[i])) ++i;
+        std::string name = toLower(text.substr(start, i - start));
+        if (name == "server_only") { manifest.serverOnly = true; continue; }
+        Side directive = SideNone;
+        if (name == "client_script" || name == "client_scripts") directive = SideClient;
+        else if (name == "server_script" || name == "server_scripts") directive = SideServer;
+        else if (name == "shared_script" || name == "shared_scripts") directive = SideBoth;
+        else if (name == "files" || name == "file") directive = SideClient;
+        if (directive == SideNone) continue;
+
+        size_t depth = 0;
+        Side side = directive;
+        for (;;) {
+            skipBlanks();
+            if (i >= n) break;
+            char c = text[i];
+            if (c == '\'' || c == '"') { add(readQuoted(), side); continue; }
+            if (c == '{') { ++i; ++depth; continue; }
+            if (c == '[') {
+                size_t e = longBracketEnd(text, i);
+                if (e) { i = e; continue; }
+                ++i;
+                ++depth;
+                continue;
+            }
+            if (c == '}' || c == ']') {
+                if (depth == 0) break;
+                ++i;
+                if (--depth == 0) break;
+                continue;
+            }
+            if (c == ',') { ++i; continue; }
+            // A comment inside the list must not hide the entries that follow it.
+            if (c == '-' && i + 1 < n && text[i + 1] == '-') {
+                size_t e = longBracketEnd(text, i + 2);
+                if (e) {
+                    i = e;
+                } else {
+                    while (i < n && text[i] != '\n') ++i;
+                }
+                continue;
+            }
+            // At the top level any other token ends the directive's value; inside a
+            // block a stray word is skipped so it cannot drop the remaining entries.
+            if (depth == 0 || !isNameStart(c)) break;
+            while (i < n && isNameChar(text[i])) ++i;
+        }
+    }
+    return manifest;
+}
+
+std::string Decryptor::detectLuaType(const std::string& relFile,
+                                     const LuaManifest& manifest) const {
+    // server_only keeps the client from downloading anything, so the whole resource
+    // is single-layer and every file takes the server key.
+    if (manifest.serverOnly) return "server";
+    std::string rel = normalizeRelPath(relFile);
+    // An explicit server_script outranks a files membership; a shared script sits in
+    // both sets, and the client side is the one that also gets the assets, so a
+    // shared script is treated as client side.
+    if (matchesManifestSet(manifest.serverScriptFiles, rel)) return "server";
+    if (matchesManifestSet(manifest.clientFiles, rel)) return "client";
+    if (matchesManifestSet(manifest.serverFiles, rel)) return "server";
     return "unknown";
 }
 
@@ -151,7 +344,8 @@ void Decryptor::processLuaFile(const std::vector<uint8_t>& buf, const std::strin
 void Decryptor::decryptResourceFile(const std::string& resourcePath, const std::string& relFile,
                                     const std::vector<uint8_t>& decryptKey,
                                     const std::string& resourceName,
-                                    const std::vector<uint8_t>& altKey) {
+                                    const std::vector<uint8_t>& altKey,
+                                    const LuaManifest& manifest) {
     std::string fullPath = resourcePath + "/" + relFile;
     std::string outputPath = outputDir + "/" + resourceName + "/" + relFile;
     if (!fs::exists(fullPath)) return;
@@ -171,19 +365,11 @@ void Decryptor::decryptResourceFile(const std::string& resourcePath, const std::
         if (stage1.empty()) { LOG("Initial decryption failed: " + relFile, LogLevel::WARNING); ++failed_; return; }
 
         if (endsWith(toLower(relFile), ".lua")) {
-            std::string luaType = detectLuaType(resourcePath, relFile);
+            std::string luaType = detectLuaType(relFile, manifest);
             const std::vector<uint8_t>& firstKey = (luaType == "client" && !altKey.empty())
                                                        ? altKey : decryptKey;
             std::vector<uint8_t> dec = decryptBuffer(stage1, firstKey);
-
-            // Check Lua 5.4 header by hex-prefix match (same as python)
-            bool isLua = false;
-            if (dec.size() >= (LUA_HEADER_HEX.size() + 1) / 2) {
-                std::string hex = hexEncode(std::vector<uint8_t>(
-                    dec.begin(), dec.begin() + (LUA_HEADER_HEX.size() + 1) / 2));
-                isLua = hex.rfind(LUA_HEADER_HEX, 0) == 0;
-            }
-            if (isLua) {
+            if (hasLuaHeader(dec)) {
                 processLuaFile(dec, outputPath, resourceName, relFile);
                 return;
             }
@@ -193,17 +379,25 @@ void Decryptor::decryptResourceFile(const std::string& resourcePath, const std::
                 std::vector<uint8_t> enc(stage1.begin() + 90, stage1.end());
                 try {
                     auto alt = chacha20Xor(decryptKey, iv, enc);
-                    if (!alt.empty()) { processLuaFile(alt, outputPath, resourceName, relFile); return; }
+                    if (hasLuaHeader(alt)) {
+                        processLuaFile(alt, outputPath, resourceName, relFile);
+                        return;
+                    }
                 } catch (...) {}
             }
             if (!altKey.empty()) {
                 auto alt2 = decryptBuffer(stage1, altKey);
-                if (!alt2.empty()) { processLuaFile(alt2, outputPath, resourceName, relFile); return; }
+                if (hasLuaHeader(alt2)) {
+                    processLuaFile(alt2, outputPath, resourceName, relFile);
+                    return;
+                }
             }
 
-            // fallback raw
-            writeFileBytes(outputPath, dec);
-            ++decryptedOk_;
+            // No key produced a Lua header: the classification or the grants are
+            // wrong and nothing may be written out as unverified garbage.
+            LOG("No valid Lua header for " + relFile + " - key mismatch, file skipped",
+                LogLevel::WARNING);
+            ++failed_;
         } else {
             auto dec = decryptBuffer(stage1, decryptKey);
             if (dec.empty()) { LOG("Buffer decryption failed: " + relFile, LogLevel::WARNING); ++failed_; return; }
@@ -316,6 +510,9 @@ void Decryptor::decryptResource(const std::string& resourcePath, const std::stri
         ++failed_;
     }
 
+    // Read and classify the manifest once, before the pool starts: the workers only read it.
+    const LuaManifest luaManifest = parseLuaManifest(resourcePath);
+
     ProgressBar bar("  " + resourceName, files.size());
     std::atomic<size_t> next{0};
     int workers = 6;
@@ -328,7 +525,8 @@ void Decryptor::decryptResource(const std::string& resourcePath, const std::stri
                 std::string rel;
                 try {
                     rel = fs::relative(files[i], resourcePath).generic_string();
-                    decryptResourceFile(resourcePath, rel, decryptKey, resourceName, altKey);
+                    decryptResourceFile(resourcePath, rel, decryptKey, resourceName, altKey,
+                                        luaManifest);
                 } catch (const std::exception& e) {
                     LOG("File error (" + rel + "): " + std::string(e.what()), LogLevel::WARNING);
                     ++failed_;
