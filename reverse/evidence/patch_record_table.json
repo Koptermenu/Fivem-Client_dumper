@@ -1,0 +1,2568 @@
+{
+  "schema": "adhesive-dumper.patch-record/1",
+  "mode": "static file parsing only, the specimen is never loaded or executed",
+  "generated_by": {
+    "script": "reverse/scripts/patch_record_1e270.py",
+    "script_sha256": "2ee4f1f9b356e6ba0cd20b27dbf15e3d6874c98b93c5b8eb7c9b42065ae4b550",
+    "python": {
+      "version": "3.14.7",
+      "version_full": "3.14.7 (tags/v3.14.7:823f032, Aug  5 2026, 10:51:32) [MSC v.1944 64 bit (AMD64)]",
+      "implementation": "CPython",
+      "compiler": "MSC v.1944 64 bit (AMD64)",
+      "api_version": 1013,
+      "default_encoding": "utf-8",
+      "utf8_mode": false
+    },
+    "pefile": {
+      "distribution": "pefile",
+      "distribution_version": "2024.8.26",
+      "module_version": "2024.8.26",
+      "module_path": "C:\\Users\\Admin\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\site-packages\\pefile.py",
+      "engine_version": null
+    },
+    "capstone": {
+      "distribution": "capstone",
+      "distribution_version": "5.0.9",
+      "module_version": "5.0.7",
+      "module_path": "C:\\Users\\Admin\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\site-packages\\capstone\\__init__.py",
+      "engine_version": [
+        5,
+        0,
+        1280
+      ]
+    }
+  },
+  "specimen": {
+    "path": "reverse/adhesive.dll",
+    "size": 53575264,
+    "size_hex": "0x3317E60",
+    "sha256": "91cc0aa006d7315cb042c8fa8dca6c1e074a307bba7dcc9eb5509c8a7b81934e"
+  },
+  "image": {
+    "image_base": 6442450944,
+    "image_base_hex": "0x180000000",
+    "entry_point_rva_hex": "0x2AB2770"
+  },
+  "confidence_scale": {
+    "H": "structurally proven from the file, an instruction or an immediate settles it",
+    "M": "derived from the file but conditional on one run time precondition",
+    "L": "weak, the mechanism is known but the instance data is absent from the file",
+    "OPEN": "not decidable from the file alone, carried as an open question"
+  },
+  "address_model": {
+    "record_expression": "rec = *(qword *)(0x1830D44F8) + index * 0x38",
+    "patch_site": {
+      "expression": "rec + 0x00 - 5 * (rec[0x20] & 1)",
+      "derivation": [
+        "rec + 0x00 is loaded",
+        "flag bit 0 is inverted into zero or one",
+        "the inverted value is scaled by five",
+        "the scaled value is added to the anchor address",
+        "five is subtracted"
+      ],
+      "variants": {
+        "flag_bit_0_clear": "the patch site equals rec + 0x00 and the region is five bytes",
+        "flag_bit_0_set": "the patch site equals rec + 0x00 - 5 and the region is seven bytes"
+      }
+    },
+    "jump_destination": {
+      "expression": "rec + 0x08",
+      "read_width": 4
+    },
+    "relative_displacement": {
+      "expression": "rec + 0x08 - patch_site - 5",
+      "stored_width": 4,
+      "stored_at": "patch site + 1",
+      "note": "described symbolically, no displacement value is emitted"
+    },
+    "second_store": {
+      "expression": "rec + 0x00",
+      "width": 2,
+      "condition": "flag bit 0 is set",
+      "lands_on": "the anchor, which is patch site + 5, the upper edge of the seven byte window",
+      "note": "the store lands on the upper edge of the region, not below it, and the stored short jump is the only reference back into the lower five bytes of the region"
+    },
+    "region": {
+      "expression": "patch_site .. patch_site + 5 + 2 * (rec[0x20] & 1)",
+      "sizes": [
+        5,
+        7
+      ],
+      "protection": "0x40",
+      "restored": true,
+      "cache_flushed": true,
+      "single_contiguous_store": false,
+      "write_group_count": 2,
+      "write_groups": [
+        {
+          "name": "patch_site",
+          "expression": "patch_site .. patch_site + 5",
+          "width": 5,
+          "condition": "unconditional",
+          "stores": [
+            {
+              "site_rva": "0x1E2EA",
+              "offset_in_group": 0,
+              "width": 1,
+              "role": "the leading byte of the five byte relative jump"
+            },
+            {
+              "site_rva": "0x1E2F7",
+              "offset_in_group": 1,
+              "width": 4,
+              "role": "the relative displacement"
+            }
+          ]
+        },
+        {
+          "name": "anchor",
+          "expression": "patch_site + 5 .. patch_site + 7",
+          "width": 2,
+          "condition": "flag bit 0 is set",
+          "stores": [
+            {
+              "site_rva": "0x1E306",
+              "offset_in_group": 0,
+              "width": 2,
+              "role": "a short jump that returns into the five byte group"
+            }
+          ]
+        }
+      ],
+      "adjacency": "with flag bit 0 set the patch site is rec + 0x00 - 5, so the two groups are adjacent and together they cover the whole seven byte window",
+      "coverage": {
+        "flag_bit_0_clear": "only the five byte group runs, the region is the anchor itself",
+        "flag_bit_0_set": "both groups run, the region is the five byte group plus the two byte group on top of it"
+      },
+      "note": "the patcher contains no target size, page boundary or per byte validation"
+    }
+  },
+  "table": {
+    "slot": {
+      "va": "0x1830D44F8",
+      "rva": "0x30D44F8",
+      "raw": "0x30D2EF8",
+      "section": ".data",
+      "section_characteristics_hex": "0xC0000040",
+      "file_bytes_hex": "00 00 00 00 00 00 00 00",
+      "holds": "pointer to an array of index times 0x38 records",
+      "initialised_in_file": false,
+      "zero_run_from_slot": 264,
+      "zero_run_from_slot_hex": "0x108"
+    },
+    "capacity_model": {
+      "initial_capacity_records": 32,
+      "initial_capacity_bytes": 1792,
+      "growth": "doubling, the byte count is the new capacity times the stride",
+      "allocator": "KERNEL32!HeapAlloc and KERNEL32!HeapReAlloc on the private heap published at 0x1830D44F0"
+    },
+    "globals": [
+      {
+        "name": "region_free_list",
+        "va": "0x1830D44E0",
+        "rva": "0x30D44E0",
+        "raw": "0x30D2EE0",
+        "section": ".data",
+        "size": 8,
+        "purpose": "head of the reusable region list owned by the arena",
+        "file_bytes_hex": "00 00 00 00 00 00 00 00",
+        "initialised_in_file": false,
+        "reference_count": 5,
+        "writers": [
+          "0x1D511"
+        ],
+        "readers": [
+          "0x1D2E8",
+          "0x1D507",
+          "0x1DE36",
+          "0x1DE71"
+        ],
+        "references": [
+          {
+            "site_rva": "0x1D2E8",
+            "instruction_rva": "0x1D2E6",
+            "function_rva": "0x1D280",
+            "mnemonic": "mov",
+            "access": "read",
+            "operand_recovered": true
+          },
+          {
+            "site_rva": "0x1D507",
+            "instruction_rva": "0x1D505",
+            "function_rva": "0x1D280",
+            "mnemonic": "mov",
+            "access": "read",
+            "operand_recovered": true
+          },
+          {
+            "site_rva": "0x1D511",
+            "instruction_rva": "0x1D50F",
+            "function_rva": "0x1D280",
+            "mnemonic": "mov",
+            "access": "write",
+            "operand_recovered": true
+          },
+          {
+            "site_rva": "0x1DE36",
+            "instruction_rva": "0x1DE34",
+            "function_rva": "0x1DCF0",
+            "mnemonic": "lea",
+            "access": "address",
+            "operand_recovered": true
+          },
+          {
+            "site_rva": "0x1DE71",
+            "instruction_rva": "0x1DE6F",
+            "function_rva": "0x1DCF0",
+            "mnemonic": "lea",
+            "access": "address",
+            "operand_recovered": true
+          }
+        ]
+      },
+      {
+        "name": "spin_lock",
+        "va": "0x1830D44E8",
+        "rva": "0x30D44E8",
+        "raw": "0x30D2EE8",
+        "section": ".data",
+        "size": 4,
+        "purpose": "hand rolled interlocked spin lock, the contention counter is unbounded and every holder re-checks its own precondition, so it is a mutual exclusion lock and not a one shot initialiser",
+        "file_bytes_hex": "00 00 00 00",
+        "initialised_in_file": false,
+        "reference_count": 6,
+        "writers": [
+          "0x1DCA6",
+          "0x1DCD9",
+          "0x1DD36",
+          "0x1DFBE",
+          "0x1E39D",
+          "0x1E563"
+        ],
+        "readers": [
+          "0x1DCA6",
+          "0x1DCD9",
+          "0x1DD36",
+          "0x1DFBE",
+          "0x1E39D",
+          "0x1E563"
+        ],
+        "references": [
+          {
+            "site_rva": "0x1DCA6",
+            "instruction_rva": "0x1DCA3",
+            "function_rva": "0x1DC80",
+            "mnemonic": "cmpxchg",
+            "access": "read_write",
+            "operand_recovered": true
+          },
+          {
+            "site_rva": "0x1DCD9",
+            "instruction_rva": "0x1DCD8",
+            "function_rva": "0x1DC80",
+            "mnemonic": "xchg",
+            "access": "read_write",
+            "operand_recovered": true
+          },
+          {
+            "site_rva": "0x1DD36",
+            "instruction_rva": "0x1DD33",
+            "function_rva": "0x1DCF0",
+            "mnemonic": "cmpxchg",
+            "access": "read_write",
+            "operand_recovered": true
+          },
+          {
+            "site_rva": "0x1DFBE",
+            "instruction_rva": "0x1DFBD",
+            "function_rva": "0x1DCF0",
+            "mnemonic": "xchg",
+            "access": "read_write",
+            "operand_recovered": true
+          },
+          {
+            "site_rva": "0x1E39D",
+            "instruction_rva": "0x1E39A",
+            "function_rva": "0x1E360",
+            "mnemonic": "cmpxchg",
+            "access": "read_write",
+            "operand_recovered": true
+          },
+          {
+            "site_rva": "0x1E563",
+            "instruction_rva": "0x1E562",
+            "function_rva": "0x1E360",
+            "mnemonic": "xchg",
+            "access": "read_write",
+            "operand_recovered": true
+          }
+        ]
+      },
+      {
+        "name": "heap_handle",
+        "va": "0x1830D44F0",
+        "rva": "0x30D44F0",
+        "raw": "0x30D2EF0",
+        "section": ".data",
+        "size": 8,
+        "purpose": "private KERNEL32!HeapCreate(0, 0, 0) handle, zero in the file and published by its only writer, the init that itself has no direct caller",
+        "file_bytes_hex": "00 00 00 00 00 00 00 00",
+        "initialised_in_file": false,
+        "reference_count": 9,
+        "writers": [
+          "0x1DCC6"
+        ],
+        "readers": [
+          "0x1DCAF",
+          "0x1DD3F",
+          "0x1DEA8",
+          "0x1DEE7",
+          "0x1E098",
+          "0x1E196",
+          "0x1E3A6",
+          "0x1E550"
+        ],
+        "references": [
+          {
+            "site_rva": "0x1DCAF",
+            "instruction_rva": "0x1DCAD",
+            "function_rva": "0x1DC80",
+            "mnemonic": "cmp",
+            "access": "read",
+            "operand_recovered": true
+          },
+          {
+            "site_rva": "0x1DCC6",
+            "instruction_rva": "0x1DCC4",
+            "function_rva": "0x1DC80",
+            "mnemonic": "mov",
+            "access": "write",
+            "operand_recovered": true
+          },
+          {
+            "site_rva": "0x1DD3F",
+            "instruction_rva": "0x1DD3D",
+            "function_rva": "0x1DCF0",
+            "mnemonic": "cmp",
+            "access": "read",
+            "operand_recovered": true
+          },
+          {
+            "site_rva": "0x1DEA8",
+            "instruction_rva": "0x1DEA6",
+            "function_rva": "0x1DCF0",
+            "mnemonic": "mov",
+            "access": "read",
+            "operand_recovered": true
+          },
+          {
+            "site_rva": "0x1DEE7",
+            "instruction_rva": "0x1DEE5",
+            "function_rva": "0x1DCF0",
+            "mnemonic": "mov",
+            "access": "read",
+            "operand_recovered": true
+          },
+          {
+            "site_rva": "0x1E098",
+            "instruction_rva": "0x1E096",
+            "function_rva": "0x1DFF0",
+            "mnemonic": "mov",
+            "access": "read",
+            "operand_recovered": true
+          },
+          {
+            "site_rva": "0x1E196",
+            "instruction_rva": "0x1E194",
+            "function_rva": "0x1DFF0",
+            "mnemonic": "mov",
+            "access": "read",
+            "operand_recovered": true
+          },
+          {
+            "site_rva": "0x1E3A6",
+            "instruction_rva": "0x1E3A4",
+            "function_rva": "0x1E360",
+            "mnemonic": "cmp",
+            "access": "read",
+            "operand_recovered": true
+          },
+          {
+            "site_rva": "0x1E550",
+            "instruction_rva": "0x1E54E",
+            "function_rva": "0x1E360",
+            "mnemonic": "mov",
+            "access": "read",
+            "operand_recovered": true
+          }
+        ]
+      },
+      {
+        "name": "record_array",
+        "va": "0x1830D44F8",
+        "rva": "0x30D44F8",
+        "raw": "0x30D2EF8",
+        "section": ".data",
+        "size": 8,
+        "purpose": "pointer to the record array, zero until the registrar allocates it",
+        "file_bytes_hex": "00 00 00 00 00 00 00 00",
+        "initialised_in_file": false,
+        "reference_count": 11,
+        "writers": [
+          "0x1DEBD",
+          "0x1DF0E"
+        ],
+        "readers": [
+          "0x1DDC5",
+          "0x1DE92",
+          "0x1E14A",
+          "0x1E21C",
+          "0x1E28C",
+          "0x1E3D5",
+          "0x1E413",
+          "0x1E434",
+          "0x1E4B6"
+        ],
+        "references": [
+          {
+            "site_rva": "0x1DDC5",
+            "instruction_rva": "0x1DDC3",
+            "function_rva": "0x1DCF0",
+            "mnemonic": "mov",
+            "access": "read",
+            "operand_recovered": true
+          },
+          {
+            "site_rva": "0x1DE92",
+            "instruction_rva": "0x1DE90",
+            "function_rva": "0x1DCF0",
+            "mnemonic": "mov",
+            "access": "read",
+            "operand_recovered": true
+          },
+          {
+            "site_rva": "0x1DEBD",
+            "instruction_rva": "0x1DEBB",
+            "function_rva": "0x1DCF0",
+            "mnemonic": "mov",
+            "access": "write",
+            "operand_recovered": true
+          },
+          {
+            "site_rva": "0x1DF0E",
+            "instruction_rva": "0x1DF0C",
+            "function_rva": "0x1DCF0",
+            "mnemonic": "mov",
+            "access": "write",
+            "operand_recovered": true
+          },
+          {
+            "site_rva": "0x1E14A",
+            "instruction_rva": "0x1E148",
+            "function_rva": "0x1DFF0",
+            "mnemonic": "mov",
+            "access": "read",
+            "operand_recovered": true
+          },
+          {
+            "site_rva": "0x1E21C",
+            "instruction_rva": "0x1E21A",
+            "function_rva": "0x1DFF0",
+            "mnemonic": "mov",
+            "access": "read",
+            "operand_recovered": true
+          },
+          {
+            "site_rva": "0x1E28C",
+            "instruction_rva": "0x1E28A",
+            "function_rva": "0x1E270",
+            "mnemonic": "mov",
+            "access": "read",
+            "operand_recovered": true
+          },
+          {
+            "site_rva": "0x1E3D5",
+            "instruction_rva": "0x1E3D3",
+            "function_rva": "0x1E360",
+            "mnemonic": "mov",
+            "access": "read",
+            "operand_recovered": true
+          },
+          {
+            "site_rva": "0x1E413",
+            "instruction_rva": "0x1E411",
+            "function_rva": "0x1E360",
+            "mnemonic": "mov",
+            "access": "read",
+            "operand_recovered": true
+          },
+          {
+            "site_rva": "0x1E434",
+            "instruction_rva": "0x1E432",
+            "function_rva": "0x1E360",
+            "mnemonic": "mov",
+            "access": "read",
+            "operand_recovered": true
+          },
+          {
+            "site_rva": "0x1E4B6",
+            "instruction_rva": "0x1E4B4",
+            "function_rva": "0x1E360",
+            "mnemonic": "mov",
+            "access": "read",
+            "operand_recovered": true
+          }
+        ]
+      },
+      {
+        "name": "capacity",
+        "va": "0x1830D4500",
+        "rva": "0x30D4500",
+        "raw": "0x30D2F00",
+        "section": ".data",
+        "size": 4,
+        "purpose": "allocated record count of the array",
+        "file_bytes_hex": "00 00 00 00",
+        "initialised_in_file": false,
+        "reference_count": 3,
+        "writers": [
+          "0x1DE9D",
+          "0x1DF07"
+        ],
+        "readers": [
+          "0x1DED2",
+          "0x1DF07"
+        ],
+        "references": [
+          {
+            "site_rva": "0x1DE9D",
+            "instruction_rva": "0x1DE9C",
+            "function_rva": "0x1DCF0",
+            "mnemonic": "mov",
+            "access": "write",
+            "operand_recovered": true
+          },
+          {
+            "site_rva": "0x1DED2",
+            "instruction_rva": "0x1DED1",
+            "function_rva": "0x1DCF0",
+            "mnemonic": "mov",
+            "access": "read",
+            "operand_recovered": true
+          },
+          {
+            "site_rva": "0x1DF07",
+            "instruction_rva": "0x1DF06",
+            "function_rva": "0x1DCF0",
+            "mnemonic": "shl",
+            "access": "read_write",
+            "operand_recovered": true
+          }
+        ]
+      },
+      {
+        "name": "count",
+        "va": "0x1830D4508",
+        "rva": "0x30D4508",
+        "raw": "0x30D2F08",
+        "section": ".data",
+        "size": 4,
+        "purpose": "live record count and the upper bound of every index scan",
+        "file_bytes_hex": "00 00 00 00",
+        "initialised_in_file": false,
+        "reference_count": 9,
+        "writers": [
+          "0x1DF1D"
+        ],
+        "readers": [
+          "0x1DDB9",
+          "0x1DED8",
+          "0x1DF14",
+          "0x1E137",
+          "0x1E3C2",
+          "0x1E406",
+          "0x1E43A",
+          "0x1E4A1"
+        ],
+        "references": [
+          {
+            "site_rva": "0x1DDB9",
+            "instruction_rva": "0x1DDB8",
+            "function_rva": "0x1DCF0",
+            "mnemonic": "mov",
+            "access": "read",
+            "operand_recovered": true
+          },
+          {
+            "site_rva": "0x1DED8",
+            "instruction_rva": "0x1DED7",
+            "function_rva": "0x1DCF0",
+            "mnemonic": "cmp",
+            "access": "read",
+            "operand_recovered": true
+          },
+          {
+            "site_rva": "0x1DF14",
+            "instruction_rva": "0x1DF13",
+            "function_rva": "0x1DCF0",
+            "mnemonic": "mov",
+            "access": "read",
+            "operand_recovered": true
+          },
+          {
+            "site_rva": "0x1DF1D",
+            "instruction_rva": "0x1DF1C",
+            "function_rva": "0x1DCF0",
+            "mnemonic": "mov",
+            "access": "write",
+            "operand_recovered": true
+          },
+          {
+            "site_rva": "0x1E137",
+            "instruction_rva": "0x1E136",
+            "function_rva": "0x1DFF0",
+            "mnemonic": "mov",
+            "access": "read",
+            "operand_recovered": true
+          },
+          {
+            "site_rva": "0x1E3C2",
+            "instruction_rva": "0x1E3C1",
+            "function_rva": "0x1E360",
+            "mnemonic": "mov",
+            "access": "read",
+            "operand_recovered": true
+          },
+          {
+            "site_rva": "0x1E406",
+            "instruction_rva": "0x1E405",
+            "function_rva": "0x1E360",
+            "mnemonic": "mov",
+            "access": "read",
+            "operand_recovered": true
+          },
+          {
+            "site_rva": "0x1E43A",
+            "instruction_rva": "0x1E439",
+            "function_rva": "0x1E360",
+            "mnemonic": "mov",
+            "access": "read",
+            "operand_recovered": true
+          },
+          {
+            "site_rva": "0x1E4A1",
+            "instruction_rva": "0x1E4A0",
+            "function_rva": "0x1E360",
+            "mnemonic": "mov",
+            "access": "read",
+            "operand_recovered": true
+          }
+        ]
+      }
+    ]
+  },
+  "lock": {
+    "global": "0x1830D44E8",
+    "kind": "hand_rolled_interlocked_spin_lock",
+    "not_a_once_flag": "every holder re-checks its own precondition after the acquire, so the flag excludes holders instead of firing once",
+    "holder_count": 3,
+    "holders": [
+      {
+        "name": "init",
+        "function_rva": "0x1DC80",
+        "take_site_rva": "0x1DCA3",
+        "take_primitive": "lock cmpxchg",
+        "drop_site_rva": "0x1DCD8",
+        "drop_primitive": "xchg with zero",
+        "recheck_site_rva": "0x1DCAD",
+        "recheck_target": "qword *(0x1830D44F0)",
+        "backoff_threshold_site_rva": "0x1DC91",
+        "backoff_call_site_rva": "0x1DC98",
+        "backoff_symbol": "KERNEL32.dll!Sleep",
+        "retry_counter_site_rva": "0x1DC9E",
+        "retry_counter_bounded": false
+      },
+      {
+        "name": "registrar",
+        "function_rva": "0x1DCF0",
+        "take_site_rva": "0x1DD33",
+        "take_primitive": "lock cmpxchg",
+        "drop_site_rva": "0x1DFBD",
+        "drop_primitive": "xchg with zero",
+        "recheck_site_rva": "0x1DD3D",
+        "recheck_target": "qword *(0x1830D44F0)",
+        "backoff_threshold_site_rva": "0x1DD21",
+        "backoff_call_site_rva": "0x1DD28",
+        "backoff_symbol": "KERNEL32.dll!Sleep",
+        "retry_counter_site_rva": "0x1DD2E",
+        "retry_counter_bounded": false
+      },
+      {
+        "name": "orchestrator",
+        "function_rva": "0x1E360",
+        "take_site_rva": "0x1E39A",
+        "take_primitive": "lock cmpxchg",
+        "drop_site_rva": "0x1E562",
+        "drop_primitive": "xchg with zero",
+        "recheck_site_rva": "0x1E3A4",
+        "recheck_target": "qword *(0x1830D44F0)",
+        "backoff_threshold_site_rva": "0x1E388",
+        "backoff_call_site_rva": "0x1E38F",
+        "backoff_symbol": "KERNEL32.dll!Sleep",
+        "retry_counter_site_rva": "0x1E395",
+        "retry_counter_bounded": false
+      }
+    ],
+    "contention_path": {
+      "sequence": [
+        "the threshold compare only saturates the Sleep argument",
+        "Sleep is called with zero or one millisecond",
+        "the retry counter is incremented and nothing is compared against it",
+        "the jump returns to the same lock cmpxchg"
+      ],
+      "sleep_symbol": "KERNEL32.dll!Sleep",
+      "sleep_argument": "0 below 0x20, 1 millisecond at and above it",
+      "threshold": 32,
+      "threshold_hex": "0x20",
+      "attempt_cap": null,
+      "timeout": null,
+      "yield_policy": "a sleep of at most one millisecond, the counter itself is never bounded"
+    },
+    "single_release_point": {
+      "function_rva": "0x1E360",
+      "site_rva": "0x1E560",
+      "note": "every orchestrator exit path converges on this block, so the lock is released exactly once on each path, including the failure codes"
+    },
+    "guard_scope": [
+      "the record table",
+      "the arena free list",
+      "the private heap publication"
+    ],
+    "confidence": "H"
+  },
+  "heap": {
+    "global": "0x1830D44F0",
+    "kind": "private_heap",
+    "is_process_heap": false,
+    "expression": "qword *(0x1830D44F0)",
+    "creation": {
+      "symbol": "KERNEL32.dll!HeapCreate",
+      "iat_slot_rva": "0x2E4D418",
+      "call_sites_in_file": [
+        "0x1DCBE"
+      ],
+      "call_site_count": 1,
+      "function_rva": "0x1DC80",
+      "arguments": [
+        "0",
+        "0",
+        "0"
+      ],
+      "argument_sites": [
+        "0x1DCB7",
+        "0x1DCB9",
+        "0x1DCBB"
+      ],
+      "store_site_rva": "0x1DCC4"
+    },
+    "release": {
+      "symbol": "KERNEL32.dll!HeapFree",
+      "iat_slot_rva": "0x2E4D420",
+      "call_sites_in_file": [
+        "0x1E55A"
+      ],
+      "call_site_count": 1,
+      "function_rva": "0x1E360"
+    },
+    "allocators": [
+      {
+        "symbol": "KERNEL32.dll!HeapAlloc",
+        "iat_slot_rva": "0x2E4D410",
+        "call_sites_in_file": [
+          "0x1DEB5",
+          "0x1E0A5"
+        ],
+        "call_site_count": 2
+      },
+      {
+        "symbol": "KERNEL32.dll!HeapReAlloc",
+        "iat_slot_rva": "0x2E4D428",
+        "call_sites_in_file": [
+          "0x1DEF1",
+          "0x1E1A0"
+        ],
+        "call_site_count": 2
+      }
+    ],
+    "why_not_the_process_heap": [
+      "the only writer of the global is the instruction right after the single HeapCreate call site, so the handle is the return value of that call",
+      "all three arguments of that call are zeroed immediately before it, so the call is HeapCreate(0, 0, 0)",
+      "KERNEL32.dll!GetProcessHeap is called from 7 sites in the file and none of them lies inside the component range 0x1D280-0x1E9D0",
+      "the matching release is a KERNEL32.dll!HeapFree on the same handle, which is the private heap ownership contract and would be wrong for the process heap"
+    ],
+    "get_process_heap": {
+      "iat_slot_rva": "0x2E4D3C0",
+      "call_sites_in_file": [
+        "0x16B3",
+        "0x1843",
+        "0x8A529C",
+        "0x8A8F15",
+        "0x955AB4",
+        "0x959DD2",
+        "0xB70391"
+      ],
+      "call_sites_in_component": [],
+      "call_sites_in_component_count": 0
+    },
+    "writers_in_file": [
+      "0x1DCC6"
+    ],
+    "writer_count": 1,
+    "rip_operand_form_sections": [
+      ".text"
+    ],
+    "rip_operand_form_sections_outside_text": [],
+    "file_bytes_hex": "00 00 00 00 00 00 00 00",
+    "initialised_in_file": false,
+    "allocator": "KERNEL32!HeapAlloc and KERNEL32!HeapReAlloc on the private heap published at 0x1830D44F0, the record array and the thread id array share it",
+    "confidence": "H"
+  },
+  "activation": {
+    "gate": {
+      "site_rva": "0x1E3A4",
+      "site_va": "0x18001E3A4",
+      "function_rva": "0x1E360",
+      "function_end_rva": "0x1E583",
+      "unwind_info_rva": "0x3009AF8",
+      "test": "cmp qword *(0x1830D44F0), 0",
+      "on_zero": {
+        "code": "0x2",
+        "code_site_rva": "0x1E3AE",
+        "branch_site_rva": "0x1E3B3",
+        "exit_rva": "0x1E560",
+        "note": "the failure branch jumps to the shared release and return block, so it leaves the function before any patcher call site"
+      }
+    },
+    "gated_call_sites": [
+      "0x1E425",
+      "0x1E4FD"
+    ],
+    "gated_call_site_count": 2,
+    "reachable_inside_decoded_cfg": false,
+    "reachability_evidence": {
+      "handle_writers": [
+        "0x1DCC6"
+      ],
+      "handle_writer_count": 1,
+      "handle_writer_function_rva": "0x1DC80",
+      "handle_rip_operand_form_sections": [
+        ".text"
+      ],
+      "init_direct_call_sites_in_file": [],
+      "init_direct_call_site_count": 0,
+      "init_rip_operand_form_sections": [],
+      "form_note": "the two rip operand fields count sections, not sites, and they cover the rip relative operand form only; an absolute pointer, an rva32 or va64 literal is a separate form and is not counted"
+    },
+    "reason": "the gate is the only thing that lets the orchestrator leave its early exits, the only writer of the tested handle is inside the init, and the init has no direct call site anywhere in the file, so no assignment reachable inside the decoded control flow graph satisfies the test",
+    "status": "OPEN",
+    "static_chain_confidence": "H",
+    "runtime_reachability_confidence": "L",
+    "runtime_caveat": "an indirect call, a function pointer, run time code generation or a writer outside the image cannot be excluded from the file, so the gate is not decidable at run time"
+  },
+  "record": {
+    "stride": 56,
+    "stride_hex": "0x38",
+    "stride_is_eight_byte_aligned": true,
+    "record_expression": "rec = *(qword *)(0x1830D44F8) + index * 0x38",
+    "fields": [
+      {
+        "offset": 0,
+        "name": "anchor",
+        "width": 8,
+        "target_expr": "rec + 0x00 - 5 * (rec[0x20] & 1)",
+        "value_expr": "absolute address of the patch anchor, resolved at registration time",
+        "readers": [
+          "0x1E297",
+          "0x1DDD0",
+          "0x1E4C1",
+          "0x1E17B"
+        ],
+        "writers": [
+          "0x1DF2B"
+        ],
+        "note": "identity key of the record, registration and lookup both compare it",
+        "offset_hex": "0x00"
+      },
+      {
+        "offset": 8,
+        "name": "destination",
+        "width": 8,
+        "target_expr": "rec + 0x08",
+        "value_expr": "absolute address that the relative jump resolves to",
+        "readers": [
+          "0x1E2ED"
+        ],
+        "writers": [
+          "0x1DF34"
+        ],
+        "note": "read as a low dword only, so the stored value has to fit in 32 bits",
+        "offset_hex": "0x08"
+      },
+      {
+        "offset": 16,
+        "name": "image_base",
+        "width": 8,
+        "target_expr": "rec + 0x10 + rec[0x30][i]",
+        "value_expr": "base of the executable image rebuilt for this record",
+        "readers": [
+          "0x1E1FD"
+        ],
+        "writers": [
+          "0x1DF3E"
+        ],
+        "note": "taken from the arena block, the bytes inside it are produced by the list builder",
+        "offset_hex": "0x10"
+      },
+      {
+        "offset": 24,
+        "name": "original_bytes",
+        "width": 7,
+        "target_expr": "snapshot of the bytes that occupy the patch region",
+        "value_expr": "seven bytes when flag bit 0 is set, otherwise five",
+        "readers": [],
+        "writers": [
+          "0x1DFAF",
+          "0x1DFA0",
+          "0x1DFAA"
+        ],
+        "note": "copied from live target memory at registration time, no reader in the analysed set, its width equals the seven byte variant of the patch region",
+        "offset_hex": "0x18"
+      },
+      {
+        "offset": 32,
+        "name": "flags",
+        "width": 1,
+        "target_expr": "rec + 0x20, one bit per gate",
+        "value_expr": "bit 0 layout, bit 1 skip, bit 2 patched, upper bits preserved on merge",
+        "readers": [
+          "0x1E29B",
+          "0x1E156",
+          "0x1E3E0",
+          "0x1E41C",
+          "0x1E4E8"
+        ],
+        "writers": [
+          "0x1DF5A",
+          "0x1E336"
+        ],
+        "note": "the patcher mutates the record it has just consumed",
+        "offset_hex": "0x20"
+      },
+      {
+        "offset": 36,
+        "name": "list_count",
+        "width": 4,
+        "target_expr": "rec + 0x24 & 0x0F, entry count of both lists",
+        "value_expr": "low nibble of the dword, zero when the record carries no list",
+        "readers": [
+          "0x1E161",
+          "0x1E834"
+        ],
+        "writers": [
+          "0x1DF74"
+        ],
+        "note": "only the low nibble is replaced, the upper three bytes are preserved",
+        "offset_hex": "0x24"
+      },
+      {
+        "offset": 40,
+        "name": "offset_list",
+        "width": 8,
+        "target_expr": "rec + 0x00 + rec[0x28][i]",
+        "value_expr": "one byte per entry, index zero is the oldest entry",
+        "readers": [
+          "0x1E1E9"
+        ],
+        "writers": [
+          "0x1DF7E"
+        ],
+        "note": "parallel to 0x30, one index selects both halves",
+        "offset_hex": "0x28"
+      },
+      {
+        "offset": 48,
+        "name": "displacement_list",
+        "width": 8,
+        "target_expr": "rec + 0x10 + rec[0x30][i]",
+        "value_expr": "one byte per entry, offset inside the rebuilt image",
+        "readers": [
+          "0x1E1F7"
+        ],
+        "writers": [
+          "0x1DF88"
+        ],
+        "note": "a zero byte makes the matching entry inert",
+        "offset_hex": "0x30"
+      }
+    ],
+    "list_builder_limits": {
+      "entry_cap": 8,
+      "entry_cap_hex": "0x8",
+      "list_capacity_bytes": 8,
+      "scan_length_cap": 50,
+      "scan_length_cap_hex": "0x32",
+      "note": "both limits are compared inside the list builder, exceeding either one abandons the record instead of truncating it"
+    },
+    "producers": [
+      {
+        "name": "registrar",
+        "role": "allocates the record, fills every field, rejects duplicate anchors",
+        "rva": "0x1DCF0",
+        "va": "0x18001DCF0",
+        "end_rva": "0x1DFE1",
+        "size": "0x2F1",
+        "unwind_info_rva": "0x300BCCC"
+      },
+      {
+        "name": "list_builder",
+        "role": "walks the anchor with the length decoder and fills the two byte lists",
+        "rva": "0x1E590",
+        "va": "0x18001E590",
+        "end_rva": "0x1E9D0",
+        "size": "0x440",
+        "unwind_info_rva": "0x300BCF8"
+      },
+      {
+        "name": "arena",
+        "role": "hands out executable blocks and keeps a reusable region list",
+        "rva": "0x1D280",
+        "va": "0x18001D280",
+        "end_rva": "0x1D546",
+        "size": "0x2C6",
+        "unwind_info_rva": "0x300BCA0"
+      },
+      {
+        "name": "init",
+        "role": "creates the private heap under the spin lock and publishes it, and has no direct caller in the file",
+        "rva": "0x1DC80",
+        "va": "0x18001DC80",
+        "end_rva": "0x1DCE7",
+        "size": "0x67",
+        "unwind_info_rva": "0x2FFE954"
+      },
+      {
+        "name": "decoder",
+        "role": "supplies instruction lengths to the list builder",
+        "rva": "0x1D550",
+        "va": "0x18001D550",
+        "end_rva": "0x1DC79",
+        "size": "0x729",
+        "unwind_info_rva": "0x300BCB4"
+      }
+    ],
+    "consumers": [
+      {
+        "name": "patcher",
+        "role": "consumes the anchor, the destination and the flag byte",
+        "rva": "0x1E270",
+        "va": "0x18001E270",
+        "end_rva": "0x1E357",
+        "size": "0xE7",
+        "unwind_info_rva": "0x300880C"
+      },
+      {
+        "name": "rip_redirect",
+        "role": "consumes both byte lists and the count nibble",
+        "rva": "0x1DFF0",
+        "va": "0x18001DFF0",
+        "end_rva": "0x1E26A",
+        "size": "0x27A",
+        "unwind_info_rva": "0x300BCE0"
+      },
+      {
+        "name": "orchestrator",
+        "role": "enumerates records and dispatches both patcher call sites",
+        "rva": "0x1E360",
+        "va": "0x18001E360",
+        "end_rva": "0x1E583",
+        "size": "0x223",
+        "unwind_info_rva": "0x3009AF8"
+      }
+    ]
+  },
+  "flags": {
+    "field": "rec + 0x20",
+    "width": 1,
+    "bits": [
+      {
+        "mask": 1,
+        "mask_hex": "0x1",
+        "name": "two_slot_layout",
+        "gate": "selector of the patch site expression",
+        "meaning": "set when the anchor is preceded by a run of five identical filler bytes, so the relative jump is placed five bytes lower and the region grows to seven bytes",
+        "readers": [
+          "0x1E2A3",
+          "0x1E2FA"
+        ],
+        "writers": [
+          "0x1E974",
+          "0x1DF4F",
+          "0x1DF5A"
+        ],
+        "confidence": "H"
+      },
+      {
+        "mask": 2,
+        "mask_hex": "0x2",
+        "name": "skip",
+        "gate": "skip gate of every record enumeration",
+        "meaning": "every enumeration in the analysed set ignores a record with this bit, and the patcher sets it together with bit 2",
+        "readers": [
+          "0x1E156",
+          "0x1E3E0",
+          "0x1E41C",
+          "0x1E4E8"
+        ],
+        "writers": [
+          "0x1E336"
+        ],
+        "confidence": "H"
+      },
+      {
+        "mask": 4,
+        "mask_hex": "0x4",
+        "name": "patched",
+        "gate": "marker that the patcher already processed the record",
+        "meaning": "written only by the patcher flag update, never read by the analysed set",
+        "readers": [],
+        "writers": [
+          "0x1E336"
+        ],
+        "confidence": "H"
+      },
+      {
+        "mask": 248,
+        "mask_hex": "0xF8",
+        "name": "preserved_bits",
+        "gate": "carried through the registrar merge untouched",
+        "meaning": "bits 3 to 7 are never cleared by the registrar, which keeps the slot bits and merges only bit 0",
+        "readers": [],
+        "writers": [
+          "0x1DF53"
+        ],
+        "confidence": "H"
+      }
+    ],
+    "patch_flag": {
+      "mask": 6,
+      "mask_hex": "0x6",
+      "decomposition": [
+        "0x02 skip",
+        "0x04 patched"
+      ],
+      "write_sites": [
+        {
+          "site_rva": "0x1E336",
+          "mask": "0x6",
+          "target": "rec + 0x20"
+        }
+      ],
+      "written_after": [
+        "protection restore",
+        "instruction cache flush"
+      ],
+      "not_written_when": "the first protection change fails, the write sits on the success path only",
+      "written_even_when": "the restore and the cache flush results are unchecked, so the state is published before the outcome is known",
+      "effect": "a processed record is skipped by every later enumeration in the analysed set and no analysed code clears the skip bit again, so the analysed paths reach a record at most once",
+      "confidence": "H"
+    }
+  },
+  "rip_redirect": {
+    "function": {
+      "name": "rip_redirect",
+      "role": "applies the replacement instruction pointer",
+      "rva": "0x1DFF0",
+      "va": "0x18001DFF0",
+      "end_rva": "0x1E26A",
+      "size": "0x27A",
+      "unwind_info_rva": "0x300BCE0"
+    },
+    "match_expression": "rec + 0x00 + rec[0x28][i]",
+    "replacement_expression": "rec + 0x10 + rec[0x30][i]",
+    "count_field": "rec + 0x24, low nibble only",
+    "count_mask": "0xF",
+    "entry_cap": 8,
+    "list_capacity_bytes": 8,
+    "apply": "KERNEL32!SetThreadContext with CONTEXT_CONTROL",
+    "resume_after_rewrite": "none inside this function",
+    "inert_conditions": [
+      "flag bit 1 is set on the record",
+      "the low nibble of rec + 0x24 is zero",
+      "rec + 0x10 plus the entry of rec + 0x30 is zero"
+    ],
+    "consistency": [
+      {
+        "id": "list_cap_matches_stride",
+        "rule": "the entry count has to stay inside the 8 bytes that 0x28 and 0x30 own inside the 0x38 stride",
+        "evidence": "the builder compares its counter with 0x8 and abandons the record above it",
+        "verdict": "enforced_by_builder",
+        "confidence": "H"
+      },
+      {
+        "id": "count_nibble_fits_cap",
+        "rule": "the stored count dword is reduced to four bits, so a count above fifteen could not survive the merge",
+        "evidence": "the registrar masks the new count with 0xF and the reader masks with 0xF",
+        "verdict": "consistent_with_cap",
+        "confidence": "H"
+      },
+      {
+        "id": "zero_count_means_empty",
+        "rule": "a zero nibble makes the record inert for the context rewrite even when the eight stored bytes are not zero",
+        "evidence": "the reader branches out before the first list load when the masked count is zero",
+        "verdict": "inert_record",
+        "confidence": "H"
+      },
+      {
+        "id": "parallel_lists_share_index",
+        "rule": "one loop counter drives both loads, so entry i of 0x28 always pairs with entry i of 0x30",
+        "evidence": "the same counter appears in the address of both byte loads",
+        "verdict": "parallel_by_construction",
+        "confidence": "H"
+      },
+      {
+        "id": "defined_but_unused_tail",
+        "rule": "the registrar always stores all eight bytes of both lists, so entries beyond the count are defined but never read",
+        "evidence": "two eight byte stores per record, independent of the count",
+        "verdict": "defined_but_unused",
+        "confidence": "M"
+      }
+    ]
+  },
+  "patcher": {
+    "rva": "0x1E270",
+    "va": "0x18001E270",
+    "end_rva": "0x1E357",
+    "size": "0xE7",
+    "unwind_info_rva": "0x300880C",
+    "stride_sites": [
+      "0x1E293"
+    ],
+    "flag_bit_probes": [
+      {
+        "site_rva": "0x1E2A3",
+        "mask": "0x1",
+        "tested_operand": "flag byte"
+      },
+      {
+        "site_rva": "0x1E2FA",
+        "mask": "0x1",
+        "tested_operand": "flag byte"
+      }
+    ],
+    "flag_write_sites": [
+      {
+        "site_rva": "0x1E336",
+        "mask": "0x6",
+        "target": "rec + 0x20"
+      }
+    ],
+    "api_calls": [
+      {
+        "site_rva": "0x1E2D1",
+        "symbol": "KERNEL32.dll!VirtualProtect",
+        "iat_slot_rva": "0x2E4D630",
+        "return_value_tested": true
+      },
+      {
+        "site_rva": "0x1E31B",
+        "symbol": "KERNEL32.dll!VirtualProtect",
+        "iat_slot_rva": "0x2E4D630",
+        "return_value_tested": false
+      },
+      {
+        "site_rva": "0x1E321",
+        "symbol": "KERNEL32.dll!GetCurrentProcess",
+        "iat_slot_rva": "0x2E4D318",
+        "return_value_tested": false
+      },
+      {
+        "site_rva": "0x1E330",
+        "symbol": "KERNEL32.dll!FlushInstructionCache",
+        "iat_slot_rva": "0x2E4D2E8",
+        "return_value_tested": false
+      }
+    ],
+    "api_calls_tested": 1,
+    "returns": {
+      "success": "0",
+      "first_protection_failure": "0xA",
+      "restore_failure": "not represented in the return value",
+      "cache_flush_failure": "not represented in the return value"
+    },
+    "validation": {
+      "requested_protection": "0x40",
+      "note": "the window bounds are curated, every comparison inside them is derived from the file",
+      "windows": [
+        {
+          "input": "table pointer",
+          "watched_register": "rbx",
+          "loaded_at": "0x1E28A",
+          "first_use": "0x1E297",
+          "comparisons_between": [],
+          "guards_on_watched_register": [],
+          "checked": false
+        },
+        {
+          "input": "record pointer",
+          "watched_register": "rax",
+          "loaded_at": "0x1E297",
+          "first_use": "0x1E2AD",
+          "comparisons_between": [
+            "0x1E2A3"
+          ],
+          "guards_on_watched_register": [],
+          "checked": false
+        },
+        {
+          "input": "index",
+          "watched_register": "rax",
+          "loaded_at": "0x1E291",
+          "first_use": "0x1E293",
+          "comparisons_between": [],
+          "guards_on_watched_register": [],
+          "checked": false
+        }
+      ]
+    }
+  },
+  "callers": [
+    {
+      "site_rva": "0x1E425",
+      "site_va": "0x18001E425",
+      "target_rva": "0x1E270",
+      "caller_function_rva": "0x1E360",
+      "caller_function_end_rva": "0x1E583",
+      "unwind_info_rva": "0x3009AF8",
+      "path": "orchestrator, zero argument branch",
+      "index_source": "a loop counter that starts at the first record without flag bit 1",
+      "index_expression": "the loop counter value",
+      "preconditions": "count is non zero, the array is published, the spin lock is taken",
+      "on_failure": "the loop stops and the failure code becomes the return value",
+      "activation_gate_count": 1,
+      "activation_gates": [
+        {
+          "site_rva": "0x1E3A4",
+          "test": "cmp qword *(0x1830D44F0), 0",
+          "code": "0x2",
+          "shared": true
+        }
+      ],
+      "activation_gate_sites": [
+        "0x1E3A4"
+      ],
+      "activation_gate_codes": [
+        "0x2"
+      ],
+      "activation_shared_gate_sites": [
+        "0x1E3A4"
+      ],
+      "activation_status": "OPEN",
+      "activation_confidence": "H",
+      "activation_reason": "the shared gate at 0x1E3A4 tests the private heap handle, whose only writer is the uncalled init, so the path has no satisfying assignment inside the decoded control flow graph",
+      "confidence": "H"
+    },
+    {
+      "site_rva": "0x1E4FD",
+      "site_va": "0x18001E4FD",
+      "target_rva": "0x1E270",
+      "caller_function_rva": "0x1E360",
+      "caller_function_end_rva": "0x1E583",
+      "unwind_info_rva": "0x3009AF8",
+      "path": "orchestrator, non zero argument branch",
+      "index_source": "the index of the record whose rec + 0x00 equals the argument",
+      "index_expression": "rec + 0x00 == caller argument",
+      "preconditions": "a record with a matching anchor exists and has flag bit 1 clear",
+      "on_failure": "the failure code of the patcher becomes the return value",
+      "activation_gate_count": 3,
+      "activation_gates": [
+        {
+          "site_rva": "0x1E3A4",
+          "test": "cmp qword *(0x1830D44F0), 0",
+          "code": "0x2",
+          "shared": true
+        },
+        {
+          "site_rva": "0x1E4A6",
+          "test": "live record count is zero",
+          "code": "0x4",
+          "shared": false
+        },
+        {
+          "site_rva": "0x1E4E3",
+          "test": "flag bit 1 is set on the located record",
+          "code": "0x5",
+          "shared": false
+        }
+      ],
+      "activation_gate_sites": [
+        "0x1E3A4",
+        "0x1E4A6",
+        "0x1E4E3"
+      ],
+      "activation_gate_codes": [
+        "0x2",
+        "0x4",
+        "0x5"
+      ],
+      "activation_shared_gate_sites": [
+        "0x1E3A4"
+      ],
+      "activation_status": "OPEN",
+      "activation_confidence": "H",
+      "activation_reason": "the shared gate at 0x1E3A4 tests the private heap handle, whose only writer is the uncalled init, so the path has no satisfying assignment inside the decoded control flow graph | the path specific gates 0x1E4A6 live record count is zero -> 0x4, 0x1E4E3 flag bit 1 is set on the located record -> 0x5 decide the path only after the shared gate is open",
+      "confidence": "H"
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "record_instances",
+      "question": "which records the table holds at run time, and which module and export each anchor belongs to",
+      "status": "OPEN",
+      "confidence": "L",
+      "reason": "the table slot is zero filled in the file and its only writer takes already resolved addresses, so no instance can be enumerated statically",
+      "evidence": {
+        "table_slot_file_bytes": "00 00 00 00 00 00 00 00",
+        "record_array_writers": [
+          "0x1DEBD",
+          "0x1DF0E"
+        ],
+        "registrar_direct_callers": [],
+        "init_direct_callers": []
+      }
+    },
+    {
+      "id": "registrar_caller",
+      "question": "what invokes the registrar and the init, that is, what supplies the anchor and destination pair and who publishes the private heap",
+      "status": "OPEN",
+      "confidence": "L",
+      "reason": "the file contains no direct call site and no rip relative reference to either function, and the init is the only writer of the private heap handle",
+      "evidence": {
+        "registrar_direct_callers": [],
+        "init_direct_callers": [],
+        "heap_handle_writers": [
+          "0x1DCC6"
+        ]
+      }
+    },
+    {
+      "id": "orchestrator_caller",
+      "question": "what invokes the orchestrator that holds both patcher call sites",
+      "status": "OPEN",
+      "confidence": "L",
+      "reason": "the file contains no direct call site and no rip relative reference to the orchestrator, and its heap gate at 0x1E3A4 tests the private heap handle whose only writer is the uncalled init, so the gate has no satisfying assignment inside the decoded control flow graph and the orchestrator returns 0x2 before either call site",
+      "evidence": {
+        "orchestrator_direct_callers": [],
+        "gate_site_rva": "0x1E3A4",
+        "gate_test": "cmp qword *(0x1830D44F0), 0",
+        "gate_failure_code": "0x2",
+        "gated_call_sites": [
+          "0x1E425",
+          "0x1E4FD"
+        ],
+        "heap_handle_writers": [
+          "0x1DCC6"
+        ],
+        "init_direct_callers": []
+      }
+    },
+    {
+      "id": "upper_flag_bits",
+      "question": "what the flag bits 3 to 7 of a record mean and which code sets them",
+      "status": "OPEN",
+      "confidence": "L",
+      "reason": "the analysed set only preserves those bits on merge, no reader and no other writer exists in the three consumers",
+      "evidence": {
+        "preserved_mask": "0xF8",
+        "merge_site": "0x1DF53"
+      }
+    }
+  ],
+  "invariants": [
+    {
+      "anchor": "table_slot_load",
+      "site_rva": "0x1E28A",
+      "site_va": "0x18001E28A",
+      "function_rva": "0x1E270",
+      "description": "the patcher loads the record array pointer once per call",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "table_slot_load_scan",
+      "site_rva": "0x1E3D3",
+      "site_va": "0x18001E3D3",
+      "function_rva": "0x1E360",
+      "description": "the orchestrator loads the same array pointer",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "table_slot_load_loop",
+      "site_rva": "0x1E411",
+      "site_va": "0x18001E411",
+      "function_rva": "0x1E360",
+      "description": "the orchestrator reloads the array pointer inside the patch loop",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "table_slot_load_lookup",
+      "site_rva": "0x1E4B4",
+      "site_va": "0x18001E4B4",
+      "function_rva": "0x1E360",
+      "description": "the orchestrator loads the array pointer for the address lookup",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "table_store_first_alloc",
+      "site_rva": "0x1DEBB",
+      "site_va": "0x18001DEBB",
+      "function_rva": "0x1DCF0",
+      "description": "the first allocation result is stored into the table slot",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "table_store_grow",
+      "site_rva": "0x1DF0C",
+      "site_va": "0x18001DF0C",
+      "function_rva": "0x1DCF0",
+      "description": "a reallocation result replaces the table slot",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "count_load_guard",
+      "site_rva": "0x1E3C1",
+      "site_va": "0x18001E3C1",
+      "function_rva": "0x1E360",
+      "description": "the orchestrator reads the record count",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "count_store_increment",
+      "site_rva": "0x1DF1C",
+      "site_va": "0x18001DF1C",
+      "function_rva": "0x1DCF0",
+      "description": "the registrar stores count plus one",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "capacity_store_initial",
+      "site_rva": "0x1DE9C",
+      "site_va": "0x18001DE9C",
+      "function_rva": "0x1DCF0",
+      "description": "the initial capacity is expressed in records",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "capacity_double",
+      "site_rva": "0x1DF06",
+      "site_va": "0x18001DF06",
+      "function_rva": "0x1DCF0",
+      "description": "the capacity doubles after a growth",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "first_allocation_bytes",
+      "site_rva": "0x1DEAD",
+      "site_va": "0x18001DEAD",
+      "function_rva": "0x1DCF0",
+      "description": "the first allocation size equals the initial capacity times the stride",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "spin_lock_take_registrar",
+      "site_rva": "0x1DD33",
+      "site_va": "0x18001DD33",
+      "function_rva": "0x1DCF0",
+      "description": "the registrar takes the interlocked spin lock",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "spin_lock_drop_registrar",
+      "site_rva": "0x1DFBD",
+      "site_va": "0x18001DFBD",
+      "function_rva": "0x1DCF0",
+      "description": "the registrar releases the interlocked spin lock",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "spin_lock_take_orchestrator",
+      "site_rva": "0x1E39A",
+      "site_va": "0x18001E39A",
+      "function_rva": "0x1E360",
+      "description": "the orchestrator takes the same spin lock",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "spin_lock_drop_orchestrator",
+      "site_rva": "0x1E562",
+      "site_va": "0x18001E562",
+      "function_rva": "0x1E360",
+      "description": "the orchestrator releases the same spin lock",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "spin_lock_retry_threshold_init",
+      "site_rva": "0x1DC91",
+      "site_va": "0x18001DC91",
+      "function_rva": "0x1DC80",
+      "description": "the init backoff threshold only saturates the Sleep argument",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "spin_lock_backoff_init",
+      "site_rva": "0x1DC98",
+      "site_va": "0x18001DC98",
+      "function_rva": "0x1DC80",
+      "description": "the init contention path sleeps zero or one millisecond",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "spin_lock_retry_increment_init",
+      "site_rva": "0x1DC9E",
+      "site_va": "0x18001DC9E",
+      "function_rva": "0x1DC80",
+      "description": "the init retry counter grows without a bound",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "spin_lock_retry_threshold_registrar",
+      "site_rva": "0x1DD21",
+      "site_va": "0x18001DD21",
+      "function_rva": "0x1DCF0",
+      "description": "the registrar backoff threshold only saturates the Sleep argument",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "spin_lock_backoff_registrar",
+      "site_rva": "0x1DD28",
+      "site_va": "0x18001DD28",
+      "function_rva": "0x1DCF0",
+      "description": "the registrar contention path sleeps zero or one millisecond",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "spin_lock_retry_increment_registrar",
+      "site_rva": "0x1DD2E",
+      "site_va": "0x18001DD2E",
+      "function_rva": "0x1DCF0",
+      "description": "the registrar retry counter grows without a bound",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "spin_lock_retry_threshold_orchestrator",
+      "site_rva": "0x1E388",
+      "site_va": "0x18001E388",
+      "function_rva": "0x1E360",
+      "description": "the orchestrator backoff threshold only saturates the Sleep argument",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "spin_lock_backoff_orchestrator",
+      "site_rva": "0x1E38F",
+      "site_va": "0x18001E38F",
+      "function_rva": "0x1E360",
+      "description": "the orchestrator contention path sleeps zero or one millisecond",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "spin_lock_retry_increment_orchestrator",
+      "site_rva": "0x1E395",
+      "site_va": "0x18001E395",
+      "function_rva": "0x1E360",
+      "description": "the orchestrator retry counter grows without a bound",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "spin_lock_recheck_init",
+      "site_rva": "0x1DCAD",
+      "site_va": "0x18001DCAD",
+      "function_rva": "0x1DC80",
+      "description": "the init re-checks its own precondition, so the flag is a lock and not a one shot initialiser",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "spin_lock_recheck_registrar",
+      "site_rva": "0x1DD3D",
+      "site_va": "0x18001DD3D",
+      "function_rva": "0x1DCF0",
+      "description": "the registrar re-checks its own precondition, so the flag is a lock and not a one shot initialiser",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "spin_lock_recheck_orchestrator",
+      "site_rva": "0x1E3A4",
+      "site_va": "0x18001E3A4",
+      "function_rva": "0x1E360",
+      "description": "the orchestrator re-checks its own precondition, so the flag is a lock and not a one shot initialiser",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "spin_lock_release_join",
+      "site_rva": "0x1E560",
+      "site_va": "0x18001E560",
+      "function_rva": "0x1E360",
+      "description": "every orchestrator exit converges here and releases the lock exactly once",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "heap_create_args_first",
+      "site_rva": "0x1DCB7",
+      "site_va": "0x18001DCB7",
+      "function_rva": "0x1DC80",
+      "description": "the first HeapCreate argument is zeroed",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "heap_create_args_second",
+      "site_rva": "0x1DCB9",
+      "site_va": "0x18001DCB9",
+      "function_rva": "0x1DC80",
+      "description": "the second HeapCreate argument is zeroed",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "heap_create_args_third",
+      "site_rva": "0x1DCBB",
+      "site_va": "0x18001DCBB",
+      "function_rva": "0x1DC80",
+      "description": "the third HeapCreate argument is zeroed",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "heap_create_call",
+      "site_rva": "0x1DCBE",
+      "site_va": "0x18001DCBE",
+      "function_rva": "0x1DC80",
+      "description": "the init creates a private heap with three zero arguments",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "heap_handle_init",
+      "site_rva": "0x1DCC4",
+      "site_va": "0x18001DCC4",
+      "function_rva": "0x1DC80",
+      "description": "the only writer in the file publishes the private heap handle here",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "heap_free_call",
+      "site_rva": "0x1E55A",
+      "site_va": "0x18001E55A",
+      "function_rva": "0x1E360",
+      "description": "the orchestrator frees the same private heap before it releases the lock",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "heap_handle_guard",
+      "site_rva": "0x1E3A4",
+      "site_va": "0x18001E3A4",
+      "function_rva": "0x1E360",
+      "description": "the orchestrator refuses to run before the private heap handle is published",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "activation_heap_gate_fail_code",
+      "site_rva": "0x1E3AE",
+      "site_va": "0x18001E3AE",
+      "function_rva": "0x1E360",
+      "description": "an unpublished heap handle yields this failure code",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "activation_heap_gate_exit",
+      "site_rva": "0x1E3B3",
+      "site_va": "0x18001E3B3",
+      "function_rva": "0x1E360",
+      "description": "the gate failure leaves the orchestrator before either patcher call site",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "activation_empty_table_code",
+      "site_rva": "0x1E4A6",
+      "site_va": "0x18001E4A6",
+      "function_rva": "0x1E360",
+      "description": "the single record path reports an empty table with this code",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "activation_single_path_code",
+      "site_rva": "0x1E4E3",
+      "site_va": "0x18001E4E3",
+      "function_rva": "0x1E360",
+      "description": "the single record path reports a skipped or unpatchable record with this code",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "activation_single_skip_exit",
+      "site_rva": "0x1E4ED",
+      "site_va": "0x18001E4ED",
+      "function_rva": "0x1E360",
+      "description": "a skipped record leaves the single record path before the patcher",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "stride_patcher",
+      "site_rva": "0x1E293",
+      "site_va": "0x18001E293",
+      "function_rva": "0x1E270",
+      "description": "index times 0x38 selects the record",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "stride_lookup",
+      "site_rva": "0x1E4BD",
+      "site_va": "0x18001E4BD",
+      "function_rva": "0x1E360",
+      "description": "the address lookup walks records with the same stride",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "stride_rip_redirect",
+      "site_rva": "0x1E152",
+      "site_va": "0x18001E152",
+      "function_rva": "0x1DFF0",
+      "description": "the context rewrite walks records with the same stride",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "stride_capacity_bytes",
+      "site_rva": "0x1DEE1",
+      "site_va": "0x18001DEE1",
+      "function_rva": "0x1DCF0",
+      "description": "a growth allocates the new capacity times 0x38 bytes",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "stride_duplicate_scan",
+      "site_rva": "0x1DDCC",
+      "site_va": "0x18001DDCC",
+      "function_rva": "0x1DCF0",
+      "description": "duplicate detection walks records with the same stride",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "stride_orchestrator_scan",
+      "site_rva": "0x1E3DC",
+      "site_va": "0x18001E3DC",
+      "function_rva": "0x1E360",
+      "description": "the orchestrator finds the first usable index with the same stride",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "stride_orchestrator_loop",
+      "site_rva": "0x1E418",
+      "site_va": "0x18001E418",
+      "function_rva": "0x1E360",
+      "description": "the orchestrator patch loop uses the same stride",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "read_base",
+      "site_rva": "0x1E297",
+      "site_va": "0x18001E297",
+      "function_rva": "0x1E270",
+      "description": "the patch anchor address is read from rec plus 0x00",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "read_flags",
+      "site_rva": "0x1E29B",
+      "site_va": "0x18001E29B",
+      "function_rva": "0x1E270",
+      "description": "the flag byte is read from rec plus 0x20",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "read_destination",
+      "site_rva": "0x1E2ED",
+      "site_va": "0x18001E2ED",
+      "function_rva": "0x1E270",
+      "description": "the jump destination is read from the low dword of rec plus 0x08",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "variant_test",
+      "site_rva": "0x1E2A3",
+      "site_va": "0x18001E2A3",
+      "function_rva": "0x1E270",
+      "description": "flag bit 0 selects the patch layout",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "variant_invert",
+      "site_rva": "0x1E2A6",
+      "site_va": "0x18001E2A6",
+      "function_rva": "0x1E270",
+      "description": "the bit 0 test is inverted into a zero or one scale",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "variant_scale",
+      "site_rva": "0x1E2A9",
+      "site_va": "0x18001E2A9",
+      "function_rva": "0x1E270",
+      "description": "the inverted bit is scaled by five",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "site_sum",
+      "site_rva": "0x1E2AD",
+      "site_va": "0x18001E2AD",
+      "function_rva": "0x1E270",
+      "description": "the anchor and the scaled bit are added",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "site_bias",
+      "site_rva": "0x1E2B1",
+      "site_va": "0x18001E2B1",
+      "function_rva": "0x1E270",
+      "description": "the patch site is biased by minus five",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "region_size",
+      "site_rva": "0x1E2B8",
+      "site_va": "0x18001E2B8",
+      "function_rva": "0x1E270",
+      "description": "the region size is five plus twice the flag bit",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "flag_field_pointer",
+      "site_rva": "0x1E2E2",
+      "site_va": "0x18001E2E2",
+      "function_rva": "0x1E270",
+      "description": "a pointer to rec plus 0x20 is formed",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "flag_field_bias",
+      "site_rva": "0x1E2E6",
+      "site_va": "0x18001E2E6",
+      "function_rva": "0x1E270",
+      "description": "the flag pointer is biased by 0x20",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "protect_request",
+      "site_rva": "0x1E2CB",
+      "site_va": "0x18001E2CB",
+      "function_rva": "0x1E270",
+      "description": "the requested protection is executable read write",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "virtualprotect_open",
+      "site_rva": "0x1E2D1",
+      "site_va": "0x18001E2D1",
+      "function_rva": "0x1E270",
+      "description": "the first VirtualProtect makes the region writable",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "first_failure_code",
+      "site_rva": "0x1E2DB",
+      "site_va": "0x18001E2DB",
+      "function_rva": "0x1E270",
+      "description": "the only failure code the patcher produces itself",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "rel32_target_delta",
+      "site_rva": "0x1E2F2",
+      "site_va": "0x18001E2F2",
+      "function_rva": "0x1E270",
+      "description": "destination minus patch site",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "rel32_bias",
+      "site_rva": "0x1E2F4",
+      "site_va": "0x18001E2F4",
+      "function_rva": "0x1E270",
+      "description": "the relative displacement is biased by minus five",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "rel32_store",
+      "site_rva": "0x1E2F7",
+      "site_va": "0x18001E2F7",
+      "function_rva": "0x1E270",
+      "description": "four displacement bytes are stored at patch site plus one",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "opcode_store",
+      "site_rva": "0x1E2EA",
+      "site_va": "0x18001E2EA",
+      "function_rva": "0x1E270",
+      "description": "the first byte of the region is stored at the patch site itself",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "short_jump_test",
+      "site_rva": "0x1E2FA",
+      "site_va": "0x18001E2FA",
+      "function_rva": "0x1E270",
+      "description": "flag bit 0 also gates a second store",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "short_jump_store",
+      "site_rva": "0x1E306",
+      "site_va": "0x18001E306",
+      "function_rva": "0x1E270",
+      "description": "two bytes are stored at rec plus 0x00, the anchor, when bit 0 is set",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "virtualprotect_restore",
+      "site_rva": "0x1E31B",
+      "site_va": "0x18001E31B",
+      "function_rva": "0x1E270",
+      "description": "the saved protection is restored, the result is dropped",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "current_process",
+      "site_rva": "0x1E321",
+      "site_va": "0x18001E321",
+      "function_rva": "0x1E270",
+      "description": "the current process pseudo handle feeds the cache flush",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "cache_flush",
+      "site_rva": "0x1E330",
+      "site_va": "0x18001E330",
+      "function_rva": "0x1E270",
+      "description": "the patched region is flushed, the result is dropped",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "patch_flag_write",
+      "site_rva": "0x1E336",
+      "site_va": "0x18001E336",
+      "function_rva": "0x1E270",
+      "description": "the record flag byte is updated with the patch state",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "success_code",
+      "site_rva": "0x1E33A",
+      "site_va": "0x18001E33A",
+      "function_rva": "0x1E270",
+      "description": "the success path yields zero",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "return_value",
+      "site_rva": "0x1E349",
+      "site_va": "0x18001E349",
+      "function_rva": "0x1E270",
+      "description": "the patcher returns the code it selected",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "caller_all_records",
+      "site_rva": "0x1E425",
+      "site_va": "0x18001E425",
+      "function_rva": "0x1E360",
+      "description": "first direct call site of the patcher",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "caller_single_record",
+      "site_rva": "0x1E4FD",
+      "site_va": "0x18001E4FD",
+      "function_rva": "0x1E360",
+      "description": "second direct call site of the patcher",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "caller_index_from_counter",
+      "site_rva": "0x1E423",
+      "site_va": "0x18001E423",
+      "function_rva": "0x1E360",
+      "description": "the loop counter becomes the index argument",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "caller_index_from_search",
+      "site_rva": "0x1E4FB",
+      "site_va": "0x18001E4FB",
+      "function_rva": "0x1E360",
+      "description": "the found index becomes the index argument",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "lookup_compare",
+      "site_rva": "0x1E4C1",
+      "site_va": "0x18001E4C1",
+      "function_rva": "0x1E360",
+      "description": "records are looked up by comparing rec plus 0x00 with the argument",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "orchestrator_skip_all",
+      "site_rva": "0x1E3E0",
+      "site_va": "0x18001E3E0",
+      "function_rva": "0x1E360",
+      "description": "flag bit 1 hides a record from the bulk path",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "orchestrator_skip_loop",
+      "site_rva": "0x1E41C",
+      "site_va": "0x18001E41C",
+      "function_rva": "0x1E360",
+      "description": "flag bit 1 hides a record from the patch loop",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "orchestrator_skip_single",
+      "site_rva": "0x1E4E8",
+      "site_va": "0x18001E4E8",
+      "function_rva": "0x1E360",
+      "description": "flag bit 1 hides a record from the single path",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "redirect_skip",
+      "site_rva": "0x1E156",
+      "site_va": "0x18001E156",
+      "function_rva": "0x1DFF0",
+      "description": "flag bit 1 hides a record from the context rewrite",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "redirect_record_base",
+      "site_rva": "0x1E16F",
+      "site_va": "0x18001E16F",
+      "function_rva": "0x1DFF0",
+      "description": "the context rewrite keeps the record base in a register",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "redirect_anchor_value",
+      "site_rva": "0x1E17B",
+      "site_va": "0x18001E17B",
+      "function_rva": "0x1DFF0",
+      "description": "rec plus 0x00 is loaded for the offset sum",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "redirect_count_load",
+      "site_rva": "0x1E161",
+      "site_va": "0x18001E161",
+      "function_rva": "0x1DFF0",
+      "description": "the entry count dword is read from rec plus 0x24",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "redirect_count_mask",
+      "site_rva": "0x1E165",
+      "site_va": "0x18001E165",
+      "function_rva": "0x1DFF0",
+      "description": "only the low nibble of the count dword is used",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "redirect_count_zero",
+      "site_rva": "0x1E169",
+      "site_va": "0x18001E169",
+      "function_rva": "0x1DFF0",
+      "description": "a zero count makes the record inert for the context rewrite",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "redirect_offset_load",
+      "site_rva": "0x1E1E9",
+      "site_va": "0x18001E1E9",
+      "function_rva": "0x1DFF0",
+      "description": "one offset byte is read from rec plus 0x28",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "redirect_offset_base",
+      "site_rva": "0x1E1EF",
+      "site_va": "0x18001E1EF",
+      "function_rva": "0x1DFF0",
+      "description": "the offset byte is added to rec plus 0x00",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "redirect_displacement_load",
+      "site_rva": "0x1E1F7",
+      "site_va": "0x18001E1F7",
+      "function_rva": "0x1DFF0",
+      "description": "one displacement byte is read from rec plus 0x30",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "redirect_displacement_base",
+      "site_rva": "0x1E1FD",
+      "site_va": "0x18001E1FD",
+      "function_rva": "0x1DFF0",
+      "description": "the displacement byte is added to rec plus 0x10",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "redirect_displacement_zero",
+      "site_rva": "0x1E202",
+      "site_va": "0x18001E202",
+      "function_rva": "0x1DFF0",
+      "description": "a zero result makes the matching entry inert",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "redirect_new_rip",
+      "site_rva": "0x1E204",
+      "site_va": "0x18001E204",
+      "function_rva": "0x1DFF0",
+      "description": "the new instruction pointer is written into the context",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "redirect_apply",
+      "site_rva": "0x1E214",
+      "site_va": "0x18001E214",
+      "function_rva": "0x1DFF0",
+      "description": "the rewritten context is applied to the thread",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "list_count_load",
+      "site_rva": "0x1E834",
+      "site_va": "0x18001E834",
+      "function_rva": "0x1E590",
+      "description": "the builder keeps its entry counter in the descriptor",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "list_count_cap",
+      "site_rva": "0x1E837",
+      "site_va": "0x18001E837",
+      "function_rva": "0x1E590",
+      "description": "the builder refuses a ninth entry",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "list_offset_store",
+      "site_rva": "0x1E844",
+      "site_va": "0x18001E844",
+      "function_rva": "0x1E590",
+      "description": "an offset byte is appended at 0x28",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "list_displacement_store",
+      "site_rva": "0x1E849",
+      "site_va": "0x18001E849",
+      "function_rva": "0x1E590",
+      "description": "the parallel displacement byte is appended at 0x30",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "list_count_store",
+      "site_rva": "0x1E850",
+      "site_va": "0x18001E850",
+      "function_rva": "0x1E590",
+      "description": "the entry counter is incremented",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "scan_length_cap",
+      "site_rva": "0x1E82F",
+      "site_va": "0x18001E82F",
+      "function_rva": "0x1E590",
+      "description": "the scanned window is capped",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "prefix_probe_flag",
+      "site_rva": "0x1E974",
+      "site_va": "0x18001E974",
+      "function_rva": "0x1E590",
+      "description": "the builder sets the flag dword when a five byte filler run precedes the anchor",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "registrar_base_store",
+      "site_rva": "0x1DF2B",
+      "site_va": "0x18001DF2B",
+      "function_rva": "0x1DCF0",
+      "description": "rec plus 0x00 is written from the descriptor",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "registrar_destination_store",
+      "site_rva": "0x1DF34",
+      "site_va": "0x18001DF34",
+      "function_rva": "0x1DCF0",
+      "description": "rec plus 0x08 is written from the descriptor",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "registrar_image_store",
+      "site_rva": "0x1DF3E",
+      "site_va": "0x18001DF3E",
+      "function_rva": "0x1DCF0",
+      "description": "rec plus 0x10 is written from the arena block",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "original_bytes_store_long",
+      "site_rva": "0x1DFA0",
+      "site_va": "0x18001DFA0",
+      "function_rva": "0x1DCF0",
+      "description": "the long original byte snapshot is stored at 0x1b",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "original_bytes_store_short",
+      "site_rva": "0x1DFAA",
+      "site_va": "0x18001DFAA",
+      "function_rva": "0x1DCF0",
+      "description": "the short original byte snapshot is stored at 0x1c",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "original_bytes_store_head",
+      "site_rva": "0x1DFAF",
+      "site_va": "0x18001DFAF",
+      "function_rva": "0x1DCF0",
+      "description": "the snapshot head is stored at 0x18",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "registrar_flag_new_bit",
+      "site_rva": "0x1DF4F",
+      "site_va": "0x18001DF4F",
+      "function_rva": "0x1DCF0",
+      "description": "only bit 0 of the new flag byte comes from the builder",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "registrar_flag_keep",
+      "site_rva": "0x1DF53",
+      "site_va": "0x18001DF53",
+      "function_rva": "0x1DCF0",
+      "description": "the upper flag bits of the slot are preserved",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "registrar_flag_merge",
+      "site_rva": "0x1DF57",
+      "site_va": "0x18001DF57",
+      "function_rva": "0x1DCF0",
+      "description": "the new and the preserved flag bits are merged",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "registrar_flag_store",
+      "site_rva": "0x1DF5A",
+      "site_va": "0x18001DF5A",
+      "function_rva": "0x1DCF0",
+      "description": "the merged flag byte is stored at rec plus 0x20",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "registrar_count_mask_new",
+      "site_rva": "0x1DF69",
+      "site_va": "0x18001DF69",
+      "function_rva": "0x1DCF0",
+      "description": "only the low nibble of the new count is used",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "registrar_count_keep",
+      "site_rva": "0x1DF6D",
+      "site_va": "0x18001DF6D",
+      "function_rva": "0x1DCF0",
+      "description": "the upper three bytes of the stored count dword are preserved",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "registrar_count_store",
+      "site_rva": "0x1DF74",
+      "site_va": "0x18001DF74",
+      "function_rva": "0x1DCF0",
+      "description": "the merged count dword is stored at rec plus 0x24",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "registrar_offsets_store",
+      "site_rva": "0x1DF7E",
+      "site_va": "0x18001DF7E",
+      "function_rva": "0x1DCF0",
+      "description": "all eight offset bytes are stored at rec plus 0x28",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "registrar_displacements_store",
+      "site_rva": "0x1DF88",
+      "site_va": "0x18001DF88",
+      "function_rva": "0x1DCF0",
+      "description": "all eight displacement bytes are stored at rec plus 0x30",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "registrar_duplicate_scan",
+      "site_rva": "0x1DDD0",
+      "site_va": "0x18001DDD0",
+      "function_rva": "0x1DCF0",
+      "description": "registration rejects an anchor that is already registered",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "registrar_arena_block",
+      "site_rva": "0x1DE15",
+      "site_va": "0x18001DE15",
+      "function_rva": "0x1DCF0",
+      "description": "the arena block becomes the descriptor image pointer",
+      "ok": true,
+      "problem": null
+    }
+  ],
+  "summary": {
+    "anchor_count": 118,
+    "anchor_failures": 0,
+    "patcher_direct_call_sites": 2,
+    "gated_call_sites": 2,
+    "record_array_static_instances": 0,
+    "record_instances_status": "OPEN",
+    "activation_status": "OPEN",
+    "heap_kind": "private_heap",
+    "lock_kind": "hand_rolled_interlocked_spin_lock",
+    "patch_region_write_groups": 2,
+    "overall_confidence": "L",
+    "note": "the mechanism is fully determined statically, the record instances and the activation of both dispatch paths are not, so every statement about a concrete patch target stays open"
+  }
+}

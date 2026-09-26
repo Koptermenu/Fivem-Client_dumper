@@ -1,0 +1,788 @@
+{
+  "schema": "adhesive-dumper.toolchain/1",
+  "determinism": {
+    "json_indent": 2,
+    "json_ensure_ascii": false,
+    "json_sort_keys": false,
+    "text_encoding": "utf-8",
+    "bom": false,
+    "line_terminator": "\\n",
+    "trailing_newline": true,
+    "payload_timestamps": false
+  },
+  "host": {
+    "system": "Windows",
+    "release": "11",
+    "version": "10.0.26200",
+    "machine": "AMD64",
+    "processor": "Intel64 Family 6 Model 186 Stepping 2, GenuineIntel",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "windows": {
+      "major": 10,
+      "minor": 0,
+      "build": 26200,
+      "platform": 2,
+      "service_pack": "",
+      "version": "10.0.26200"
+    }
+  },
+  "python": {
+    "version": "3.14.7",
+    "version_full": "3.14.7 (tags/v3.14.7:823f032, Aug  5 2026, 10:51:32) [MSC v.1944 64 bit (AMD64)]",
+    "implementation": "CPython",
+    "compiler": "MSC v.1944 64 bit (AMD64)",
+    "api_version": 1013,
+    "default_encoding": "utf-8",
+    "utf8_mode": false
+  },
+  "libraries": {
+    "pefile": {
+      "distribution": "pefile",
+      "distribution_version": "2024.8.26",
+      "module_version": "2024.8.26",
+      "module_path": "C:\\Users\\Admin\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\site-packages\\pefile.py",
+      "engine_version": null
+    },
+    "lief": {
+      "distribution": "lief",
+      "distribution_version": "1.0.0",
+      "module_version": "1.0.0-d05b3499b",
+      "module_path": "C:\\Users\\Admin\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\site-packages\\lief\\__init__.py",
+      "engine_version": null
+    },
+    "capstone": {
+      "distribution": "capstone",
+      "distribution_version": "5.0.9",
+      "module_version": "5.0.7",
+      "module_path": "C:\\Users\\Admin\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\site-packages\\capstone\\__init__.py",
+      "engine_version": [
+        5,
+        0,
+        1280
+      ]
+    }
+  },
+  "binutils": {
+    "objdump": {
+      "available": true,
+      "path": "C:\\Users\\Admin\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BrechtSanders.WinLibs.POSIX.UCRT_Microsoft.Winget.Source_8wekyb3d8bbwe\\mingw64\\bin\\objdump.EXE",
+      "banner": "GNU objdump (Binutils for MinGW-W64 x86_64, built by Brecht Sanders, r4) 2.47.20260726",
+      "version": "2.47.20260726"
+    }
+  },
+  "specimen": {
+    "path": "reverse/adhesive.dll",
+    "sha256": "91cc0aa006d7315cb042c8fa8dca6c1e074a307bba7dcc9eb5509c8a7b81934e",
+    "size": 53575264
+  },
+  "script_inventory": {
+    "root": "reverse/scripts",
+    "glob": "*.py",
+    "entry_count": 19,
+    "order": "file name ascending, code point order",
+    "producer": "reverse/scripts/common.py script_records, extended by reverse/scripts/refresh_toolchain.py with third_party_imports",
+    "fields": [
+      "path",
+      "name",
+      "size",
+      "sha256",
+      "utf8_bom",
+      "crlf_line_count",
+      "lf_line_count",
+      "third_party_imports"
+    ],
+    "omitted": [
+      "atime",
+      "ctime",
+      "mtime"
+    ],
+    "omitted_reason": "filesystem timestamps are host state rather than evidence, recording them would make the payload change on a touch, so the inventory attests content identity only"
+  },
+  "package_versions": {
+    "method": "each third-party package is versioned on independent axes: the installed distribution metadata, the attribute the imported module exposes and the version the native engine reports. The axes are recorded side by side and are never reconciled into one value, so a disagreement between them stays visible in the evidence set",
+    "axes": [
+      "package_metadata",
+      "imported_module",
+      "native_engine"
+    ],
+    "library_block_fields": {
+      "package_metadata.version": "distribution_version",
+      "imported_module.version": "module_version",
+      "native_engine.version": "engine_version"
+    },
+    "declared": [
+      "capstone",
+      "lief",
+      "pefile"
+    ],
+    "packages": {
+      "capstone": {
+        "declared_in_libraries": true,
+        "axes": {
+          "package_metadata": {
+            "distribution": "capstone",
+            "installed": true,
+            "version": "5.0.9",
+            "metadata_name": "capstone",
+            "metadata_version": "5.0.9",
+            "dist_info": "capstone-5.0.9.dist-info",
+            "metadata_version_matches_version_field": true,
+            "wheel_generator": "setuptools (75.3.4)",
+            "wheel_tag": "py3-none-win_amd64",
+            "wheel_root_is_purelib": "true",
+            "installer": "pip",
+            "recorded_file_count": 102
+          },
+          "imported_module": {
+            "module": "capstone",
+            "imported": true,
+            "__version__": "5.0.7",
+            "version": "5.0.7",
+            "binding_constants": {
+              "CS_API_MAJOR": 5,
+              "CS_API_MINOR": 0,
+              "CS_VERSION_MAJOR": 5,
+              "CS_VERSION_MINOR": 0,
+              "CS_VERSION_EXTRA": 7
+            },
+            "version_composed_from_binding_constants": "5.0.7",
+            "version_equals_composition": true
+          },
+          "native_engine": {
+            "version": [
+              5,
+              0,
+              1280
+            ],
+            "reported_by": "capstone.cs_version()",
+            "binding_version": [
+              5,
+              0,
+              1280
+            ],
+            "reported_by_binding": "capstone.version_bind()",
+            "core_matches_binding": true
+          }
+        },
+        "imported_by": [
+          "apc_audit.py",
+          "audit_syscall_candidates.py",
+          "c856c0_callers.py",
+          "cfg_build.py",
+          "defuse_slice.py",
+          "patch_audit_1dff0.py",
+          "patch_audit_helpers.py",
+          "patch_record_1e270.py",
+          "syscall_args.py",
+          "syscall_scan.py",
+          "syscall_service_map.py",
+          "unresolved_regions.py",
+          "xref_build.py"
+        ],
+        "divergence": {
+          "axes": {
+            "package_metadata": "5.0.9",
+            "imported_module": "5.0.7",
+            "native_engine": [
+              5,
+              0,
+              1280
+            ]
+          },
+          "compared_axes": [
+            "package_metadata",
+            "imported_module"
+          ],
+          "axes_disagreeing_with_package_metadata": [
+            "imported_module"
+          ],
+          "axes_reconciled": false,
+          "native_engine_comparable_to_release_versions": false,
+          "native_engine_note": "the native engine reports a core API number as (major, minor, major << 8 | minor), not a release version, so it is recorded in full but never compared against a release string",
+          "library_block_values_match_axes": {
+            "package_metadata.version": true,
+            "imported_module.version": true,
+            "native_engine.version": true
+          },
+          "assessments": {
+            "imported_module": "the installed wheel declares 5.0.9 in its distribution metadata while the imported capstone package reports 5.0.7, because the binding composes __version__ from CS_API_MAJOR, CS_API_MINOR and the literal CS_VERSION_EXTRA in capstone/__init__.py and never reads the wheel version, so the imported string lags the wheel that carries it"
+          },
+          "documented_claims": [
+            {
+              "file": "reverse/adhesive-03-imports-exports.md",
+              "label": "Capstone",
+              "version": "5.0.7",
+              "axis": "imported_module",
+              "agrees_with_package_metadata": false
+            },
+            {
+              "file": "reverse/adhesive-12-risk-methodology-open-questions.md",
+              "label": "Capstone",
+              "version": "5.0.7",
+              "axis": "imported_module",
+              "agrees_with_package_metadata": false
+            }
+          ],
+          "effect_on_evidence": "the decoded evidence depends on this package through apc_audit.py, audit_syscall_candidates.py, c856c0_callers.py, cfg_build.py, defuse_slice.py, patch_audit_1dff0.py, patch_audit_helpers.py, patch_record_1e270.py, syscall_args.py, syscall_scan.py, syscall_service_map.py, unresolved_regions.py, xref_build.py, so the axis that names the build actually loaded is the one a reader has to take as authoritative"
+        }
+      },
+      "lief": {
+        "declared_in_libraries": true,
+        "axes": {
+          "package_metadata": {
+            "distribution": "lief",
+            "installed": true,
+            "version": "1.0.0",
+            "metadata_name": "lief",
+            "metadata_version": "1.0.0",
+            "dist_info": "lief-1.0.0.dist-info",
+            "metadata_version_matches_version_field": true,
+            "wheel_generator": "scikit-build-core 1.0.3",
+            "wheel_tag": "cp312-abi3-win_amd64",
+            "wheel_root_is_purelib": "false",
+            "installer": "pip",
+            "recorded_file_count": 49
+          },
+          "imported_module": {
+            "module": "lief",
+            "imported": true,
+            "__version__": "1.0.0-d05b3499b",
+            "__commit__": "d05b3499b",
+            "__tag__": "",
+            "__is_tagged__": false,
+            "__extended__": false,
+            "__free_threaded__": false,
+            "version": "1.0.0-d05b3499b",
+            "version_re_exported_from": "_lief",
+            "version_re_exported_from_kind": "compiled extension"
+          },
+          "native_engine": {
+            "extended_version": "0.0.0",
+            "extended_version_info": ""
+          }
+        },
+        "imported_by": [],
+        "divergence": {
+          "axes": {
+            "package_metadata": "1.0.0",
+            "imported_module": "1.0.0-d05b3499b",
+            "native_engine": null
+          },
+          "compared_axes": [
+            "package_metadata",
+            "imported_module"
+          ],
+          "axes_disagreeing_with_package_metadata": [
+            "imported_module"
+          ],
+          "axes_reconciled": false,
+          "native_engine_comparable_to_release_versions": false,
+          "native_engine_note": null,
+          "library_block_values_match_axes": {
+            "package_metadata.version": true,
+            "imported_module.version": true,
+            "native_engine.version": true
+          },
+          "assessments": {
+            "imported_module": "the installed wheel declares 1.0.0 in its distribution metadata while the imported lief package reports 1.0.0-d05b3499b, because lief/__init__.py re-exports __version__ from the compiled extension and that string is the build stamp baked in by scikit-build-core, here an untagged commit build rather than a release build"
+          },
+          "documented_claims": [
+            {
+              "file": "reverse/adhesive-03-imports-exports.md",
+              "label": "LIEF",
+              "version": "1.0.0-d05b3499b",
+              "axis": "imported_module",
+              "agrees_with_package_metadata": false
+            },
+            {
+              "file": "reverse/adhesive-12-risk-methodology-open-questions.md",
+              "label": "LIEF",
+              "version": "1.0.0-d05b3499b",
+              "axis": "imported_module",
+              "agrees_with_package_metadata": false
+            }
+          ],
+          "effect_on_evidence": "no reverse/scripts producer imports lief, so the divergence is confined to this record and cannot have changed any decoded artifact"
+        }
+      },
+      "pefile": {
+        "declared_in_libraries": true,
+        "axes": {
+          "package_metadata": {
+            "distribution": "pefile",
+            "installed": true,
+            "version": "2024.8.26",
+            "metadata_name": "pefile",
+            "metadata_version": "2024.8.26",
+            "dist_info": "pefile-2024.8.26.dist-info",
+            "metadata_version_matches_version_field": true,
+            "wheel_generator": "setuptools (70.3.0)",
+            "wheel_tag": "py3-none-any",
+            "wheel_root_is_purelib": "true",
+            "installer": "pip",
+            "recorded_file_count": 19
+          },
+          "imported_module": {
+            "module": "pefile",
+            "imported": true,
+            "__version__": "2024.8.26",
+            "version": "2024.8.26"
+          },
+          "native_engine": {}
+        },
+        "imported_by": [
+          "apc_audit.py",
+          "audit_syscall_candidates.py",
+          "c856c0_callers.py",
+          "common.py",
+          "patch_audit_1dff0.py",
+          "patch_audit_helpers.py",
+          "patch_record_1e270.py",
+          "xref_build.py"
+        ],
+        "divergence": {
+          "axes": {
+            "package_metadata": "2024.8.26",
+            "imported_module": "2024.8.26",
+            "native_engine": null
+          },
+          "compared_axes": [
+            "package_metadata",
+            "imported_module"
+          ],
+          "axes_disagreeing_with_package_metadata": [],
+          "axes_reconciled": false,
+          "native_engine_comparable_to_release_versions": false,
+          "native_engine_note": null,
+          "library_block_values_match_axes": {
+            "package_metadata.version": true,
+            "imported_module.version": true,
+            "native_engine.version": true
+          },
+          "assessments": {},
+          "documented_claims": [
+            {
+              "file": "reverse/adhesive-03-imports-exports.md",
+              "label": "pefile",
+              "version": "2024.8.26",
+              "axis": "imported_module",
+              "agrees_with_package_metadata": true
+            },
+            {
+              "file": "reverse/adhesive-12-risk-methodology-open-questions.md",
+              "label": "pefile",
+              "version": "2024.8.26",
+              "axis": "imported_module",
+              "agrees_with_package_metadata": true
+            }
+          ],
+          "effect_on_evidence": "the decoded evidence depends on this package through apc_audit.py, audit_syscall_candidates.py, c856c0_callers.py, common.py, patch_audit_1dff0.py, patch_audit_helpers.py, patch_record_1e270.py, xref_build.py, so the axis that names the build actually loaded is the one a reader has to take as authoritative"
+        }
+      }
+    },
+    "undeclared_imports": {
+      "numpy": {
+        "declared_in_libraries": false,
+        "imported_by": [
+          "apc_audit.py"
+        ],
+        "package_metadata": {
+          "distribution": "numpy",
+          "installed": true,
+          "version": "2.5.2",
+          "metadata_name": "numpy",
+          "metadata_version": "2.5.2",
+          "dist_info": "numpy-2.5.2.dist-info",
+          "metadata_version_matches_version_field": true,
+          "wheel_generator": "meson",
+          "wheel_tag": "cp314-cp314-win_amd64",
+          "wheel_root_is_purelib": "false",
+          "installer": "pip",
+          "recorded_file_count": 1355
+        },
+        "imported_module": {
+          "module": "numpy",
+          "imported": true,
+          "__version__": "2.5.2",
+          "version": "2.5.2"
+        },
+        "note": "numpy is imported by apc_audit.py but is not one of the packages the libraries block declares, so the libraries block is not a complete inventory of what the producers import"
+      }
+    },
+    "imported_by": {
+      "capstone": [
+        "apc_audit.py",
+        "audit_syscall_candidates.py",
+        "c856c0_callers.py",
+        "cfg_build.py",
+        "defuse_slice.py",
+        "patch_audit_1dff0.py",
+        "patch_audit_helpers.py",
+        "patch_record_1e270.py",
+        "syscall_args.py",
+        "syscall_scan.py",
+        "syscall_service_map.py",
+        "unresolved_regions.py",
+        "xref_build.py"
+      ],
+      "pefile": [
+        "apc_audit.py",
+        "audit_syscall_candidates.py",
+        "c856c0_callers.py",
+        "common.py",
+        "patch_audit_1dff0.py",
+        "patch_audit_helpers.py",
+        "patch_record_1e270.py",
+        "xref_build.py"
+      ]
+    },
+    "import_census": {
+      "apc_audit.py": [
+        "capstone",
+        "numpy",
+        "pefile"
+      ],
+      "audit_handle_flow.py": [],
+      "audit_infra.py": [],
+      "audit_syscall_candidates.py": [
+        "capstone",
+        "pefile"
+      ],
+      "c856c0_callers.py": [
+        "capstone",
+        "pefile"
+      ],
+      "cfg_build.py": [
+        "capstone"
+      ],
+      "common.py": [
+        "pefile"
+      ],
+      "defuse_slice.py": [
+        "capstone"
+      ],
+      "patch_audit_1dff0.py": [
+        "capstone",
+        "pefile"
+      ],
+      "patch_audit_helpers.py": [
+        "capstone",
+        "pefile"
+      ],
+      "patch_record_1e270.py": [
+        "capstone",
+        "pefile"
+      ],
+      "pdata_map.py": [],
+      "pdb_correlate.py": [],
+      "refresh_toolchain.py": [],
+      "syscall_args.py": [
+        "capstone"
+      ],
+      "syscall_scan.py": [
+        "capstone"
+      ],
+      "syscall_service_map.py": [
+        "capstone"
+      ],
+      "unresolved_regions.py": [
+        "capstone"
+      ],
+      "xref_build.py": [
+        "capstone",
+        "pefile"
+      ]
+    }
+  },
+  "digests": {
+    "algorithm": "sha256 over the file bytes, recomputed on every refresh",
+    "entries": {
+      "reverse/evidence/baseline.json": {
+        "size": 36512,
+        "sha256": "dc34cb50f1a002bae4f01e33064f35c0b28019fe7023add0988ab84fb8df67ea"
+      },
+      "reverse/scripts/common.py": {
+        "size": 46556,
+        "sha256": "4aa2ceec1af88b9cd72e64274b779f4fadf6b62d491fead2c865c3fa99eca750"
+      },
+      "reverse/evidence/pdata_stats.json": {
+        "size": 18329,
+        "sha256": "df1e6ff4cc799afc907ac2c0a8568e87912bf14106bd6f5e88b14d5711a70be8"
+      },
+      "reverse/evidence/cfg_functions.csv": {
+        "size": 40180030,
+        "sha256": "041d2365e3be008fbacbcb6f957fbd10fe0ae08c52ee1cbc9090e04bb64df788"
+      },
+      "reverse/evidence/cfg_clusters.csv": {
+        "size": 127104,
+        "sha256": "7d90d02c195e89357d8ec9a213a10140445dcffaf401e3bfe7c7c1871f1aa048"
+      },
+      "reverse/evidence/xref_edges.csv": {
+        "size": 11126183,
+        "sha256": "fc744f611f4b94caf3c619a874dbead3b57123ded4e5df55ba128d748334270a"
+      },
+      "reverse/evidence/indirect_sites.csv": {
+        "size": 27390456,
+        "sha256": "21e0e1af566ad8e7972647d78402a254f647c9fb588508e4c5f657cf6de940ee"
+      },
+      "reverse/evidence/syscall_candidates_raw.csv": {
+        "size": 920267,
+        "sha256": "7c99950c48c6320487a28bdde1cba5914a8d620b4ef2049ae3f2118a2fcc3e8a"
+      },
+      "reverse/evidence/unresolved_regions.json": {
+        "size": 12253941,
+        "sha256": "0092fef1f0e07798fd2573909dc3d0cd4d79a84859e42ca24576b407337b34cd"
+      }
+    },
+    "entries_cover": "the two foundation files every other artifact in the set is built on, plus reverse/evidence/pdata_stats.json because the cross references below read their digests out of it, plus the five decoded csv artifacts whose producers record no output digest of their own. That is every artifact reverse/scripts/audit_infra.py audits except the payload itself, which is the one file the self block below excludes, plus reverse/evidence/unresolved_regions.json. That last one is not an audited artifact: it is a large derived payload that no surviving record in the set attests, its producer records no output digest of its own, and it records no digest of this payload, so hashing it here is what stops it from drifting unnoticed. every target is hashed rather than merely listed, so a producer run invalidates the digest this payload records for it: refresh_toolchain.py has to run after pdata_map.py, cfg_build.py, xref_build.py, syscall_scan.py and unresolved_regions.py, never before them",
+    "cross_references": [
+      {
+        "file": "reverse/evidence/pdata_stats.json",
+        "field": "producer.baseline_sha256",
+        "target": "reverse/evidence/baseline.json",
+        "recorded_sha256": "dc34cb50f1a002bae4f01e33064f35c0b28019fe7023add0988ab84fb8df67ea",
+        "matches_recomputed": true
+      },
+      {
+        "file": "reverse/evidence/pdata_stats.json",
+        "field": "producer.helper_sha256",
+        "target": "reverse/scripts/common.py",
+        "recorded_sha256": "4aa2ceec1af88b9cd72e64274b779f4fadf6b62d491fead2c865c3fa99eca750",
+        "matches_recomputed": true
+      }
+    ],
+    "self": {
+      "path": "reverse/evidence/toolchain.json",
+      "sha256": null,
+      "reason": "a payload cannot contain its own digest, so reverse/scripts/refresh_toolchain.py prints it after writing and the file has to be attested from outside"
+    }
+  },
+  "scripts": [
+    {
+      "path": "reverse/scripts/apc_audit.py",
+      "name": "apc_audit.py",
+      "size": 72325,
+      "sha256": "9ba8429499ff1abd6207017aa22d2127611cbeeab7ff35da8a1462ce8f511976",
+      "utf8_bom": false,
+      "crlf_line_count": 0,
+      "lf_line_count": 1768,
+      "third_party_imports": [
+        "capstone",
+        "numpy",
+        "pefile"
+      ]
+    },
+    {
+      "path": "reverse/scripts/audit_handle_flow.py",
+      "name": "audit_handle_flow.py",
+      "size": 103019,
+      "sha256": "20e55254697f186fa29def538770502a204a3776f2b2b7c09ebf4fcfa6b6daef",
+      "utf8_bom": false,
+      "crlf_line_count": 0,
+      "lf_line_count": 2011,
+      "third_party_imports": []
+    },
+    {
+      "path": "reverse/scripts/audit_infra.py",
+      "name": "audit_infra.py",
+      "size": 151067,
+      "sha256": "ebf7f4f4547786ad52b780ca3f8ab2b10df8ab2890e2460d7eba5e08f2dc3e9b",
+      "utf8_bom": false,
+      "crlf_line_count": 0,
+      "lf_line_count": 3578,
+      "third_party_imports": []
+    },
+    {
+      "path": "reverse/scripts/audit_syscall_candidates.py",
+      "name": "audit_syscall_candidates.py",
+      "size": 69878,
+      "sha256": "dfd90442d93cd591bcbacf2999a85fe50f514f2796136f741c1c94c69114b7a5",
+      "utf8_bom": false,
+      "crlf_line_count": 0,
+      "lf_line_count": 1721,
+      "third_party_imports": [
+        "capstone",
+        "pefile"
+      ]
+    },
+    {
+      "path": "reverse/scripts/c856c0_callers.py",
+      "name": "c856c0_callers.py",
+      "size": 115586,
+      "sha256": "7adb46051bc57e70689b9265d52cf381f5068dce65aa16354fda34da981bae74",
+      "utf8_bom": false,
+      "crlf_line_count": 0,
+      "lf_line_count": 2734,
+      "third_party_imports": [
+        "capstone",
+        "pefile"
+      ]
+    },
+    {
+      "path": "reverse/scripts/cfg_build.py",
+      "name": "cfg_build.py",
+      "size": 69916,
+      "sha256": "320d8865ebcc2ec1005cd7ceeaa5ae127929d2fec1a132ec7ff38eb3554dbfdb",
+      "utf8_bom": false,
+      "crlf_line_count": 0,
+      "lf_line_count": 1945,
+      "third_party_imports": [
+        "capstone"
+      ]
+    },
+    {
+      "path": "reverse/scripts/common.py",
+      "name": "common.py",
+      "size": 46556,
+      "sha256": "4aa2ceec1af88b9cd72e64274b779f4fadf6b62d491fead2c865c3fa99eca750",
+      "utf8_bom": false,
+      "crlf_line_count": 0,
+      "lf_line_count": 1191,
+      "third_party_imports": [
+        "pefile"
+      ]
+    },
+    {
+      "path": "reverse/scripts/defuse_slice.py",
+      "name": "defuse_slice.py",
+      "size": 68046,
+      "sha256": "5c82f21d6127545afb7c7d3b7a3f0d1bf237ad84a8815c7bbf2718d395a6d650",
+      "utf8_bom": false,
+      "crlf_line_count": 0,
+      "lf_line_count": 1695,
+      "third_party_imports": [
+        "capstone"
+      ]
+    },
+    {
+      "path": "reverse/scripts/patch_audit_1dff0.py",
+      "name": "patch_audit_1dff0.py",
+      "size": 129344,
+      "sha256": "a534deb69499d50f874c9fe4e5bbf6f694c985a49b071258ab03942fda4278b7",
+      "utf8_bom": false,
+      "crlf_line_count": 2423,
+      "lf_line_count": 2430,
+      "third_party_imports": [
+        "capstone",
+        "pefile"
+      ]
+    },
+    {
+      "path": "reverse/scripts/patch_audit_helpers.py",
+      "name": "patch_audit_helpers.py",
+      "size": 93959,
+      "sha256": "2455508498db39a168998d5f8dd31e636f266db89b9cee09fe078793c1b1ebf7",
+      "utf8_bom": false,
+      "crlf_line_count": 0,
+      "lf_line_count": 2329,
+      "third_party_imports": [
+        "capstone",
+        "pefile"
+      ]
+    },
+    {
+      "path": "reverse/scripts/patch_record_1e270.py",
+      "name": "patch_record_1e270.py",
+      "size": 99001,
+      "sha256": "2ee4f1f9b356e6ba0cd20b27dbf15e3d6874c98b93c5b8eb7c9b42065ae4b550",
+      "utf8_bom": true,
+      "crlf_line_count": 0,
+      "lf_line_count": 1999,
+      "third_party_imports": [
+        "capstone",
+        "pefile"
+      ]
+    },
+    {
+      "path": "reverse/scripts/pdata_map.py",
+      "name": "pdata_map.py",
+      "size": 38995,
+      "sha256": "6772cfbfea0db607a626a91f5bcd4c5b2e1eb47d25a6e3c770b031e8c0f845b7",
+      "utf8_bom": false,
+      "crlf_line_count": 0,
+      "lf_line_count": 982,
+      "third_party_imports": []
+    },
+    {
+      "path": "reverse/scripts/pdb_correlate.py",
+      "name": "pdb_correlate.py",
+      "size": 97422,
+      "sha256": "34132edcb926fe966227b4b03a558fcdd3cf95f8930e234be9188b3a9e40bc93",
+      "utf8_bom": false,
+      "crlf_line_count": 0,
+      "lf_line_count": 2203,
+      "third_party_imports": []
+    },
+    {
+      "path": "reverse/scripts/refresh_toolchain.py",
+      "name": "refresh_toolchain.py",
+      "size": 29120,
+      "sha256": "7cfda978f999833f654c4942b02a343264ddcdba5b6ea13c96f980dee61d75ce",
+      "utf8_bom": false,
+      "crlf_line_count": 0,
+      "lf_line_count": 709,
+      "third_party_imports": []
+    },
+    {
+      "path": "reverse/scripts/syscall_args.py",
+      "name": "syscall_args.py",
+      "size": 113239,
+      "sha256": "a5c58df7020d8440a40a097833a95fc3bd136b695820d7aff75273992a9836b3",
+      "utf8_bom": false,
+      "crlf_line_count": 0,
+      "lf_line_count": 2951,
+      "third_party_imports": [
+        "capstone"
+      ]
+    },
+    {
+      "path": "reverse/scripts/syscall_scan.py",
+      "name": "syscall_scan.py",
+      "size": 24266,
+      "sha256": "1710dd90b8e7bad04b29d9101f900c3a0040d83a16b8d35446556ed4b210cfc8",
+      "utf8_bom": false,
+      "crlf_line_count": 0,
+      "lf_line_count": 636,
+      "third_party_imports": [
+        "capstone"
+      ]
+    },
+    {
+      "path": "reverse/scripts/syscall_service_map.py",
+      "name": "syscall_service_map.py",
+      "size": 89433,
+      "sha256": "5e303021696ca6ac6061e1fa3e31914062661345e70f1e9ff75b27f5c26e60b6",
+      "utf8_bom": false,
+      "crlf_line_count": 0,
+      "lf_line_count": 2133,
+      "third_party_imports": [
+        "capstone"
+      ]
+    },
+    {
+      "path": "reverse/scripts/unresolved_regions.py",
+      "name": "unresolved_regions.py",
+      "size": 77828,
+      "sha256": "b4bf6677bc97e7102c05eb65fda9dc2317ea6a14f811b0a48f3586da51671323",
+      "utf8_bom": false,
+      "crlf_line_count": 0,
+      "lf_line_count": 2070,
+      "third_party_imports": [
+        "capstone"
+      ]
+    },
+    {
+      "path": "reverse/scripts/xref_build.py",
+      "name": "xref_build.py",
+      "size": 102838,
+      "sha256": "cbb48bccba566f417a7c70db1821ef1d51fc8841ffa2c897edc6fbcff0c538d9",
+      "utf8_bom": false,
+      "crlf_line_count": 0,
+      "lf_line_count": 2398,
+      "third_party_imports": [
+        "capstone",
+        "pefile"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,571 @@
+{
+  "schema": "adhesive-dumper.syscall-service-map/1",
+  "phase": "P0/S8",
+  "predecessor": "P0/S7",
+  "scope": "static file parsing only; the specimen is never loaded, mapped for execution, patched or run; an Nt/Zw service name is written only where the producer chain folds to a static service number and the argument schema is sufficient for it; no exploit, bypass or patch recipe",
+  "inventory": {
+    "path": "reverse/evidence/syscall_inventory.csv",
+    "schema": "adhesive-dumper.syscall-inventory/1",
+    "rows": 3627,
+    "columns": 106,
+    "s7_columns_preserved": 100,
+    "s8_columns_added": [
+      "svc_producer_rva",
+      "producer_chain",
+      "nt_confidence",
+      "mapping_basis",
+      "service_class",
+      "status"
+    ],
+    "s8_columns_superseding": [
+      "nt_service"
+    ],
+    "supersession_note": "nt_service exists in the P0/S7 schema as well; this phase writes the S8 verdict into that same position instead of adding a second identically named column, which a csv reader would collapse. The S7 assertion it replaces is UNRESOLVED on every row and is still recorded per row in the preserved nt_service_status column, and reverse/evidence/syscall_arg_inventory.csv is unmodified on disk."
+  },
+  "generated_by": {
+    "script": "reverse/scripts/syscall_service_map.py",
+    "python": {
+      "version": "3.14.7",
+      "version_full": "3.14.7 (tags/v3.14.7:823f032, Aug  5 2026, 10:51:32) [MSC v.1944 64 bit (AMD64)]",
+      "implementation": "CPython",
+      "compiler": "MSC v.1944 64 bit (AMD64)",
+      "api_version": 1013,
+      "default_encoding": "utf-8",
+      "utf8_mode": false
+    }
+  },
+  "specimen": {
+    "md5": "2e24179cc01167e50190fdd3bcf6939a",
+    "sha1": "ae5627c6aab786095a816fc43f0e4ce04cee8829",
+    "sha256": "91cc0aa006d7315cb042c8fa8dca6c1e074a307bba7dcc9eb5509c8a7b81934e"
+  },
+  "inputs": {
+    "syscall_candidates_raw.csv": {
+      "rows": 3881,
+      "sha256": "7c99950c48c6320487a28bdde1cba5914a8d620b4ef2049ae3f2118a2fcc3e8a"
+    },
+    "syscall_arg_inventory.csv": {
+      "rows": 3627,
+      "columns": 100,
+      "sha256": "5dd86ec3ff41969567c1630628dff1d3f1146a9994b9fa5109e02733edab1500"
+    },
+    "cfg_functions.csv": {
+      "rows": 142004,
+      "sha256": "041d2365e3be008fbacbcb6f957fbd10fe0ae08c52ee1cbc9090e04bb64df788"
+    }
+  },
+  "parameters": {
+    "chain_max_depth": 10,
+    "chain_cell_entries": 24,
+    "kuser_shared_data_window": [
+      "0x7FFE0000",
+      "0x7FFF0000"
+    ],
+    "information_class_max": "0x80",
+    "information_class_constants": {
+      "ProcessBasicInformation": "0x0",
+      "ProcessDebugPort": "0x7",
+      "ProcessDebugObjectHandle": "0x1E",
+      "ProcessDebugFlags": "0x1F",
+      "ProcessInstrumentationCallback": "0x28"
+    },
+    "allocation_anchors": {
+      "type": "0x1000",
+      "protection": "0x40"
+    },
+    "service_hypothesis_by_class": {
+      "process_information_basic": "NtQueryInformationProcess",
+      "process_information_debug": "NtQueryInformationProcess",
+      "process_information_instrumentation_callback": "NtSetInformationProcess"
+    }
+  },
+  "method": {
+    "window": "the owning IMAGE_RUNTIME_FUNCTION is swept linearly from its begin in rva space, the same channel P0/S6 used to accept the candidate and the same one P0/S7 swept; the producer chain is the region of that sweep in front of the candidate and never crosses a function boundary",
+    "boundaries": [
+      "a call clobbers the volatile registers, so a definition of RAX before the last call of the window is not the live value",
+      "an unconditional jump or a return ends the linear path, so a definition before the last one of those is not on the path to the candidate",
+      "a read-modify-write reads its accumulator strictly before its own instruction, so a chain does not close on itself",
+      "a cmov and friends define their destination on one edge only, so the nearest definite definition decides and a conditional definition is a conditional_merge"
+    ],
+    "foldable": [
+      "adc",
+      "add",
+      "and",
+      "bswap",
+      "dec",
+      "imul",
+      "inc",
+      "neg",
+      "not",
+      "or",
+      "rol",
+      "ror",
+      "sal",
+      "sar",
+      "sbb",
+      "shl",
+      "shld",
+      "shr",
+      "shrld",
+      "sub",
+      "xor"
+    ],
+    "symbolic_unknown": [
+      "an absolute operand in the KUSER_SHARED_DATA window",
+      "an image slot that holds a KUSER_SHARED_DATA address",
+      "a gs segment operand, and every memory operand whose base register resolves to the PEB",
+      "a frame or stack relative operand",
+      "a register indirect operand",
+      "a code or data address produced by lea"
+    ],
+    "naming_gate": "a service name is written only when the producer chain folds to a static constant with no symbolic operand in it, and the anchor group of the site carries a documented information class constant the schema needs; every other row is UNRESOLVED with the reason in mapping_basis",
+    "mapping_basis_order": [
+      "svc_kind",
+      "symbolic_operand",
+      "service_number",
+      "class",
+      "anchor",
+      "producer",
+      "alloc_write_scope and alloc_write, or alloc_write=observed_in_window"
+    ],
+    "mapping_basis_droppable": [
+      "producer_text",
+      "schema"
+    ],
+    "mapping_basis_note": "a token that carries a verdict is never dropped and the descriptive tokens are shed from the tail when the cell would overflow the cell length limit, so a basis cell is always a complete list of the tokens that decide the row; the full P0/S7 site signature and the producer disassembly both stay reproducible, the former in its own preserved column and the latter from the specimen at the producer rva",
+    "cell_limit": 320,
+    "schema_abbreviation": {
+      "A1_PSEUDO_HANDLE": "A1",
+      "A2_OBJ_CLASS": "A2",
+      "A3_OUT_BUF": "A3",
+      "A3_INOUT_BUF": "A3",
+      "A4_LEN": "A4",
+      "A5_STACK_SLOT": "A5",
+      "A6_SELF_HANDLE": "A6",
+      "A7_REG_INDIRECT": "A7",
+      "A8_UNKNOWN": "A8"
+    }
+  },
+  "service_number": {
+    "sweep_reached": 3627,
+    "by_kind": {
+      "code_address": 342,
+      "kuser_shared_data": 961,
+      "memory_indirect": 1957,
+      "peb": 367
+    },
+    "static_service_numbers": {},
+    "static_service_number_sites": 0,
+    "chain_length_histogram": {
+      "1": 82,
+      "2": 315,
+      "3": 261,
+      "4": 245,
+      "5": 142,
+      "6": 244,
+      "7": 142,
+      "8": 392,
+      "9": 129,
+      "10": 84,
+      "11": 56,
+      "12": 7,
+      "13": 19,
+      "14": 10,
+      "15": 20,
+      "16": 90
+    },
+    "sweep_depth_instructions_64_buckets": {
+      "0": 15,
+      "64": 274,
+      "128": 81,
+      "192": 63,
+      "256": 73,
+      "320": 60,
+      "384": 73,
+      "448": 60,
+      "512": 61,
+      "576": 75,
+      "640": 67,
+      "704": 66,
+      "768": 54,
+      "832": 47,
+      "896": 49,
+      "960": 31
+    },
+    "sweep_depth_note": "the number of swept instructions in front of the candidate, bucketed in blocks of 64 and capped at 4096; it is the evidence that the producer chain does not fit the 20..40 byte P0/S7 argument window, so this phase walks the whole owning pdata/CFG window instead",
+    "naming_gate": {
+      "named_rows": 0,
+      "unresolved_rows": 3627,
+      "by_nt_service": {
+        "UNRESOLVED": 3627
+      },
+      "by_status": {
+        "unresolved_symbolic_service_number": 3627
+      },
+      "by_nt_confidence": {
+        "none": 3627
+      }
+    }
+  },
+  "service_classes": {
+    "process_information_basic": {
+      "rule": "argument 2 is a statically resolved constant 0x00, the ProcessBasicInformation value, and arguments 3 or 4 carry the buffer or the length that class needs",
+      "sites": 78,
+      "anchors": {
+        "information_class_0x00": 78
+      },
+      "service_number_kinds": {
+        "code_address": 1,
+        "kuser_shared_data": 29,
+        "memory_indirect": 39,
+        "peb": 9
+      },
+      "by_status": {
+        "unresolved_symbolic_service_number": 78
+      },
+      "site_row_numbers": [
+        3,
+        762,
+        763,
+        807,
+        812
+      ]
+    },
+    "process_information_debug": {
+      "rule": "argument 2 is a statically resolved constant out of 0x07, 0x1E, 0x1F, that is ProcessDebugPort, ProcessDebugObjectHandle and ProcessDebugFlags, and arguments 3 or 4 carry the buffer or the length that class needs",
+      "sites": 24,
+      "anchors": {
+        "information_class_0x07": 8,
+        "information_class_0x1E": 8,
+        "information_class_0x1F": 8
+      },
+      "service_number_kinds": {
+        "code_address": 3,
+        "kuser_shared_data": 6,
+        "memory_indirect": 15
+      },
+      "by_status": {
+        "unresolved_symbolic_service_number": 24
+      },
+      "site_row_numbers": [
+        3412,
+        3413,
+        3414,
+        3415,
+        3416
+      ]
+    },
+    "process_information_instrumentation_callback": {
+      "rule": "argument 2 is a statically resolved constant 0x28, the ProcessInstrumentationCallback value, and arguments 3 or 4 carry the buffer or the length that class needs",
+      "sites": 8,
+      "anchors": {
+        "information_class_0x28": 8
+      },
+      "service_number_kinds": {
+        "kuser_shared_data": 3,
+        "memory_indirect": 5
+      },
+      "by_status": {
+        "unresolved_symbolic_service_number": 8
+      },
+      "site_row_numbers": [
+        3404,
+        3405,
+        3406,
+        3407,
+        3408
+      ]
+    },
+    "allocation_0x1000_0x40": {
+      "rule": "the argument set carries both 0x1000, an allocation type, and 0x40, a page protection",
+      "sites": 16,
+      "anchors": {
+        "constants_0x1000_and_0x40": 16
+      },
+      "service_number_kinds": {
+        "code_address": 8,
+        "kuser_shared_data": 4,
+        "memory_indirect": 4
+      },
+      "by_status": {
+        "unresolved_symbolic_service_number": 16
+      },
+      "site_row_numbers": [
+        776,
+        777,
+        778,
+        779,
+        780
+      ]
+    },
+    "transfer_5arg": {
+      "rule": "all five enumerated argument positions resolve to a class other than unknown or stack slot, and at least one of them is a buffer and at least one is a length",
+      "sites": 633,
+      "anchors": {
+        "five_resolved_buffer_and_length": 633
+      },
+      "service_number_kinds": {
+        "code_address": 154,
+        "kuser_shared_data": 156,
+        "memory_indirect": 253,
+        "peb": 70
+      },
+      "by_status": {
+        "unresolved_symbolic_service_number": 633
+      },
+      "site_row_numbers": [
+        1,
+        2,
+        4,
+        5,
+        6
+      ]
+    },
+    "wrapper_forwarding": {
+      "rule": "all four argument register positions are a handle the site received from its own caller, so the argument schema belongs to the calling layer",
+      "sites": 21,
+      "anchors": {
+        "four_entry_parameters_forwarded": 21
+      },
+      "service_number_kinds": {
+        "code_address": 2,
+        "kuser_shared_data": 6,
+        "memory_indirect": 11,
+        "peb": 2
+      },
+      "by_status": {
+        "unresolved_symbolic_service_number": 21
+      },
+      "site_row_numbers": [
+        3308,
+        3309,
+        3310,
+        3311,
+        3312
+      ]
+    },
+    "other": {
+      "rule": "no anchor of the groups above fires",
+      "sites": 2847,
+      "anchors": {
+        "no_anchor": 2847
+      },
+      "service_number_kinds": {
+        "code_address": 174,
+        "kuser_shared_data": 757,
+        "memory_indirect": 1630,
+        "peb": 286
+      },
+      "by_status": {
+        "unresolved_symbolic_service_number": 2847
+      },
+      "site_row_numbers": [
+        8,
+        9,
+        10,
+        11,
+        12
+      ]
+    }
+  },
+  "reconciliation": {
+    "signal": "allocation_to_write",
+    "source_phase": "P0/S7",
+    "observed": "P0/S7 publishes signal_sites.allocation_to_write as 0 arguments over 0 sites and allocation_origins.by_symbol as empty, while the same phase classes 1534 sites as carrying an A3_OUT_BUF or A3_INOUT_BUF argument position",
+    "not_a_contradiction": "the two numbers are different quantities: A3_OUT_BUF classifies the address handed to the service at the syscall boundary, and allocation_to_write is a conjunction of an allocator return value in the value chain and an observed store through that same pointer, both of them window local",
+    "why_zero_is_forced": "allocation_origins.by_symbol is empty across the whole corpus, so no argument of any of the 3627 sites terminates at an allocator return; the conjunction is zero by arithmetic and not by a missed observation",
+    "forwarding_is_not_a_conflict": "where such a buffer is produced by an allocator, the write belongs to another layer: the allocating call is outside the 40 byte window, or in the caller frame, or the pointer reaches the stub by forwarding through an A6_SELF_HANDLE entry parameter, a prologue spill or a value copied down from a wrapper; forwarding between layers moves the write out of the window without making it untrue, so it is recorded as a scope difference",
+    "per_row_marking": "a row that carries a buffer class with allocation_write_arguments at 0 gets alloc_write_scope=window and alloc_write=forwarded_or_cross_layer in mapping_basis",
+    "validation_rule": "no check of this phase treats a buffer class together with allocation_write_arguments at 0 as a failure",
+    "counts": {
+      "rows_with_a_buffer_class": 1534,
+      "rows_with_a_buffer_class_and_alloc_write_zero": 1534,
+      "rows_with_an_observed_allocation_write": 0,
+      "arguments_with_an_allocator_origin": 0,
+      "buffer_rows_marked": 1534
+    }
+  },
+  "validation": {
+    "checks": [
+      {
+        "check": "row_count",
+        "expected": "3627",
+        "actual": "3627",
+        "ok": "true"
+      },
+      {
+        "check": "s7_columns_preserved",
+        "expected": "100",
+        "actual": "100",
+        "ok": "true"
+      },
+      {
+        "check": "column_count_at_least_s7",
+        "expected": "100",
+        "actual": "106",
+        "ok": "true"
+      },
+      {
+        "check": "s7_column_order_preserved",
+        "expected": "true",
+        "actual": "true",
+        "ok": "true"
+      },
+      {
+        "check": "no_duplicate_columns",
+        "expected": "106",
+        "actual": "106",
+        "ok": "true"
+      },
+      {
+        "check": "every_s8_column_present",
+        "expected": "7",
+        "actual": "7",
+        "ok": "true"
+      },
+      {
+        "check": "rows_in_raw_offset_order",
+        "expected": "true",
+        "actual": "true",
+        "ok": "true"
+      },
+      {
+        "check": "hit_index_is_a_permutation",
+        "expected": "3627",
+        "actual": "3627",
+        "ok": "true"
+      },
+      {
+        "check": "named_rows_have_a_static_service_number",
+        "expected": "0",
+        "actual": "0",
+        "ok": "true"
+      },
+      {
+        "check": "named_rows_have_a_sufficient_schema",
+        "expected": "0",
+        "actual": "0",
+        "ok": "true"
+      },
+      {
+        "check": "no_sufficient_static_row_left_unnamed",
+        "expected": "0",
+        "actual": "0",
+        "ok": "true"
+      },
+      {
+        "check": "named_count_agrees_with_the_rows",
+        "expected": "0",
+        "actual": "0",
+        "ok": "true"
+      },
+      {
+        "check": "unresolved_service_count",
+        "expected": "3627",
+        "actual": "3627",
+        "ok": "true"
+      },
+      {
+        "check": "named_rows",
+        "expected": "0",
+        "actual": "0",
+        "ok": "true"
+      },
+      {
+        "check": "symbolic_kinds_name_their_operand",
+        "expected": "0",
+        "actual": "0",
+        "ok": "true"
+      },
+      {
+        "check": "kuser_shared_data_and_peb_rows_stay_unresolved",
+        "expected": "0",
+        "actual": "0",
+        "ok": "true"
+      },
+      {
+        "check": "no_symbolic_operand_without_a_symbolic_kind",
+        "expected": "0",
+        "actual": "0",
+        "ok": "true"
+      },
+      {
+        "check": "buffer_rows_with_alloc_write_zero",
+        "expected": "true",
+        "actual": "1534",
+        "ok": "true"
+      },
+      {
+        "check": "buffer_rows_carry_the_reconciliation_marks",
+        "expected": "1534",
+        "actual": "1534",
+        "ok": "true"
+      },
+      {
+        "check": "allocation_write_never_exceeds_buffer_positions",
+        "expected": "0",
+        "actual": "0",
+        "ok": "true"
+      },
+      {
+        "check": "no_allocation_write_is_claimed_without_observation",
+        "expected": "0",
+        "actual": "0",
+        "ok": "true"
+      },
+      {
+        "check": "raw_hit_rows",
+        "expected": "3881",
+        "actual": "3881",
+        "ok": "true"
+      },
+      {
+        "check": "valid_candidate_rows",
+        "expected": "3627",
+        "actual": "3627",
+        "ok": "true"
+      },
+      {
+        "check": "cfg_function_rows",
+        "expected": "142004",
+        "actual": "142004",
+        "ok": "true"
+      },
+      {
+        "check": "runtime_functions",
+        "expected": "142004",
+        "actual": "142004",
+        "ok": "true"
+      },
+      {
+        "check": "s7_inventory_rows",
+        "expected": "3627",
+        "actual": "3627",
+        "ok": "true"
+      },
+      {
+        "check": "sweep_reached_every_site",
+        "expected": "3627",
+        "actual": "3627",
+        "ok": "true"
+      },
+      {
+        "check": "all_checks_passed",
+        "expected": "true",
+        "actual": "true",
+        "ok": "true"
+      }
+    ]
+  },
+  "limitations": [
+    "The specimen is parsed as a file only: nothing is loaded, mapped for execution, patched or run, so no observation here is a runtime observation.",
+    "This phase produces no exploit, no bypass and no patch recipe, and no cell of the evidence is intended as one.",
+    "A service number is read from the RAX producer chain only. A dispatcher that computes the number in a callee and returns it, or that indexes a table built at run time, is not followed, so a service number a stub obtains that way stays unresolved here.",
+    "KUSER_SHARED_DATA and PEB reads are symbolic unknown by rule. Their runtime values are not in the file, so a service number derived from either is not a static fact and no name is written for it.",
+    "A frame or stack relative operand, a register indirect operand and a code address produced by lea are kept as distinct kinds, and each of them also blocks a name. A buffer the site hands on from its own caller is therefore described by the schema of the calling layer, which the anchor groups label rather than resolve.",
+    "The chain walk is linear and bounded. A definition that leaves a register through a branch outside the window, or a chain deeper than CHAIN_MAX_DEPTH hops, is reported as a register or opaque kind and is not claimed to be complete.",
+    "The [RSP + 0x28] anchor of the first stack argument is a P0/S7 property of the call site, not of the candidate, and the P0/S7 limitations of the argument window carry over unchanged to the schema this phase reads from it.",
+    "The information class values that key the anchor groups are the documented public PROCESSINFOCLASS values. They are used as constants to group sites, and a group label is a hypothesis about a shape, not an identification of the service reached.",
+    "A file value read through a global slot is the value with the DIR64 fixups of the relocation table applied, which models a load at the preferred base. A slot another module or a runtime initialiser overwrites after load is not seen."
+  ]
+}

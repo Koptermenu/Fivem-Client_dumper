@@ -1,0 +1,2604 @@
+{
+  "schema": "adhesive-dumper.thread-context-map/1",
+  "mode": "static file parsing only, the specimen is never loaded or executed",
+  "generated_by": {
+    "script": "reverse/scripts/patch_audit_1dff0.py",
+    "python": {
+      "version": "3.14.7",
+      "version_full": "3.14.7 (tags/v3.14.7:823f032, Aug  5 2026, 10:51:32) [MSC v.1944 64 bit (AMD64)]",
+      "implementation": "CPython",
+      "compiler": "MSC v.1944 64 bit (AMD64)",
+      "api_version": 1013,
+      "default_encoding": "utf-8",
+      "utf8_mode": false
+    },
+    "pefile": {
+      "distribution": "pefile",
+      "distribution_version": "2024.8.26",
+      "module_version": "2024.8.26",
+      "module_path": "C:\\Users\\Admin\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\site-packages\\pefile.py",
+      "engine_version": null
+    },
+    "capstone": {
+      "distribution": "capstone",
+      "distribution_version": "5.0.9",
+      "module_version": "5.0.7",
+      "module_path": "C:\\Users\\Admin\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\site-packages\\capstone\\__init__.py",
+      "engine_version": [
+        5,
+        0,
+        1280
+      ]
+    }
+  },
+  "specimen": {
+    "path": "reverse/adhesive.dll",
+    "size": 53575264,
+    "sha256": "91cc0aa006d7315cb042c8fa8dca6c1e074a307bba7dcc9eb5509c8a7b81934e"
+  },
+  "companion_table": {
+    "path": "reverse/evidence/patch_mechanisms_1dff0.csv",
+    "schema": "adhesive-dumper.patch-mechanisms-1dff0/1",
+    "rows": 51
+  },
+  "image": {
+    "image_base": 6442450944,
+    "image_base_hex": "0x180000000"
+  },
+  "confidence_scale": {
+    "HIGH": "an instruction, an immediate or a directory entry settles it",
+    "MEDIUM": "derived from the file but conditional on one run time property",
+    "LOW": "the mechanism is known, the deciding instance data is absent from the file",
+    "OPEN": "not decidable from the file alone, carried as an open question"
+  },
+  "status_vocabulary": {
+    "OBSERVED": "the structure is present and settled by an instruction or an immediate",
+    "ABSENT": "the structure is proven not to exist inside the audited range",
+    "ASYMMETRIC": "the two halves of a cross function pair sit in different functions",
+    "UNRESOLVED": "the file does not decide the question"
+  },
+  "subject": {
+    "function": {
+      "name": "rip_redirect",
+      "role": "moves a suspended thread from a recorded original address to the matching position in a rebuilt image",
+      "rva": "0x1DFF0",
+      "fn": "0x1DFF0-0x1E26A",
+      "size": "0x27A",
+      "signature": "void f(LONG record_index_or_minus_one, THREADIDLIST* out), windows x64, out block in rcx, index in edx",
+      "return_value": "none, the caller discards the return register at both call sites"
+    },
+    "functions": {
+      "0x1DFF0": {
+        "begin_rva": "0x1DFF0",
+        "end_rva": "0x1E26A",
+        "size": "0x27A",
+        "unwind_info_rva": "0x300BCE0"
+      },
+      "0x1E360": {
+        "begin_rva": "0x1E360",
+        "end_rva": "0x1E583",
+        "size": "0x223",
+        "unwind_info_rva": "0x3009AF8"
+      },
+      "0x1E270": {
+        "begin_rva": "0x1E270",
+        "end_rva": "0x1E357",
+        "size": "0xE7",
+        "unwind_info_rva": "0x300880C"
+      },
+      "0x1E590": {
+        "begin_rva": "0x1E590",
+        "end_rva": "0x1E9D0",
+        "size": "0x440",
+        "unwind_info_rva": "0x300BCF8"
+      }
+    },
+    "record_expression": "rec = *(qword *)(0x1830D44F8) + index * 0x38",
+    "address_taken": false,
+    "reachability": {
+      "direct_call_sites": [
+        "0x1E400",
+        "0x1E4F6"
+      ],
+      "direct_call_site_count": 2,
+      "rip_relative_reference_sites": [],
+      "rip_relative_reference_count": 0,
+      "rva32_literal_sites": [
+        "0x490034"
+      ],
+      "rva32_literal_count": 1,
+      "rva32_literal_classification": [
+        {
+          "site_rva": "0x490034",
+          "is_pointer": false,
+          "is_rip_displacement": true,
+          "resolved_rva": "0x4AE028",
+          "note": "the literal is the rip relative displacement of the instruction that precedes it, and it resolves to a different address"
+        }
+      ],
+      "va64_literal_sites": [],
+      "va64_literal_count": 0,
+      "pointer_literal_sites": [],
+      "exception_directory_entries": 1,
+      "address_taken": false
+    }
+  },
+  "api_surface": {
+    "enumeration": [
+      {
+        "role": "snapshot",
+        "site_rva": "0x1E029",
+        "iat_slot_rva": "0x2E4D290",
+        "thunk_rva": "0x2BED400",
+        "symbol": "KERNEL32.dll!CreateToolhelp32Snapshot",
+        "arguments": "dwFlags=0x4 TH32CS_SNAPTHREAD, dwProcessId=0"
+      },
+      {
+        "role": "first",
+        "site_rva": "0x1E04B",
+        "iat_slot_rva": "0x2E4D5C8",
+        "thunk_rva": "0x2BED410",
+        "symbol": "KERNEL32.dll!Thread32First",
+        "arguments": "snapshot handle, THREADENTRY32 at rsp+0x30 with dwSize 0x1C"
+      },
+      {
+        "role": "next",
+        "site_rva": "0x1E1D7",
+        "iat_slot_rva": "0x2E4D5D0",
+        "thunk_rva": "0x2BED420",
+        "symbol": "KERNEL32.dll!Thread32Next",
+        "arguments": "snapshot handle, dwSize re-armed to 0x1C before the call"
+      }
+    ],
+    "selection": [
+      {
+        "role": "owner_process",
+        "site_rva": "0x1E063",
+        "iat_slot_rva": "0x2E4D320",
+        "symbol": "KERNEL32.dll!GetCurrentProcessId",
+        "use": "th32OwnerProcessID at structure offset 0xC must equal the result"
+      },
+      {
+        "role": "self",
+        "site_rva": "0x1E075",
+        "iat_slot_rva": "0x2E4D330",
+        "symbol": "KERNEL32.dll!GetCurrentThreadId",
+        "use": "th32ThreadID at structure offset 0x8 must differ from the result"
+      }
+    ],
+    "thread_lifecycle": [
+      {
+        "role": "open",
+        "site_rva": "0x1E0F4",
+        "iat_slot_rva": "0x2E4D4C8",
+        "symbol": "KERNEL32.dll!OpenThread",
+        "arguments": "dwDesiredAccess=0x5A, bInheritHandle=FALSE, dwThreadId from the array",
+        "access_decomposition": {
+          "0x5A": [
+            "THREAD_SUSPEND_RESUME",
+            "THREAD_GET_CONTEXT",
+            "THREAD_SET_CONTEXT",
+            "THREAD_QUERY_INFORMATION"
+          ]
+        },
+        "result_checked": true
+      },
+      {
+        "role": "suspend",
+        "site_rva": "0x1E109",
+        "iat_slot_rva": "0x2E4D5A0",
+        "symbol": "KERNEL32.dll!SuspendThread",
+        "result_checked": false
+      },
+      {
+        "role": "get_context",
+        "site_rva": "0x1E11F",
+        "iat_slot_rva": "0x2E4D400",
+        "symbol": "KERNEL32.dll!GetThreadContext",
+        "result_checked": true
+      },
+      {
+        "role": "set_context",
+        "site_rva": "0x1E214",
+        "iat_slot_rva": "0x2E4D570",
+        "symbol": "KERNEL32.dll!SetThreadContext",
+        "result_checked": false
+      },
+      {
+        "role": "close",
+        "site_rva": "0x1E0BA;0x1E230",
+        "iat_slot_rva": "0x2E4D228",
+        "symbol": "KERNEL32.dll!CloseHandle",
+        "arguments": "the snapshot handle, then one handle per opened thread"
+      }
+    ],
+    "resume_absent_in_subject": {
+      "iat_slot_rva": "0x2E4D538",
+      "symbol": "KERNEL32.dll!ResumeThread",
+      "site_rvas_in_subject": [],
+      "site_rvas_in_caller": [
+        "0x1E484",
+        "0x1E537"
+      ],
+      "note": "the subject suspends and never resumes, the orchestrator owns the resume"
+    },
+    "heap": [
+      {
+        "role": "allocate_identifier_array",
+        "site_rva": "0x1E0A5",
+        "iat_slot_rva": "0x2E4D410",
+        "symbol": "KERNEL32.dll!HeapAlloc",
+        "heap_global": "0x1830D44F0"
+      },
+      {
+        "role": "grow_identifier_array",
+        "site_rva": "0x1E1A0",
+        "iat_slot_rva": "0x2E4D428",
+        "symbol": "KERNEL32.dll!HeapReAlloc",
+        "heap_global": "0x1830D44F0"
+      },
+      {
+        "role": "free_identifier_array",
+        "site_rva": "0x1E55A",
+        "iat_slot_rva": "0x2E4D420",
+        "symbol": "KERNEL32.dll!HeapFree",
+        "heap_global": "0x1830D44F0",
+        "in_caller": true
+      }
+    ],
+    "stack_guard": {
+      "site_rva": "0x1E00A",
+      "global": "0x1830B9140",
+      "check_rva": "0x2AB3500"
+    }
+  },
+  "thread_handles": [
+    {
+      "role": "snapshot",
+      "obtain_rva": "0x1E029",
+      "obtain_expr": "CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0)",
+      "stored_in": "rbx",
+      "invalid_test_rva": "0x1E02E",
+      "close_rva": "0x1E0BA",
+      "close_paths": [
+        "the first read returned zero",
+        "the allocation returned null",
+        "the growth returned null",
+        "the last read returned zero"
+      ],
+      "alive_during": "the enumeration only, the handle is closed before any thread is opened"
+    },
+    {
+      "role": "thread",
+      "obtain_rva": "0x1E0F4",
+      "obtain_expr": "OpenThread(0x5A, FALSE, out.array[i])",
+      "stored_in": "rbx, the same register the snapshot handle used",
+      "invalid_test_rva": "0x1E0FD",
+      "close_rva": "0x1E230",
+      "close_paths": [
+        "the context read failed",
+        "the start index is at or above the limit",
+        "the record scan ran to the exclusive limit"
+      ],
+      "reused_register_safe": true,
+      "suspends": 1,
+      "resumes_inside_subject": 0
+    },
+    {
+      "role": "resume",
+      "obtain_rva": "0x1E473;0x1E526",
+      "obtain_expr": "OpenThread(0x5A, FALSE, out.array[i]) in the caller",
+      "stored_in": "rbx",
+      "invalid_test_rva": "0x1E47C;0x1E52F",
+      "close_rva": "0x1E48D;0x1E540",
+      "close_paths": [
+        "immediately after the resume call"
+      ],
+      "independent_handle": true,
+      "suspends": 0,
+      "resumes_inside_subject": 1,
+      "note": "a second, independent handle per identifier, so the resume does not depend on the handle the subject used"
+    }
+  ],
+  "out_block": {
+    "expression": "the caller's frame block, passed in rcx; the orchestrator passes its own rsp+0x28 on both call paths",
+    "caller_block_rva": [
+      "0x1E3F6",
+      "0x1E4EF"
+    ],
+    "size": 16,
+    "zeroed_at": "0x1E01F",
+    "zeroing_source": "0x1E01C",
+    "zeroing_width": "one 128 bit store covers the pointer, the capacity and the count",
+    "fields": [
+      {
+        "offset": 0,
+        "name": "identifiers",
+        "width": 8,
+        "written_by": "0x1E0AB"
+      },
+      {
+        "offset": 8,
+        "name": "capacity",
+        "width": 4,
+        "written_by": "0x1E08F"
+      },
+      {
+        "offset": 12,
+        "name": "count",
+        "width": 4,
+        "written_by": "0x1E1C0"
+      }
+    ],
+    "element": {
+      "width": 4,
+      "expression": "out.array[out.index], a dword thread identifier",
+      "value": "a thread identifier read at structure offset 0x8",
+      "store_rva": "0x1E1C4",
+      "capacity_model": {
+        "initial_entries": 128,
+        "initial_bytes": 512,
+        "growth": "doubling, the new byte count is capacity times two times the element size"
+      },
+      "bounds_safe": true,
+      "bounds_evidence": "0x1E187 compares the count with the capacity before every append"
+    },
+    "owner": {
+      "allocates": "0x1DFF0-0x1E26A",
+      "frees": "0x1E360-0x1E583",
+      "shared_globals": [
+        "0x1830D44F0"
+      ]
+    }
+  },
+  "context_buffer": {
+    "expression": "ctx = rsp + 0x30",
+    "stack_offset": "0x30",
+    "structure_size": "0x4D0",
+    "frame_size": "0x508",
+    "frame_fits_exactly": true,
+    "frame_fit_note": "the structure starts at the frame offset above and ends exactly where the stack cookie is stored, so the frame is sized for one structure plus the cookie",
+    "context_flags": {
+      "field": "CONTEXT+0x30",
+      "stack_offset": "0x60",
+      "value": "0x100001",
+      "value_decimal": 1048577,
+      "contains": {
+        "CONTEXT_CONTROL": true
+      },
+      "note": "the low bit is the control selector of the CONTEXT group, the value is the control group request",
+      "writer_rva": "0x1E10F",
+      "written_per_thread": true
+    },
+    "rip": {
+      "field": "CONTEXT+0xF8",
+      "stack_offset": "0x128",
+      "reader_rva": "0x1E173",
+      "writer_rva": "0x1E204",
+      "kernel_applied": "0x1E214",
+      "read_frequency": "once per scanned record",
+      "write_frequency": "at most once per record",
+      "note": "the frame copy is updated before the apply, so the next record reads the value the previous record intended to install"
+    },
+    "fields_touched": [
+      "ContextFlags",
+      "Rip"
+    ],
+    "fields_not_touched": "every other field of the structure, including the whole general purpose register group",
+    "aliasing": {
+      "shared_slot": "the thread entry structure and the context structure occupy the same frame slot",
+      "enumeration_uses": [
+        "0x1E03B",
+        "0x1E1C7"
+      ],
+      "context_uses": [
+        "0x1E10F",
+        "0x1E117",
+        "0x1E173",
+        "0x1E204"
+      ],
+      "overlap_in_time": false,
+      "note": "the enumeration loop closes the snapshot handle before the thread loop opens the first context, so the two uses never interleave"
+    }
+  },
+  "record_map": {
+    "expression": "rec = *(qword *)(0x1830D44F8) + index * 0x38",
+    "table_slot": "0x1830D44F8",
+    "count_slot": "0x1830D4508",
+    "stride": "0x38",
+    "shared_with": {
+      "inline_patcher": "0x1E270-0x1E357",
+      "orchestrator": "0x1E360-0x1E583",
+      "registrar": "0x1DCF0",
+      "arena": "0x1D280"
+    },
+    "fields_read_by_subject": [
+      {
+        "offset": 0,
+        "offset_hex": "0x0",
+        "name": "anchor",
+        "width": 8,
+        "reader_rva": "0x1E17B",
+        "role": "the address the 0x28 list offsets are added to"
+      },
+      {
+        "offset": 16,
+        "offset_hex": "0x10",
+        "name": "image_base",
+        "width": 8,
+        "reader_rva": "0x1E1FD",
+        "role": "the base of the rebuilt image the 0x30 list offsets are added to",
+        "tested_for_null": false
+      },
+      {
+        "offset": 32,
+        "offset_hex": "0x20",
+        "name": "flags",
+        "width": 1,
+        "reader_rva": "0x1E156",
+        "role": "the skip bit hides the record from the rewrite",
+        "bits": [
+          {
+            "mask": 1,
+            "name": "two_slot_layout",
+            "reader_in_subject": false
+          },
+          {
+            "mask": 2,
+            "name": "skip",
+            "reader_in_subject": true
+          },
+          {
+            "mask": 4,
+            "name": "patched",
+            "reader_in_subject": false
+          }
+        ]
+      },
+      {
+        "offset": 36,
+        "offset_hex": "0x24",
+        "name": "entry_count",
+        "width": 4,
+        "reader_rva": "0x1E161",
+        "role": "the number of parallel list entries, low nibble only",
+        "mask": "0xF"
+      },
+      {
+        "offset": 40,
+        "offset_hex": "0x28",
+        "name": "match_list",
+        "width": 8,
+        "reader_rva": "0x1E1E9",
+        "element_width": 1,
+        "meaning": "rec[0x28][i], byte built as the instruction start offset from rec + 0x00",
+        "writer_rva": "0x1E844"
+      },
+      {
+        "offset": 48,
+        "offset_hex": "0x30",
+        "name": "target_list",
+        "width": 8,
+        "reader_rva": "0x1E1F7",
+        "element_width": 1,
+        "meaning": "rec[0x30][i], byte built as the window cursor past that instruction",
+        "writer_rva": "0x1E849"
+      }
+    ],
+    "fields_written_by_subject": [],
+    "flag_interaction": {
+      "patch_flag_mask": "0x6",
+      "patch_flag_writer_rva": "0x1E336",
+      "decomposition": [
+        {
+          "mask": 2,
+          "name": "skip",
+          "read_by": [
+            "0x1E156",
+            "0x1E3E0",
+            "0x1E41C",
+            "0x1E4E8"
+          ]
+        },
+        {
+          "mask": 4,
+          "name": "patched",
+          "read_by": []
+        }
+      ],
+      "ordering": "the flag is written by the inline patcher, which the orchestrator runs after the redirect on both paths",
+      "consequence": "a record is visible to the rewrite only on a pass that happens before the patcher has processed it"
+    }
+  },
+  "rip_reconstruction": {
+    "match_expression": "rec + 0x00 + rec[0x28][i] == ctx + 0xF8",
+    "target_expression": "rec + 0x10 + rec[0x30][i]",
+    "comparison": "exact 64 bit equality, the branch on inequality advances the entry cursor",
+    "entry_cap": 8,
+    "list_capacity_bytes": 8,
+    "count_field": "rec + 0x24, low nibble only",
+    "parallel_lists": "one entry cursor drives both byte loads, so entry i of 0x28 pairs with entry i of 0x30",
+    "per_entry_semantics": {
+      "match_byte": "the offset of an instruction start from the record anchor",
+      "target_byte": "the window cursor just past that instruction",
+      "reading": "a suspended thread is redirected only when its instruction pointer sits exactly on a recorded instruction start",
+      "landing": "the replacement is the same relative position in the rebuilt image, past the instruction that was about to run"
+    },
+    "window": {
+      "cap_bytes": "0x32",
+      "cap_rva": "0x1E82F",
+      "consequence": "both list bytes stay representable in one unsigned byte, so the byte lists cannot wrap"
+    },
+    "applies_per_record": 1,
+    "applies_per_thread": "at most the number of scanned records, because the cursor chain continues after an apply",
+    "chaining": "the frame copy of the instruction pointer is rewritten before the apply, so the next record matches against the replacement value",
+    "inert_conditions": [
+      "the skip bit 0x2 is set on the record",
+      "the low nibble of rec + 0x24 is zero",
+      "the reconstructed target is zero",
+      "the start index is at or above the exclusive limit"
+    ]
+  },
+  "callers": [
+    {
+      "site_rva": "0x1E400",
+      "site_va": "0x18001E400",
+      "target_rva": "0x1DFF0",
+      "caller_function_rva": "0x1E360",
+      "path": "orchestrator, null argument branch, every record",
+      "selected_by": "0x1E3B8 tests the argument, a null argument takes this path",
+      "index_expression": "edx, the record index, or -1 for every record",
+      "index_value": -1,
+      "start_index": 0,
+      "limit": "*(dword *)(0x1830D4508)",
+      "preconditions": [
+        "the once flag at 0x1830D44E8 is taken",
+        "the heap handle at 0x1830D44F0 is published, otherwise the call is not reached",
+        "the live record count is non zero",
+        "at least one record without the skip bit exists, otherwise the call is not reached"
+      ],
+      "ordering": "redirect at 0x1E400, inline patch loop from 0x1E418, resume loop from 0x1E465, free at 0x1E55A",
+      "on_failure": "the subject has no return value, so a redirect that did not happen is invisible to the orchestrator",
+      "confidence": "HIGH"
+    },
+    {
+      "site_rva": "0x1E4F6",
+      "site_va": "0x18001E4F6",
+      "target_rva": "0x1DFF0",
+      "caller_function_rva": "0x1E360",
+      "path": "orchestrator, non null argument branch, one record",
+      "selected_by": "0x1E3BB branches on a non null argument",
+      "index_expression": "rec + 0x00 == the caller argument, the index found by the linear search",
+      "index_value": "the found index",
+      "start_index": "the found index",
+      "limit": "the found index plus one",
+      "preconditions": [
+        "the once flag at 0x1830D44E8 is taken",
+        "the live record count is non zero, otherwise the path returns 4",
+        "a record with a matching anchor exists, otherwise the path returns 4",
+        "the found record does not carry the skip bit, otherwise the path returns 5"
+      ],
+      "ordering": "redirect at 0x1E4F6, inline patcher at 0x1E4FD, resume loop from 0x1E518, free at 0x1E55A",
+      "on_failure": "the patcher status becomes the orchestrator status, the redirect outcome is not represented",
+      "confidence": "HIGH"
+    }
+  ],
+  "activation": {
+    "caller_lock": {
+      "take_rva": "0x1E39A",
+      "take_target": "0x1830D44E8",
+      "drop_rva": "0x1E562",
+      "contended_path": "0x1E38F sleeps and retries, so the subject runs at most once concurrently",
+      "subject_takes_lock": false,
+      "note": "the subject reads the record table and the record count without any lock of its own, which is sound only because both call sites sit inside the held region"
+    },
+    "heap_gate": {
+      "site_rva": "0x1E3A4",
+      "target": "0x1830D44F0",
+      "effect": "an unpublished heap handle makes the orchestrator return 2 before any call site"
+    },
+    "record_availability": {
+      "count_global": "0x1830D4508",
+      "zero_effect": "both paths return before any call site when the count is zero",
+      "skip_bit": "0x2",
+      "skip_effect": "the bulk path needs one record without the bit, the single path refuses a record that has it"
+    },
+    "thread_availability": {
+      "source": "the toolhelp snapshot, so a thread that does not exist at enumeration time is never redirected",
+      "filters": [
+        "the owning process must be the current process",
+        "the calling thread is excluded",
+        "a reported structure size below 0x10 drops the entry",
+        "an identifier that cannot be opened is skipped by the subject but still resumed by the caller"
+      ]
+    },
+    "ordering_matrix": [
+      {
+        "step": 1,
+        "action": "enumerate the threads into the out block",
+        "rva": "0x1E0C0"
+      },
+      {
+        "step": 2,
+        "action": "suspend, read the instruction pointer, rewrite it, apply the context, close the handle",
+        "rva": "0x1E109"
+      },
+      {
+        "step": 3,
+        "action": "the inline patcher replaces the code bytes and raises the flag mask 0x06",
+        "rva": "0x1E336"
+      },
+      {
+        "step": 4,
+        "action": "the caller reopens every collected thread, resumes it and closes that handle",
+        "rva": "0x1E484"
+      },
+      {
+        "step": 5,
+        "action": "the caller frees the identifier array and releases the once flag",
+        "rva": "0x1E55A"
+      }
+    ]
+  },
+  "error_branches": [
+    {
+      "id": "snapshot_invalid",
+      "site_rva": "0x1E02E",
+      "branch_rva": "0x1E032",
+      "condition": "the snapshot handle equals 0xFFFFFFFFFFFFFFFF",
+      "effect": "the enumeration and the thread pass are skipped, the function returns",
+      "status_reported": false,
+      "confidence": "HIGH"
+    },
+    {
+      "id": "first_read_failed",
+      "site_rva": "0x1E050",
+      "branch_rva": "0x1E052",
+      "condition": "the first read returned zero",
+      "effect": "the snapshot handle is closed and the function returns",
+      "status_reported": false,
+      "confidence": "HIGH"
+    },
+    {
+      "id": "entry_size_gate",
+      "site_rva": "0x1E054",
+      "branch_rva": "0x1E059",
+      "condition": "the reported structure size is below 0x10",
+      "effect": "the thread is not appended and not processed, the enumeration continues",
+      "status_reported": false,
+      "confidence": "HIGH"
+    },
+    {
+      "id": "foreign_process",
+      "site_rva": "0x1E069",
+      "branch_rva": "0x1E06B",
+      "condition": "the owner process differs from the current process",
+      "effect": "the thread is skipped",
+      "status_reported": false,
+      "confidence": "HIGH"
+    },
+    {
+      "id": "self_thread",
+      "site_rva": "0x1E07B",
+      "branch_rva": "0x1E07D",
+      "condition": "the identifier equals the current thread identifier",
+      "effect": "the thread is skipped, so the walker never suspends its own thread",
+      "status_reported": false,
+      "confidence": "HIGH"
+    },
+    {
+      "id": "allocation_failed",
+      "site_rva": "0x1E0AE",
+      "branch_rva": "0x1E0B1",
+      "condition": "the identifier array allocation returned null",
+      "effect": "the snapshot handle is closed and the function returns",
+      "status_reported": false,
+      "confidence": "HIGH"
+    },
+    {
+      "id": "growth_failed",
+      "site_rva": "0x1E1A6",
+      "branch_rva": "0x1E1A9",
+      "condition": "the identifier array growth returned null",
+      "effect": "the snapshot handle is closed and the function returns",
+      "status_reported": false,
+      "confidence": "HIGH"
+    },
+    {
+      "id": "open_failed",
+      "site_rva": "0x1E0FA",
+      "branch_rva": "0x1E0FD",
+      "condition": "the thread could not be opened",
+      "effect": "the thread cursor advances, the identifier remains in the array and the caller still resumes it",
+      "status_reported": false,
+      "confidence": "HIGH"
+    },
+    {
+      "id": "get_context_failed",
+      "site_rva": "0x1E125",
+      "branch_rva": "0x1E127",
+      "condition": "the context read failed",
+      "effect": "the handle is closed and the record scan is skipped, the thread stays suspended until the caller resumes it",
+      "status_reported": false,
+      "confidence": "HIGH"
+    },
+    {
+      "id": "index_out_of_range",
+      "site_rva": "0x1E13C",
+      "branch_rva": "0x1E13F",
+      "condition": "the start index is at or above the exclusive limit",
+      "effect": "the handle is closed and no record is scanned",
+      "status_reported": false,
+      "confidence": "HIGH"
+    },
+    {
+      "id": "record_skipped",
+      "site_rva": "0x1E156",
+      "branch_rva": "0x1E15B",
+      "condition": "the skip bit 0x2 is set",
+      "effect": "the record cursor advances, the thread is closed and resumed by the caller without any change",
+      "status_reported": false,
+      "confidence": "HIGH"
+    },
+    {
+      "id": "record_inert",
+      "site_rva": "0x1E169",
+      "branch_rva": "0x1E169",
+      "condition": "the low nibble of rec + 0x24 is zero",
+      "effect": "the record is abandoned before the first list load",
+      "status_reported": false,
+      "confidence": "HIGH"
+    },
+    {
+      "id": "entry_exhausted",
+      "site_rva": "0x1E1E4",
+      "branch_rva": "0x1E1E7",
+      "condition": "the entry cursor reached the masked count",
+      "effect": "the record is abandoned",
+      "status_reported": false,
+      "confidence": "HIGH"
+    },
+    {
+      "id": "target_zero",
+      "site_rva": "0x1E202",
+      "branch_rva": "0x1E202",
+      "condition": "the reconstructed target is zero",
+      "effect": "the whole record is abandoned, not only the current entry",
+      "status_reported": false,
+      "confidence": "HIGH"
+    },
+    {
+      "id": "suspend_result_ignored",
+      "site_rva": "0x1E109",
+      "branch_rva": null,
+      "condition": "the suspend return value is never tested",
+      "effect": "a suspend that did not take effect leaves the read and the apply racing a running thread, and the caller still performs one resume",
+      "status_reported": false,
+      "confidence": "MEDIUM"
+    },
+    {
+      "id": "set_context_result_ignored",
+      "site_rva": "0x1E214",
+      "branch_rva": null,
+      "condition": "the apply return value is never tested",
+      "effect": "the frame copy was already updated, so the next record compares against a replacement the kernel may have rejected",
+      "status_reported": false,
+      "confidence": "MEDIUM"
+    }
+  ],
+  "consistency": [
+    {
+      "id": "access_mask_matches_usage",
+      "rule": "the requested access must cover every operation the sequence performs",
+      "evidence": "0x5A decomposes into the suspend, get context, set context and query information rights, one per operation used",
+      "verdict": "matches",
+      "confidence": "HIGH"
+    },
+    {
+      "id": "three_argument_open",
+      "rule": "only three argument registers are set before the open call",
+      "evidence": "the open entry point takes three parameters, so the untouched fourth register is not a missing argument",
+      "verdict": "consistent",
+      "confidence": "HIGH"
+    },
+    {
+      "id": "context_frame_fits",
+      "rule": "the frame must hold the structure the code fills",
+      "evidence": "the structure at offset 0x30 of size 0x4D0 ends exactly at the cookie offset 0x500",
+      "verdict": "exact_fit",
+      "confidence": "HIGH"
+    },
+    {
+      "id": "context_offsets_are_control_group",
+      "rule": "the two touched fields must belong to the requested group",
+      "evidence": "ContextFlags at structure offset 0x30 and Rip at 0xF8 are both control group fields, and the request mask selects the control group",
+      "verdict": "consistent",
+      "confidence": "HIGH"
+    },
+    {
+      "id": "suspend_resume_balance",
+      "rule": "every suspend needs one resume",
+      "evidence": "one suspend per opened thread in the subject, one resume per collected identifier in the caller, so a pre-existing suspend count is preserved",
+      "verdict": "balanced_across_functions",
+      "confidence": "HIGH"
+    },
+    {
+      "id": "identifier_array_bounds",
+      "rule": "the append must not pass the capacity",
+      "evidence": "0x1E187 compares the count with the capacity and grows first, so the count never exceeds the capacity",
+      "verdict": "enforced",
+      "confidence": "HIGH"
+    },
+    {
+      "id": "identifier_array_freed",
+      "rule": "an allocation must be released",
+      "evidence": "the subject allocates and the caller frees, both on the same heap global, and every path that published the array reaches the free",
+      "verdict": "cross_function_ownership",
+      "confidence": "HIGH"
+    },
+    {
+      "id": "entry_cap_fits_stride",
+      "rule": "the two lists must fit inside the record stride",
+      "evidence": "the builder refuses a ninth entry and the two lists own 0x10 bytes of the 0x38 byte stride",
+      "verdict": "enforced_by_builder",
+      "confidence": "HIGH"
+    },
+    {
+      "id": "count_mask_wider_than_cap",
+      "rule": "the count read must not lose entries the builder produced",
+      "evidence": "the builder caps the count at eight and the reader masks with 0xF, which is wider than the cap",
+      "verdict": "consistent",
+      "confidence": "HIGH"
+    },
+    {
+      "id": "window_cap_keeps_bytes",
+      "rule": "both list values must stay representable in one byte",
+      "evidence": "the window is capped at 0x32 bytes, so neither the start offset nor the cursor past an instruction can exceed a byte",
+      "verdict": "enforced_by_builder",
+      "confidence": "HIGH"
+    },
+    {
+      "id": "redirect_precedes_patch",
+      "rule": "the thread must leave the original address before the bytes there change",
+      "evidence": "0x1E400 precedes 0x1E425 and 0x1E4F6 precedes 0x1E4FD",
+      "verdict": "ordered",
+      "confidence": "HIGH"
+    },
+    {
+      "id": "flag_visibility_window",
+      "rule": "the flag must not hide a record before its own rewrite",
+      "evidence": "the flag write at 0x1E336 runs after the redirect on both paths, so the skip bit is clear while the rewrite is decided",
+      "verdict": "ordered",
+      "confidence": "HIGH"
+    },
+    {
+      "id": "register_reuse_across_roles",
+      "rule": "one register must not hold two live handles",
+      "evidence": "the snapshot handle is closed at the enumeration exit, which is before the first thread open, so the reuse of rbx is safe",
+      "verdict": "safe",
+      "confidence": "HIGH"
+    },
+    {
+      "id": "frame_slot_aliasing",
+      "rule": "the enumeration structure and the context must not be live at the same time",
+      "evidence": "the enumeration loop completes and the snapshot handle is closed before the thread loop reaches the first context use",
+      "verdict": "safe",
+      "confidence": "HIGH"
+    },
+    {
+      "id": "table_pointer_refresh",
+      "rule": "a table that can grow must be reloaded",
+      "evidence": "0x1E21A reloads the array pointer after every applied context",
+      "verdict": "defensive",
+      "confidence": "HIGH"
+    }
+  ],
+  "negative_findings": [
+    {
+      "id": "no_resume_in_subject",
+      "statement": "KERNEL32.dll!ResumeThread is not referenced between the first and the last byte of the subject",
+      "evidence": "the resume import slot is referenced only from the orchestrator",
+      "consequence": "every thread this function suspends is left suspended when it returns, and only the two known callers undo it",
+      "confidence": "HIGH"
+    },
+    {
+      "id": "no_status_channel",
+      "statement": "the subject has no return value and no output flag that reports whether a redirect happened",
+      "evidence": "both call sites overwrite the return register with an unrelated load immediately after the call",
+      "consequence": "the orchestrator cannot distinguish a completed rewrite from a skipped thread",
+      "confidence": "HIGH"
+    },
+    {
+      "id": "no_register_save",
+      "statement": "no general purpose register is read from or written to the context",
+      "evidence": "the request mask selects the control group and only the instruction pointer is touched",
+      "consequence": "the redirected thread continues with the register state of the old location, which is only sound when the replacement is a fresh entry",
+      "confidence": "MEDIUM"
+    },
+    {
+      "id": "no_code_write",
+      "statement": "the subject writes no executable bytes and requests no page protection change",
+      "evidence": "no protection or cache flush import is referenced in the range, the only writes are into the frame copy and the out block",
+      "consequence": "the mechanism is a control flow relocation only, the byte level patching is a separate function",
+      "confidence": "HIGH"
+    },
+    {
+      "id": "no_indirect_entry",
+      "statement": "the subject is not address taken and has no thunk or function pointer referring to it",
+      "evidence": "no absolute pointer literal, no rip relative reference and only the two direct call sites",
+      "consequence": "the two audited call sites are the complete caller set for this build of the specimen",
+      "confidence": "HIGH"
+    },
+    {
+      "id": "no_image_base_null_test",
+      "statement": "the record image base field is never tested on its own",
+      "evidence": "only the sum with the target byte is compared against zero",
+      "consequence": "a null image base with a non zero target byte would pass the gate and install a very small instruction pointer",
+      "confidence": "MEDIUM"
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "orchestrator_invocation",
+      "question": "what invokes the orchestrator, and therefore what activates the whole mechanism",
+      "status": "OPEN",
+      "confidence": "LOW",
+      "reason": "the file contains no direct call site, no rip relative reference and no pointer literal for the orchestrator",
+      "evidence": {
+        "orchestrator_rva": "0x1E360",
+        "call_sites": []
+      }
+    },
+    {
+      "id": "record_instances",
+      "question": "which records exist at run time, and which module and export each anchor belongs to",
+      "status": "OPEN",
+      "confidence": "LOW",
+      "reason": "the table slot is zero filled in the file and the registrar is only reachable from the builder, so no record can be enumerated statically",
+      "evidence": {
+        "table_slot": "0x1830D44F8",
+        "registrar_rva": "0x1DCF0",
+        "builder_rva": "0x1E590"
+      }
+    },
+    {
+      "id": "image_base_nullability",
+      "question": "can the record image base field be published as zero",
+      "status": "OPEN",
+      "confidence": "LOW",
+      "reason": "the field is written by the registrar from an arena block, and whether a null block can reach that store is not settled by the record layout alone",
+      "evidence": {
+        "field": "0x10"
+      }
+    },
+    {
+      "id": "hit_rate",
+      "question": "how often a suspended thread is actually at one of the recorded instruction starts",
+      "status": "OPEN",
+      "confidence": "LOW",
+      "reason": "the mechanism depends on the run time instruction pointer landing on a recorded offset, and no scheduling or timing data exists in the file",
+      "evidence": {
+        "entry_cap": 8
+      }
+    }
+  ],
+  "invariants": [
+    {
+      "anchor": "frame_reserve",
+      "site_rva": "0x1DFFC",
+      "site_va": "0x18001DFFC",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "sub",
+      "description": "the frame is sized for one CONTEXT plus the cookie",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "cookie_load",
+      "site_rva": "0x1E00A",
+      "site_va": "0x18001E00A",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "mov",
+      "description": "the stack cookie is read from the guard global",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "out_zero_source",
+      "site_rva": "0x1E01C",
+      "site_va": "0x18001E01C",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "xorps",
+      "description": "the zeroing source is a cleared vector register",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "out_zero_store",
+      "site_rva": "0x1E01F",
+      "site_va": "0x18001E01F",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "movups",
+      "description": "the sixteen byte out block is zeroed on entry",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "snapshot_flag",
+      "site_rva": "0x1E022",
+      "site_va": "0x18001E022",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "mov",
+      "description": "the snapshot is requested for threads only",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "snapshot_pid",
+      "site_rva": "0x1E027",
+      "site_va": "0x18001E027",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "xor",
+      "description": "the snapshot process identifier is zero, meaning every process",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "snapshot_call",
+      "site_rva": "0x1E029",
+      "site_va": "0x18001E029",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "call",
+      "description": "the snapshot is taken",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "snapshot_invalid",
+      "site_rva": "0x1E02E",
+      "site_va": "0x18001E02E",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "cmp",
+      "description": "the invalid handle value is rejected",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "snapshot_invalid_branch",
+      "site_rva": "0x1E032",
+      "site_va": "0x18001E032",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "je",
+      "description": "an invalid snapshot skips the whole mechanism",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "entry_size_init",
+      "site_rva": "0x1E03B",
+      "site_va": "0x18001E03B",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "mov",
+      "description": "the thread entry structure size is armed before the first read",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "first_call",
+      "site_rva": "0x1E04B",
+      "site_va": "0x18001E04B",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "call",
+      "description": "the first thread entry is read",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "first_failed",
+      "site_rva": "0x1E050",
+      "site_va": "0x18001E050",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "test",
+      "description": "the first read result decides whether enumeration starts",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "entry_size_gate",
+      "site_rva": "0x1E054",
+      "site_va": "0x18001E054",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "cmp",
+      "description": "a returned structure smaller than the offset window is rejected",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "entry_size_branch",
+      "site_rva": "0x1E059",
+      "site_va": "0x18001E059",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "jb",
+      "description": "a rejected structure skips the thread",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "owner_pid_read",
+      "site_rva": "0x1E05F",
+      "site_va": "0x18001E05F",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "mov",
+      "description": "the owner process identifier is read at structure offset 0x0C",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "owner_pid_call",
+      "site_rva": "0x1E063",
+      "site_va": "0x18001E063",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "call",
+      "description": "the current process identifier is read",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "owner_pid_filter",
+      "site_rva": "0x1E069",
+      "site_va": "0x18001E069",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "cmp",
+      "description": "a foreign process is dropped from the list",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "owner_pid_branch",
+      "site_rva": "0x1E06B",
+      "site_va": "0x18001E06B",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "jne",
+      "description": "a foreign process skips the thread",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "thread_id_read",
+      "site_rva": "0x1E071",
+      "site_va": "0x18001E071",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "mov",
+      "description": "the thread identifier is read at structure offset 0x08",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "thread_id_call",
+      "site_rva": "0x1E075",
+      "site_va": "0x18001E075",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "call",
+      "description": "the current thread identifier is read",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "self_exclusion",
+      "site_rva": "0x1E07B",
+      "site_va": "0x18001E07B",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "cmp",
+      "description": "the calling thread itself is dropped from the list",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "self_exclusion_branch",
+      "site_rva": "0x1E07D",
+      "site_va": "0x18001E07D",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "je",
+      "description": "the calling thread skips itself",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "array_load",
+      "site_rva": "0x1E083",
+      "site_va": "0x18001E083",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "mov",
+      "description": "the identifier array pointer is loaded",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "array_capacity_init",
+      "site_rva": "0x1E08F",
+      "site_va": "0x18001E08F",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "mov",
+      "description": "the initial capacity is one hundred and twenty eight entries",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "array_heap",
+      "site_rva": "0x1E096",
+      "site_va": "0x18001E096",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "mov",
+      "description": "the identifier array is taken from the shared process heap",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "array_alloc_bytes",
+      "site_rva": "0x1E09D",
+      "site_va": "0x18001E09D",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "mov",
+      "description": "the first allocation is capacity times four bytes",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "array_alloc_call",
+      "site_rva": "0x1E0A5",
+      "site_va": "0x18001E0A5",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "call",
+      "description": "the identifier array is allocated",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "array_store",
+      "site_rva": "0x1E0AB",
+      "site_va": "0x18001E0AB",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "mov",
+      "description": "the allocation result is published into the out block",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "snapshot_close",
+      "site_rva": "0x1E0BA",
+      "site_va": "0x18001E0BA",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "call",
+      "description": "the snapshot handle is closed",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "list_null_guard",
+      "site_rva": "0x1E0C0",
+      "site_va": "0x18001E0C0",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "cmp",
+      "description": "an unpublished array ends the mechanism",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "list_null_branch",
+      "site_rva": "0x1E0C4",
+      "site_va": "0x18001E0C4",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "je",
+      "description": "a null array returns immediately",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "list_count_guard",
+      "site_rva": "0x1E0CA",
+      "site_va": "0x18001E0CA",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "cmp",
+      "description": "an empty array ends the mechanism",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "list_count_branch",
+      "site_rva": "0x1E0CE",
+      "site_va": "0x18001E0CE",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "je",
+      "description": "an empty list returns immediately",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "index_argument",
+      "site_rva": "0x1E0D7",
+      "site_va": "0x18001E0D7",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "mov",
+      "description": "the record index argument is loaded from the frame",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "limit_base",
+      "site_rva": "0x1E0DB",
+      "site_va": "0x18001E0DB",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "mov",
+      "description": "the exclusive limit starts from the index argument",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "limit_increment",
+      "site_rva": "0x1E0DD",
+      "site_va": "0x18001E0DD",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "inc",
+      "description": "the exclusive limit is the index argument plus one",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "start_index",
+      "site_rva": "0x1E0DF",
+      "site_va": "0x18001E0DF",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "mov",
+      "description": "the first scanned record is the index argument",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "start_index_sentinel",
+      "site_rva": "0x1E0E2",
+      "site_va": "0x18001E0E2",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "cmove",
+      "description": "the sentinel argument folds the first scanned record to zero",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "thread_id_load",
+      "site_rva": "0x1E0E9",
+      "site_va": "0x18001E0E9",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "mov",
+      "description": "the thread identifier is loaded into the third argument register",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "open_access",
+      "site_rva": "0x1E0ED",
+      "site_va": "0x18001E0ED",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "mov",
+      "description": "the requested access is the four rights the sequence needs",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "open_inherit",
+      "site_rva": "0x1E0F2",
+      "site_va": "0x18001E0F2",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "xor",
+      "description": "the handle is requested non inheritable",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "open_call",
+      "site_rva": "0x1E0F4",
+      "site_va": "0x18001E0F4",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "call",
+      "description": "the thread is opened",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "open_failed",
+      "site_rva": "0x1E0FD",
+      "site_va": "0x18001E0FD",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "je",
+      "description": "an unopenable thread is skipped without any other effect",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "suspend_call",
+      "site_rva": "0x1E109",
+      "site_va": "0x18001E109",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "call",
+      "description": "the thread is suspended",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "context_flags_store",
+      "site_rva": "0x1E10F",
+      "site_va": "0x18001E10F",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "mov",
+      "description": "the context request mask is written into the structure",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "context_buffer",
+      "site_rva": "0x1E117",
+      "site_va": "0x18001E117",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "lea",
+      "description": "the context structure is the frame buffer",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "context_get",
+      "site_rva": "0x1E11F",
+      "site_va": "0x18001E11F",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "call",
+      "description": "the thread context is read",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "context_get_failed",
+      "site_rva": "0x1E127",
+      "site_va": "0x18001E127",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "je",
+      "description": "an unreadable context skips the record scan for that thread",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "limit_from_argument",
+      "site_rva": "0x1E12D",
+      "site_va": "0x18001E12D",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "mov",
+      "description": "the exclusive limit falls back to the index argument plus one",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "limit_sentinel_test",
+      "site_rva": "0x1E12F",
+      "site_va": "0x18001E12F",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "cmp",
+      "description": "the sentinel argument is recognised",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "limit_sentinel_load",
+      "site_rva": "0x1E136",
+      "site_va": "0x18001E136",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "mov",
+      "description": "the sentinel resolves the limit to the live record count",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "limit_range_check",
+      "site_rva": "0x1E13C",
+      "site_va": "0x18001E13C",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "cmp",
+      "description": "a start index at or above the limit skips the record scan",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "limit_range_branch",
+      "site_rva": "0x1E13F",
+      "site_va": "0x18001E13F",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "jae",
+      "description": "an out of range start index closes the handle",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "limit_hold",
+      "site_rva": "0x1E145",
+      "site_va": "0x18001E145",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "mov",
+      "description": "the exclusive limit is kept in a register for the loop",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "record_table_load",
+      "site_rva": "0x1E148",
+      "site_va": "0x18001E148",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "mov",
+      "description": "the record array is loaded once per thread",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "record_index_init",
+      "site_rva": "0x1E14F",
+      "site_va": "0x18001E14F",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "mov",
+      "description": "the record cursor starts at the first scanned record",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "record_stride",
+      "site_rva": "0x1E152",
+      "site_va": "0x18001E152",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "imul",
+      "description": "the record offset is the cursor times the record stride",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "record_skip_test",
+      "site_rva": "0x1E156",
+      "site_va": "0x18001E156",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "test",
+      "description": "the skip flag bit hides the record from the rewrite",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "record_skip_branch",
+      "site_rva": "0x1E15B",
+      "site_va": "0x18001E15B",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "jne",
+      "description": "a skipped record advances the cursor",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "record_count_load",
+      "site_rva": "0x1E161",
+      "site_va": "0x18001E161",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "mov",
+      "description": "the entry count dword is read",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "record_count_mask",
+      "site_rva": "0x1E165",
+      "site_va": "0x18001E165",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "and",
+      "description": "only the low nibble of the count is used",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "record_count_zero",
+      "site_rva": "0x1E169",
+      "site_va": "0x18001E169",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "je",
+      "description": "a zero nibble makes the record inert",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "record_base",
+      "site_rva": "0x1E16F",
+      "site_va": "0x18001E16F",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "lea",
+      "description": "the record base is kept for the two list loads",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "context_rip_read",
+      "site_rva": "0x1E173",
+      "site_va": "0x18001E173",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "mov",
+      "description": "the saved instruction pointer is loaded per record",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "record_anchor",
+      "site_rva": "0x1E17B",
+      "site_va": "0x18001E17B",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "mov",
+      "description": "the record anchor is loaded",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "entry_index_init",
+      "site_rva": "0x1E17E",
+      "site_va": "0x18001E17E",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "xor",
+      "description": "the entry cursor starts at zero",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "array_capacity_check",
+      "site_rva": "0x1E187",
+      "site_va": "0x18001E187",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "cmp",
+      "description": "the append is refused once the count reaches the capacity",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "array_capacity_branch",
+      "site_rva": "0x1E18B",
+      "site_va": "0x18001E18B",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "jb",
+      "description": "the append proceeds while the count is below the capacity",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "array_grow_bytes",
+      "site_rva": "0x1E18D",
+      "site_va": "0x18001E18D",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "add",
+      "description": "the growth byte count is the capacity doubled",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "array_grow_scale",
+      "site_rva": "0x1E190",
+      "site_va": "0x18001E190",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "shl",
+      "description": "the growth byte count is scaled by the four byte entry size",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "array_grow_call",
+      "site_rva": "0x1E1A0",
+      "site_va": "0x18001E1A0",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "call",
+      "description": "the identifier array is grown",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "array_capacity_double",
+      "site_rva": "0x1E1AF",
+      "site_va": "0x18001E1AF",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "shl",
+      "description": "the stored capacity is doubled after a growth",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "array_count_read",
+      "site_rva": "0x1E1B9",
+      "site_va": "0x18001E1B9",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "mov",
+      "description": "the live entry count is read for the append",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "array_count_write",
+      "site_rva": "0x1E1C0",
+      "site_va": "0x18001E1C0",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "mov",
+      "description": "the entry count is incremented",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "array_append",
+      "site_rva": "0x1E1C4",
+      "site_va": "0x18001E1C4",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "mov",
+      "description": "the thread identifier is appended",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "entry_size_rearm",
+      "site_rva": "0x1E1C7",
+      "site_va": "0x18001E1C7",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "mov",
+      "description": "the structure size is re-armed before every next call",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "next_call",
+      "site_rva": "0x1E1D7",
+      "site_va": "0x18001E1D7",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "call",
+      "description": "the next thread entry is read",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "next_loop",
+      "site_rva": "0x1E1DC",
+      "site_va": "0x18001E1DC",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "jmp",
+      "description": "enumeration re-tests the iteration result",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "entry_advance",
+      "site_rva": "0x1E1E1",
+      "site_va": "0x18001E1E1",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "inc",
+      "description": "the entry cursor advances",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "entry_end",
+      "site_rva": "0x1E1E4",
+      "site_va": "0x18001E1E4",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "cmp",
+      "description": "the entry cursor is compared with the masked count",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "entry_end_branch",
+      "site_rva": "0x1E1E7",
+      "site_va": "0x18001E1E7",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "je",
+      "description": "the record is abandoned when the cursor reaches the count",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "match_byte_load",
+      "site_rva": "0x1E1E9",
+      "site_va": "0x18001E1E9",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "movzx",
+      "description": "the match byte is read from the 0x28 list",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "match_byte_add",
+      "site_rva": "0x1E1EF",
+      "site_va": "0x18001E1EF",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "add",
+      "description": "the match byte is added to the record anchor",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "match_compare",
+      "site_rva": "0x1E1F2",
+      "site_va": "0x18001E1F2",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "cmp",
+      "description": "the reconstructed address is compared with the saved instruction pointer",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "match_miss",
+      "site_rva": "0x1E1F5",
+      "site_va": "0x18001E1F5",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "jne",
+      "description": "a miss advances the entry cursor",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "target_byte_load",
+      "site_rva": "0x1E1F7",
+      "site_va": "0x18001E1F7",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "movzx",
+      "description": "the target byte is read from the 0x30 list",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "target_byte_add",
+      "site_rva": "0x1E1FD",
+      "site_va": "0x18001E1FD",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "add",
+      "description": "the target byte is added to the rebuilt image base",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "target_zero",
+      "site_rva": "0x1E202",
+      "site_va": "0x18001E202",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "je",
+      "description": "a zero result abandons the record",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "context_rip_write",
+      "site_rva": "0x1E204",
+      "site_va": "0x18001E204",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "mov",
+      "description": "the replacement instruction pointer is written into the frame copy",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "context_set",
+      "site_rva": "0x1E214",
+      "site_va": "0x18001E214",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "call",
+      "description": "the rewritten context is applied to the thread",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "record_table_reload",
+      "site_rva": "0x1E21A",
+      "site_va": "0x18001E21A",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "mov",
+      "description": "the record array pointer is refreshed after every apply",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "record_advance",
+      "site_rva": "0x1E221",
+      "site_va": "0x18001E221",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "inc",
+      "description": "the record cursor advances",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "record_end",
+      "site_rva": "0x1E224",
+      "site_va": "0x18001E224",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "cmp",
+      "description": "the record cursor is compared with the exclusive limit",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "record_end_branch",
+      "site_rva": "0x1E227",
+      "site_va": "0x18001E227",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "jne",
+      "description": "the scan repeats until the limit is reached",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "thread_close",
+      "site_rva": "0x1E230",
+      "site_va": "0x18001E230",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "call",
+      "description": "the thread handle is closed",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "thread_advance",
+      "site_rva": "0x1E236",
+      "site_va": "0x18001E236",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "inc",
+      "description": "the thread cursor advances",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "thread_count",
+      "site_rva": "0x1E239",
+      "site_va": "0x18001E239",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "mov",
+      "description": "the identifier count drives the thread loop",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "thread_end",
+      "site_rva": "0x1E23C",
+      "site_va": "0x18001E23C",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "cmp",
+      "description": "the thread cursor is compared with the identifier count",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "thread_end_branch",
+      "site_rva": "0x1E23F",
+      "site_va": "0x18001E23F",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "jb",
+      "description": "the next thread is opened until the count is reached",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "cookie_check",
+      "site_rva": "0x1E250",
+      "site_va": "0x18001E250",
+      "function_rva": "0x1DFF0",
+      "unwind_info_rva": "0x300BCE0",
+      "mnemonic": "call",
+      "description": "the cookie is verified before the epilogue",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "patch_flag_write",
+      "site_rva": "0x1E336",
+      "site_va": "0x18001E336",
+      "function_rva": "0x1E270",
+      "unwind_info_rva": "0x300880C",
+      "mnemonic": "or",
+      "description": "the patcher raises the skip and patched bits together through a pointer to the flag byte",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "lock_spin",
+      "site_rva": "0x1E38F",
+      "site_va": "0x18001E38F",
+      "function_rva": "0x1E360",
+      "unwind_info_rva": "0x3009AF8",
+      "mnemonic": "call",
+      "description": "a losing lock contender sleeps and retries",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "lock_take",
+      "site_rva": "0x1E39A",
+      "site_va": "0x18001E39A",
+      "function_rva": "0x1E360",
+      "unwind_info_rva": "0x3009AF8",
+      "mnemonic": "cmpxchg",
+      "description": "the orchestrator takes the shared once flag",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "branch_select",
+      "site_rva": "0x1E3B8",
+      "site_va": "0x18001E3B8",
+      "function_rva": "0x1E360",
+      "unwind_info_rva": "0x3009AF8",
+      "mnemonic": "test",
+      "description": "a null argument selects the every record path",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "single_path",
+      "site_rva": "0x1E3BB",
+      "site_va": "0x18001E3BB",
+      "function_rva": "0x1E360",
+      "unwind_info_rva": "0x3009AF8",
+      "mnemonic": "jne",
+      "description": "a non null argument selects the single record path",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "count_guard_bulk",
+      "site_rva": "0x1E3C1",
+      "site_va": "0x18001E3C1",
+      "function_rva": "0x1E360",
+      "unwind_info_rva": "0x3009AF8",
+      "mnemonic": "mov",
+      "description": "the live record count is read on the bulk path",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "first_usable_scan",
+      "site_rva": "0x1E3E0",
+      "site_va": "0x18001E3E0",
+      "function_rva": "0x1E360",
+      "unwind_info_rva": "0x3009AF8",
+      "mnemonic": "test",
+      "description": "the bulk path looks for the first record without the skip bit",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "call_all_buffer",
+      "site_rva": "0x1E3F6",
+      "site_va": "0x18001E3F6",
+      "function_rva": "0x1E360",
+      "unwind_info_rva": "0x3009AF8",
+      "mnemonic": "lea",
+      "description": "the out block of the bulk path is the orchestrator frame",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "call_all_sentinel",
+      "site_rva": "0x1E3FB",
+      "site_va": "0x18001E3FB",
+      "function_rva": "0x1E360",
+      "unwind_info_rva": "0x3009AF8",
+      "mnemonic": "mov",
+      "description": "the bulk path passes the every record sentinel",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "call_all",
+      "site_rva": "0x1E400",
+      "site_va": "0x18001E400",
+      "function_rva": "0x1E360",
+      "unwind_info_rva": "0x3009AF8",
+      "mnemonic": "call",
+      "description": "first direct call site of the redirect walker",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "call_all_result_dropped",
+      "site_rva": "0x1E405",
+      "site_va": "0x18001E405",
+      "function_rva": "0x1E360",
+      "unwind_info_rva": "0x3009AF8",
+      "mnemonic": "mov",
+      "description": "the bulk path discards any return value",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "call_all_before_patch",
+      "site_rva": "0x1E425",
+      "site_va": "0x18001E425",
+      "function_rva": "0x1E360",
+      "unwind_info_rva": "0x3009AF8",
+      "mnemonic": "call",
+      "description": "the inline patcher runs after the redirect on the bulk path",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "out_block_read",
+      "site_rva": "0x1E449",
+      "site_va": "0x18001E449",
+      "function_rva": "0x1E360",
+      "unwind_info_rva": "0x3009AF8",
+      "mnemonic": "mov",
+      "description": "the out block is read back by the caller",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "resume_loop_count",
+      "site_rva": "0x1E45C",
+      "site_va": "0x18001E45C",
+      "function_rva": "0x1E360",
+      "unwind_info_rva": "0x3009AF8",
+      "mnemonic": "test",
+      "description": "an empty identifier list skips the resume pass",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "resume_open",
+      "site_rva": "0x1E473",
+      "site_va": "0x18001E473",
+      "function_rva": "0x1E360",
+      "unwind_info_rva": "0x3009AF8",
+      "mnemonic": "call",
+      "description": "the resume pass opens each collected thread again",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "resume_call",
+      "site_rva": "0x1E484",
+      "site_va": "0x18001E484",
+      "function_rva": "0x1E360",
+      "unwind_info_rva": "0x3009AF8",
+      "mnemonic": "call",
+      "description": "the resume pass is the only place a suspend is undone",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "resume_close",
+      "site_rva": "0x1E48D",
+      "site_va": "0x18001E48D",
+      "function_rva": "0x1E360",
+      "unwind_info_rva": "0x3009AF8",
+      "mnemonic": "call",
+      "description": "the resume handle is closed immediately",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "lookup_count",
+      "site_rva": "0x1E4A0",
+      "site_va": "0x18001E4A0",
+      "function_rva": "0x1E360",
+      "unwind_info_rva": "0x3009AF8",
+      "mnemonic": "mov",
+      "description": "the single path reads the live record count",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "lookup_compare",
+      "site_rva": "0x1E4C1",
+      "site_va": "0x18001E4C1",
+      "function_rva": "0x1E360",
+      "unwind_info_rva": "0x3009AF8",
+      "mnemonic": "cmp",
+      "description": "the single path matches the argument against the record anchor",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "lookup_dead_guard",
+      "site_rva": "0x1E4D4",
+      "site_va": "0x18001E4D4",
+      "function_rva": "0x1E360",
+      "unwind_info_rva": "0x3009AF8",
+      "mnemonic": "cmp",
+      "description": "the single path tests the found index against the sentinel",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "lookup_dead_branch",
+      "site_rva": "0x1E4D7",
+      "site_va": "0x18001E4D7",
+      "function_rva": "0x1E360",
+      "unwind_info_rva": "0x3009AF8",
+      "mnemonic": "je",
+      "description": "the single path sentinel branch is unreachable after a found index",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "lookup_stride",
+      "site_rva": "0x1E4DF",
+      "site_va": "0x18001E4DF",
+      "function_rva": "0x1E360",
+      "unwind_info_rva": "0x3009AF8",
+      "mnemonic": "imul",
+      "description": "the single path address probe uses the record stride",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "lookup_skip_test",
+      "site_rva": "0x1E4E8",
+      "site_va": "0x18001E4E8",
+      "function_rva": "0x1E360",
+      "unwind_info_rva": "0x3009AF8",
+      "mnemonic": "test",
+      "description": "the single path refuses a record with the skip bit set",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "call_one_buffer",
+      "site_rva": "0x1E4EF",
+      "site_va": "0x18001E4EF",
+      "function_rva": "0x1E360",
+      "unwind_info_rva": "0x3009AF8",
+      "mnemonic": "lea",
+      "description": "the out block of the single path is the orchestrator frame",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "call_one_index",
+      "site_rva": "0x1E4F4",
+      "site_va": "0x18001E4F4",
+      "function_rva": "0x1E360",
+      "unwind_info_rva": "0x3009AF8",
+      "mnemonic": "mov",
+      "description": "the single path passes the found record index",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "call_one",
+      "site_rva": "0x1E4F6",
+      "site_va": "0x18001E4F6",
+      "function_rva": "0x1E360",
+      "unwind_info_rva": "0x3009AF8",
+      "mnemonic": "call",
+      "description": "second direct call site of the redirect walker",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "call_one_result_dropped",
+      "site_rva": "0x1E4FB",
+      "site_va": "0x18001E4FB",
+      "function_rva": "0x1E360",
+      "unwind_info_rva": "0x3009AF8",
+      "mnemonic": "mov",
+      "description": "the single path discards any return value",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "call_one_before_patch",
+      "site_rva": "0x1E4FD",
+      "site_va": "0x18001E4FD",
+      "function_rva": "0x1E360",
+      "unwind_info_rva": "0x3009AF8",
+      "mnemonic": "call",
+      "description": "the inline patcher runs after the redirect on the single path",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "resume_open_second",
+      "site_rva": "0x1E526",
+      "site_va": "0x18001E526",
+      "function_rva": "0x1E360",
+      "unwind_info_rva": "0x3009AF8",
+      "mnemonic": "call",
+      "description": "the second resume pass opens each collected thread again",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "resume_call_second",
+      "site_rva": "0x1E537",
+      "site_va": "0x18001E537",
+      "function_rva": "0x1E360",
+      "unwind_info_rva": "0x3009AF8",
+      "mnemonic": "call",
+      "description": "the second resume pass is the only place a suspend is undone",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "out_block_free_heap",
+      "site_rva": "0x1E54E",
+      "site_va": "0x18001E54E",
+      "function_rva": "0x1E360",
+      "unwind_info_rva": "0x3009AF8",
+      "mnemonic": "mov",
+      "description": "the free uses the same shared process heap",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "out_block_free",
+      "site_rva": "0x1E55A",
+      "site_va": "0x18001E55A",
+      "function_rva": "0x1E360",
+      "unwind_info_rva": "0x3009AF8",
+      "mnemonic": "call",
+      "description": "the caller frees the identifier array from the shared heap",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "lock_drop",
+      "site_rva": "0x1E562",
+      "site_va": "0x18001E562",
+      "function_rva": "0x1E360",
+      "unwind_info_rva": "0x3009AF8",
+      "mnemonic": "xchg",
+      "description": "the orchestrator releases the shared once flag",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "window_anchor",
+      "site_rva": "0x1E61A",
+      "site_va": "0x18001E61A",
+      "function_rva": "0x1E590",
+      "unwind_info_rva": "0x300BCF8",
+      "mnemonic": "add",
+      "description": "the window cursor is biased by the anchor",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "window_length_agree",
+      "site_rva": "0x1E829",
+      "site_va": "0x18001E829",
+      "function_rva": "0x1E590",
+      "unwind_info_rva": "0x300BCF8",
+      "mnemonic": "cmp",
+      "description": "the decoded length must match the opcode derived length",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "window_advance",
+      "site_rva": "0x1E82D",
+      "site_va": "0x18001E82D",
+      "function_rva": "0x1E590",
+      "unwind_info_rva": "0x300BCF8",
+      "mnemonic": "add",
+      "description": "the window cursor advances by the instruction length",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "window_cap",
+      "site_rva": "0x1E82F",
+      "site_va": "0x18001E82F",
+      "function_rva": "0x1E590",
+      "unwind_info_rva": "0x300BCF8",
+      "mnemonic": "cmp",
+      "description": "the scanned window is capped",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "entry_count_load",
+      "site_rva": "0x1E834",
+      "site_va": "0x18001E834",
+      "function_rva": "0x1E590",
+      "unwind_info_rva": "0x300BCF8",
+      "mnemonic": "mov",
+      "description": "the builder keeps its entry counter in the descriptor",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "entry_cap",
+      "site_rva": "0x1E837",
+      "site_va": "0x18001E837",
+      "function_rva": "0x1E590",
+      "unwind_info_rva": "0x300BCF8",
+      "mnemonic": "cmp",
+      "description": "the builder refuses a ninth entry",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "entry_abandon",
+      "site_rva": "0x1E83B",
+      "site_va": "0x18001E83B",
+      "function_rva": "0x1E590",
+      "unwind_info_rva": "0x300BCF8",
+      "mnemonic": "jb",
+      "description": "storing continues while the counter is below the cap",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "match_list_store",
+      "site_rva": "0x1E844",
+      "site_va": "0x18001E844",
+      "function_rva": "0x1E590",
+      "unwind_info_rva": "0x300BCF8",
+      "mnemonic": "mov",
+      "description": "the instruction start offset is appended to the 0x28 list",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "target_list_store",
+      "site_rva": "0x1E849",
+      "site_va": "0x18001E849",
+      "function_rva": "0x1E590",
+      "unwind_info_rva": "0x300BCF8",
+      "mnemonic": "mov",
+      "description": "the window cursor past the instruction is appended to the 0x30 list",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "entry_count_store",
+      "site_rva": "0x1E850",
+      "site_va": "0x18001E850",
+      "function_rva": "0x1E590",
+      "unwind_info_rva": "0x300BCF8",
+      "mnemonic": "mov",
+      "description": "the entry counter is incremented",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "match_cursor_advance",
+      "site_rva": "0x1E85E",
+      "site_va": "0x18001E85E",
+      "function_rva": "0x1E590",
+      "unwind_info_rva": "0x300BCF8",
+      "mnemonic": "add",
+      "description": "the match cursor advances by the instruction length",
+      "ok": true,
+      "problem": null
+    },
+    {
+      "anchor": "target_cursor_capture",
+      "site_rva": "0x1E863",
+      "site_va": "0x18001E863",
+      "function_rva": "0x1E590",
+      "unwind_info_rva": "0x300BCF8",
+      "mnemonic": "mov",
+      "description": "the target cursor is captured after the advance",
+      "ok": true,
+      "problem": null
+    }
+  ],
+  "summary": {
+    "anchor_count": 145,
+    "anchor_failures": 0,
+    "mechanism_rows": 51,
+    "api_imports_in_range": 13,
+    "direct_call_sites": 2,
+    "address_taken": false,
+    "opens_per_thread": 2,
+    "suspends_in_subject": 1,
+    "resumes_in_subject": 0,
+    "resumes_in_caller": 2,
+    "context_fields_touched": 2,
+    "record_fields_read": 6,
+    "record_fields_written": 0,
+    "error_branches": 16,
+    "consistency_checks": 15,
+    "negative_findings": 6,
+    "open_questions": 4,
+    "record_instance_status": "OPEN",
+    "overall_confidence": "HIGH",
+    "note": "the control flow, the handle lifecycle, the context layout and the cross function ordering are fully determined statically; only the record instances and the activation of the orchestrator stay open"
+  }
+}

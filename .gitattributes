@@ -1,0 +1,4 @@
+# The reverse/ analysis corpus is byte-exact: every evidence file is hashed in
+# reverse/evidence/toolchain.json and cited by sha256 in the Markdown reports.
+# CRLF conversion on checkout would break those pins, so keep it LF everywhere.
+reverse/** text eol=lf

@@ -1,0 +1,694 @@
+{
+  "schema": "adhesive-dumper.pdata-stats/1",
+  "producer": {
+    "script": "reverse/scripts/pdata_map.py",
+    "script_sha256": "6772cfbfea0db607a626a91f5bcd4c5b2e1eb47d25a6e3c770b031e8c0f845b7",
+    "helper": "reverse/scripts/common.py",
+    "helper_sha256": "4aa2ceec1af88b9cd72e64274b779f4fadf6b62d491fead2c865c3fa99eca750",
+    "baseline": "reverse/evidence/baseline.json",
+    "baseline_sha256": "dc34cb50f1a002bae4f01e33064f35c0b28019fe7023add0988ab84fb8df67ea"
+  },
+  "specimen": {
+    "path": "reverse/adhesive.dll",
+    "name": "adhesive.dll",
+    "size": 53575264,
+    "sha256": "91cc0aa006d7315cb042c8fa8dca6c1e074a307bba7dcc9eb5509c8a7b81934e",
+    "sha256_matches_baseline": true,
+    "image_base": 6442450944,
+    "image_base_hex": "0x180000000",
+    "size_of_image": 53600256,
+    "size_of_image_hex": "0x331E000"
+  },
+  "parsing": {
+    "record_layout": "IMAGE_RUNTIME_FUNCTION { BeginAddress, EndAddress, UnwindInfoAddress }",
+    "record_size": 12,
+    "unwind_layout": "UNWIND_INFO { Version:3, Flags:5, SizeOfProlog, CountOfCodes, FrameRegister:4, FrameOffset:4 }",
+    "extension_offset_rule": "align_up(4 + 2 * CountOfCodes, 4)",
+    "flag_masks": {
+      "EHANDLER": 1,
+      "UHANDLER": 2,
+      "CHAININFO": 4
+    },
+    "csv_columns": [
+      "record_index",
+      "begin_address",
+      "begin_address_hex",
+      "end_address",
+      "end_address_hex",
+      "code_size",
+      "code_section",
+      "begin_raw",
+      "end_raw",
+      "record_raw",
+      "record_raw_hex",
+      "unwind_info_address",
+      "unwind_info_address_hex",
+      "unwind_info_raw",
+      "unwind_info_raw_hex",
+      "unwind_info_section",
+      "unwind_info_index",
+      "unwind_reference_count",
+      "unwind_first_record",
+      "unwind_version",
+      "unwind_flags",
+      "unwind_flag_names",
+      "unwind_size_of_prolog",
+      "unwind_count_of_codes",
+      "unwind_frame_register",
+      "unwind_frame_offset",
+      "unwind_extension_offset",
+      "unwind_info_end",
+      "unwind_code_size",
+      "has_handler",
+      "handler_rva",
+      "handler_rva_hex",
+      "handler_raw",
+      "handler_section",
+      "has_chain",
+      "chain_begin_address",
+      "chain_begin_address_hex",
+      "chain_end_address",
+      "chain_end_address_hex",
+      "chain_unwind_info_address",
+      "chain_depth",
+      "gap_before",
+      "gap_before_hex"
+    ],
+    "csv_column_notes": {
+      "begin_raw": "file offset of BeginAddress",
+      "end_raw": "file offset of EndAddress-1, the last covered byte",
+      "gap_before": "BeginAddress minus the previous record EndAddress, 0 when adjacent",
+      "record_index": "0-based position inside the exception directory",
+      "record_raw": "file offset of this 12-byte IMAGE_RUNTIME_FUNCTION entry",
+      "unwind_first_record": "lowest record_index pointing at this UNWIND_INFO",
+      "unwind_info_end": "RVA just past the decoded UNWIND_INFO, padding included",
+      "unwind_info_index": "1-based ordinal of the unique UNWIND_INFO, ascending by RVA",
+      "unwind_reference_count": "runtime functions pointing at this UNWIND_INFO"
+    }
+  },
+  "expected": {
+    "record_count": 142004,
+    "unique_unwind_info": 15533,
+    "flag_distribution_per_record": {
+      "0": 137037,
+      "1": 65,
+      "2": 45,
+      "3": 2694,
+      "4": 2163
+    },
+    "unwind_sections": {
+      ".rdata": 15533
+    },
+    "handler_records": 2804,
+    "chain_records": 2163,
+    "source": "reverse/adhesive-02-pe-layout-security.md#15"
+  },
+  "csv": {
+    "path": "reverse/evidence/pdata_functions.csv",
+    "row_count": 142004,
+    "row_order": "exception directory order, BeginAddress ascending",
+    "column_count": 43,
+    "encoding": "utf-8",
+    "bom": false,
+    "line_terminator": "\\n",
+    "sha256": "65ab914c1b38986fcb4bf07d55af0bdad16904a0dcd4271d73343ea7723d785b"
+  },
+  "exception_directory": {
+    "rva": 48582204,
+    "rva_hex": "0x2E54E3C",
+    "raw": 48576572,
+    "raw_hex": "0x2E5383C",
+    "section": ".rdata",
+    "size": 1704048,
+    "size_hex": "0x1A0070",
+    "record_size": 12,
+    "record_count": 142004,
+    "record_count_hex": "0x22AB4",
+    "record_remainder": 0,
+    "parsed_records": 142004
+  },
+  "ordering": {
+    "sorted_by_begin_address": true,
+    "out_of_order_pairs": 0,
+    "duplicate_records": 0,
+    "duplicate_begin_addresses": 0,
+    "overlapping_records": 0,
+    "begin_address_min": 4128,
+    "begin_address_min_hex": "0x1020",
+    "end_address_max": 46064821,
+    "end_address_max_hex": "0x2BEE4B5"
+  },
+  "unwind_info": {
+    "null_address_records": 0,
+    "unique_count": 15533,
+    "unmapped_records": 0,
+    "invalid_header_records": 0,
+    "end_outside_section_records": 0,
+    "rva_min": 48281164,
+    "rva_min_hex": "0x2E0B64C",
+    "rva_max": 51087840,
+    "rva_max_hex": "0x30B89E0",
+    "sections": {
+      ".rdata": 15533
+    },
+    "sections_per_record": {
+      ".rdata": 142004
+    },
+    "version_distribution": {
+      "1": 142004
+    },
+    "version_invalid_records": 0,
+    "reference_count_max": 93153,
+    "reference_count_median": 1,
+    "size_of_prolog_min": 0,
+    "size_of_prolog_max": 254,
+    "count_of_codes_min": 0,
+    "count_of_codes_max": 31
+  },
+  "unwind_flags": {
+    "value_distribution_per_record": {
+      "0": 137037,
+      "1": 65,
+      "2": 45,
+      "3": 2694,
+      "4": 2163
+    },
+    "value_distribution_per_unique_info": {
+      "0": 10725,
+      "1": 65,
+      "2": 45,
+      "3": 2654,
+      "4": 2044
+    },
+    "name_distribution_per_unique_info": {
+      "CHAININFO": 2044,
+      "EHANDLER": 2719,
+      "UHANDLER": 2699
+    },
+    "name_distribution_per_record": {
+      "CHAININFO": 2163,
+      "EHANDLER": 2759,
+      "UHANDLER": 2739
+    },
+    "records_with_handler": 2804,
+    "records_with_chain": 2163
+  },
+  "handlers": {
+    "record_count": 2804,
+    "unique_handler_rvas": 32,
+    "rva_min": 44515520,
+    "rva_min_hex": "0x2A740C0",
+    "rva_max": 46063136,
+    "rva_max_hex": "0x2BEDE20",
+    "sections": {
+      ".text": 2804
+    }
+  },
+  "chains": {
+    "record_count": 2163,
+    "invalid_chained_entries": 0,
+    "chained_range_above_record_begin": 3,
+    "depth_max": 4,
+    "unique_infos_by_depth": {
+      "1": 1736,
+      "2": 273,
+      "3": 29,
+      "4": 6
+    }
+  },
+  "text_coverage": {
+    "section": ".text",
+    "section_present": true,
+    "section_virtual_address": 4096,
+    "section_virtual_address_hex": "0x1000",
+    "section_virtual_size": 46060725,
+    "section_virtual_size_hex": "0x2BED4B5",
+    "section_raw_size": 46061056,
+    "section_raw_size_hex": "0x2BED600",
+    "section_virtual_end": 46064821,
+    "section_virtual_end_hex": "0x2BEE4B5",
+    "section_raw_end_rva": 46065152,
+    "section_raw_end_rva_hex": "0x2BEE600",
+    "records_by_section": {
+      ".text": 142004
+    },
+    "records_outside_text": 0,
+    "records_outside_size_of_image": 0,
+    "covered_bytes": 37200748,
+    "covered_hex": "0x237A36C",
+    "uncovered_bytes": 8859945,
+    "uncovered_hex": "0x873129",
+    "span_bytes": 46060693,
+    "span_hex": "0x2BED495",
+    "coverage_of_span_percent": 80.764629,
+    "coverage_of_virtual_size_percent": 80.764573,
+    "leading_gap": 32,
+    "leading_gap_hex": "0x20",
+    "trailing_gap": 331,
+    "trailing_gap_hex": "0x14B",
+    "bytes_beyond_declared_virtual_size": 0,
+    "bytes_beyond_declared_virtual_size_hex": "0x0",
+    "code_size_min": 1,
+    "code_size_max": 1279205
+  },
+  "gaps": {
+    "count": 137103,
+    "total_bytes": 8859945,
+    "total_hex": "0x873129",
+    "min_bytes": 1,
+    "min_hex": "0x1",
+    "max_bytes": 175312,
+    "max_hex": "0x2ACD0",
+    "histogram": {
+      "0x1": 2542,
+      "0x2..0xF": 37083,
+      "0x10..0xFF": 96436,
+      "0x100..0xFFF": 810,
+      "0x1000..0xFFFF": 229,
+      "0x10000..0xFFFFF": 3,
+      "0x1000000+": 0
+    },
+    "largest": [
+      {
+        "offset": 18042624,
+        "offset_hex": "0x1134F00",
+        "previous_end": 17867312,
+        "previous_end_hex": "0x110A230",
+        "size": 175312,
+        "size_hex": "0x2ACD0"
+      },
+      {
+        "offset": 26783840,
+        "offset_hex": "0x198B060",
+        "previous_end": 26685639,
+        "previous_end_hex": "0x19730C7",
+        "size": 98201,
+        "size_hex": "0x17F99"
+      },
+      {
+        "offset": 9548608,
+        "offset_hex": "0x91B340",
+        "previous_end": 9479232,
+        "previous_end_hex": "0x90A440",
+        "size": 69376,
+        "size_hex": "0x10F00"
+      },
+      {
+        "offset": 20650080,
+        "offset_hex": "0x13B1860",
+        "previous_end": 20606492,
+        "previous_end_hex": "0x13A6E1C",
+        "size": 43588,
+        "size_hex": "0xAA44"
+      },
+      {
+        "offset": 15414720,
+        "offset_hex": "0xEB35C0",
+        "previous_end": 15372688,
+        "previous_end_hex": "0xEA9190",
+        "size": 42032,
+        "size_hex": "0xA430"
+      },
+      {
+        "offset": 13505232,
+        "offset_hex": "0xCE12D0",
+        "previous_end": 13463275,
+        "previous_end_hex": "0xCD6EEB",
+        "size": 41957,
+        "size_hex": "0xA3E5"
+      },
+      {
+        "offset": 13317600,
+        "offset_hex": "0xCB35E0",
+        "previous_end": 13276805,
+        "previous_end_hex": "0xCA9685",
+        "size": 40795,
+        "size_hex": "0x9F5B"
+      },
+      {
+        "offset": 33355376,
+        "offset_hex": "0x1FCF670",
+        "previous_end": 33314895,
+        "previous_end_hex": "0x1FC584F",
+        "size": 40481,
+        "size_hex": "0x9E21"
+      },
+      {
+        "offset": 16024080,
+        "offset_hex": "0xF48210",
+        "previous_end": 15984175,
+        "previous_end_hex": "0xF3E62F",
+        "size": 39905,
+        "size_hex": "0x9BE1"
+      },
+      {
+        "offset": 10106192,
+        "offset_hex": "0x9A3550",
+        "previous_end": 10067780,
+        "previous_end_hex": "0x999F44",
+        "size": 38412,
+        "size_hex": "0x960C"
+      },
+      {
+        "offset": 11167440,
+        "offset_hex": "0xAA66D0",
+        "previous_end": 11129355,
+        "previous_end_hex": "0xA9D20B",
+        "size": 38085,
+        "size_hex": "0x94C5"
+      },
+      {
+        "offset": 23786368,
+        "offset_hex": "0x16AF380",
+        "previous_end": 23751486,
+        "previous_end_hex": "0x16A6B3E",
+        "size": 34882,
+        "size_hex": "0x8842"
+      },
+      {
+        "offset": 2202480,
+        "offset_hex": "0x219B70",
+        "previous_end": 2167715,
+        "previous_end_hex": "0x2113A3",
+        "size": 34765,
+        "size_hex": "0x87CD"
+      },
+      {
+        "offset": 32752640,
+        "offset_hex": "0x1F3C400",
+        "previous_end": 32720789,
+        "previous_end_hex": "0x1F34795",
+        "size": 31851,
+        "size_hex": "0x7C6B"
+      },
+      {
+        "offset": 31673552,
+        "offset_hex": "0x1E34CD0",
+        "previous_end": 31644944,
+        "previous_end_hex": "0x1E2DD10",
+        "size": 28608,
+        "size_hex": "0x6FC0"
+      },
+      {
+        "offset": 947744,
+        "offset_hex": "0xE7620",
+        "previous_end": 920352,
+        "previous_end_hex": "0xE0B20",
+        "size": 27392,
+        "size_hex": "0x6B00"
+      },
+      {
+        "offset": 1046208,
+        "offset_hex": "0xFF6C0",
+        "previous_end": 1019227,
+        "previous_end_hex": "0xF8D5B",
+        "size": 26981,
+        "size_hex": "0x6965"
+      },
+      {
+        "offset": 19403872,
+        "offset_hex": "0x1281460",
+        "previous_end": 19378526,
+        "previous_end_hex": "0x127B15E",
+        "size": 25346,
+        "size_hex": "0x6302"
+      },
+      {
+        "offset": 12273024,
+        "offset_hex": "0xBB4580",
+        "previous_end": 12248791,
+        "previous_end_hex": "0xBAE6D7",
+        "size": 24233,
+        "size_hex": "0x5EA9"
+      },
+      {
+        "offset": 19510944,
+        "offset_hex": "0x129B6A0",
+        "previous_end": 19486843,
+        "previous_end_hex": "0x129587B",
+        "size": 24101,
+        "size_hex": "0x5E25"
+      },
+      {
+        "offset": 14405168,
+        "offset_hex": "0xDBCE30",
+        "previous_end": 14381612,
+        "previous_end_hex": "0xDB722C",
+        "size": 23556,
+        "size_hex": "0x5C04"
+      },
+      {
+        "offset": 14236576,
+        "offset_hex": "0xD93BA0",
+        "previous_end": 14213117,
+        "previous_end_hex": "0xD8DFFD",
+        "size": 23459,
+        "size_hex": "0x5BA3"
+      },
+      {
+        "offset": 1337760,
+        "offset_hex": "0x1469A0",
+        "previous_end": 1314577,
+        "previous_end_hex": "0x140F11",
+        "size": 23183,
+        "size_hex": "0x5A8F"
+      },
+      {
+        "offset": 29587984,
+        "offset_hex": "0x1C37A10",
+        "previous_end": 29565360,
+        "previous_end_hex": "0x1C321B0",
+        "size": 22624,
+        "size_hex": "0x5860"
+      }
+    ]
+  },
+  "validation": {
+    "check_count": 37,
+    "failed_count": 0,
+    "checks": [
+      {
+        "check": "specimen.sha256_matches_baseline",
+        "expected": "91cc0aa006d7315cb042c8fa8dca6c1e074a307bba7dcc9eb5509c8a7b81934e",
+        "actual": "91cc0aa006d7315cb042c8fa8dca6c1e074a307bba7dcc9eb5509c8a7b81934e",
+        "ok": "true"
+      },
+      {
+        "check": "record.count",
+        "expected": "142004",
+        "actual": "142004",
+        "ok": "true"
+      },
+      {
+        "check": "record.remainder",
+        "expected": "0",
+        "actual": "0",
+        "ok": "true"
+      },
+      {
+        "check": "record.parsed",
+        "expected": "142004",
+        "actual": "142004",
+        "ok": "true"
+      },
+      {
+        "check": "record.sorted_by_begin",
+        "expected": "true",
+        "actual": "true",
+        "ok": "true"
+      },
+      {
+        "check": "record.duplicates",
+        "expected": "0",
+        "actual": "0",
+        "ok": "true"
+      },
+      {
+        "check": "record.overlaps",
+        "expected": "0",
+        "actual": "0",
+        "ok": "true"
+      },
+      {
+        "check": "record.nonempty_range",
+        "expected": "true",
+        "actual": "true",
+        "ok": "true"
+      },
+      {
+        "check": "record.outside_size_of_image",
+        "expected": "0",
+        "actual": "0",
+        "ok": "true"
+      },
+      {
+        "check": "unwind.null_address",
+        "expected": "0",
+        "actual": "0",
+        "ok": "true"
+      },
+      {
+        "check": "unwind.unique",
+        "expected": "15533",
+        "actual": "15533",
+        "ok": "true"
+      },
+      {
+        "check": "unwind.sections",
+        "expected": "{'.rdata': 15533}",
+        "actual": "{'.rdata': 15533}",
+        "ok": "true"
+      },
+      {
+        "check": "unwind.version_invalid",
+        "expected": "0",
+        "actual": "0",
+        "ok": "true"
+      },
+      {
+        "check": "unwind.unmapped",
+        "expected": "0",
+        "actual": "0",
+        "ok": "true"
+      },
+      {
+        "check": "unwind.end_outside_section",
+        "expected": "0",
+        "actual": "0",
+        "ok": "true"
+      },
+      {
+        "check": "unwind.invalid_header",
+        "expected": "0",
+        "actual": "0",
+        "ok": "true"
+      },
+      {
+        "check": "flags.distribution_per_record",
+        "expected": "{'0': 137037, '1': 65, '2': 45, '3': 2694, '4': 2163}",
+        "actual": "{'0': 137037, '1': 65, '2': 45, '3': 2694, '4': 2163}",
+        "ok": "true"
+      },
+      {
+        "check": "handlers.records",
+        "expected": "2804",
+        "actual": "2804",
+        "ok": "true"
+      },
+      {
+        "check": "handlers.sections",
+        "expected": "{'.text': 2804}",
+        "actual": "{'.text': 2804}",
+        "ok": "true"
+      },
+      {
+        "check": "chains.records",
+        "expected": "2163",
+        "actual": "2163",
+        "ok": "true"
+      },
+      {
+        "check": "chains.invalid_entries",
+        "expected": "0",
+        "actual": "0",
+        "ok": "true"
+      },
+      {
+        "check": "text.records",
+        "expected": "{'.text': 142004}",
+        "actual": "{'.text': 142004}",
+        "ok": "true"
+      },
+      {
+        "check": "text.records_outside",
+        "expected": "0",
+        "actual": "0",
+        "ok": "true"
+      },
+      {
+        "check": "text.covered_plus_gaps",
+        "expected": "46060693",
+        "actual": "46060693",
+        "ok": "true"
+      },
+      {
+        "check": "text.covered_within_span",
+        "expected": "true",
+        "actual": "true",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.record_count",
+        "expected": "142004",
+        "actual": "142004",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.duplicate_records",
+        "expected": "0",
+        "actual": "0",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.overlapping_records",
+        "expected": "0",
+        "actual": "0",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.begin_address_min",
+        "expected": "4128",
+        "actual": "4128",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.end_address_max",
+        "expected": "46064821",
+        "actual": "46064821",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.unwind_info_address_null",
+        "expected": "0",
+        "actual": "0",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.unique_unwind_infos",
+        "expected": "15533",
+        "actual": "15533",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.unwind_info_rva_min",
+        "expected": "48281164",
+        "actual": "48281164",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.unwind_info_rva_max",
+        "expected": "51087840",
+        "actual": "51087840",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.unwind_info_sections",
+        "expected": "{'.rdata': 15533}",
+        "actual": "{'.rdata': 15533}",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.unwind_flag_value_distribution",
+        "expected": "{'0': 137037, '1': 65, '2': 45, '3': 2694, '4': 2163}",
+        "actual": "{'0': 137037, '1': 65, '2': 45, '3': 2694, '4': 2163}",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.unwind_flag_distribution_per_unique_info",
+        "expected": "{'EHANDLER': 2719, 'UHANDLER': 2699, 'CHAININFO': 2044}",
+        "actual": "{'CHAININFO': 2044, 'EHANDLER': 2719, 'UHANDLER': 2699}",
+        "ok": "true"
+      }
+    ]
+  }
+}

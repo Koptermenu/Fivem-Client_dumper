@@ -1,0 +1,2666 @@
+{
+  "schema": "adhesive-dumper.pdb-correlation/1",
+  "scope": {
+    "question": "which reproducible keys identify this build, and which of them are unavailable",
+    "specimen": "reverse/adhesive.dll",
+    "analysis": "static file bytes only",
+    "specimen_executed": false,
+    "specimen_loaded": false,
+    "network_used": false,
+    "authenticator_used": false,
+    "authenticator_skipped_reason": "chain validation can trigger revocation traffic; the run stays offline, so only bytes the signature already contains are compared",
+    "emits_bypass_or_patch_material": false,
+    "related_reports": [
+      "reverse/adhesive-01-identity-build-signature.md",
+      "reverse/adhesive-02-pe-layout-security.md",
+      "reverse/adhesive-03-imports-exports.md",
+      "reverse/adhesive-12-risk-methodology-open-questions.md"
+    ]
+  },
+  "generator": {
+    "script": "reverse/scripts/pdb_correlate.py",
+    "schema": "adhesive-dumper.pdb-correlation/1",
+    "python": "3.14.7",
+    "pefile": "2024.8.26",
+    "determinism": {
+      "json_indent": 2,
+      "json_ensure_ascii": false,
+      "sort_keys": false,
+      "collection_order": "explicitly sorted",
+      "text_encoding": "utf-8",
+      "bom": false,
+      "line_terminator": "\\n",
+      "trailing_newline": true,
+      "wall_clock_values": false
+    }
+  },
+  "specimen": {
+    "path": "reverse/adhesive.dll",
+    "size": 53575264,
+    "size_hex": "0x3317E60",
+    "md5": "2e24179cc01167e50190fdd3bcf6939a",
+    "sha1": "ae5627c6aab786095a816fc43f0e4ce04cee8829",
+    "sha256": "91cc0aa006d7315cb042c8fa8dca6c1e074a307bba7dcc9eb5509c8a7b81934e"
+  },
+  "pdb": {
+    "debug_directory": {
+      "rva": 48540072,
+      "rva_hex": "0x2E4A9A8",
+      "raw": 48534440,
+      "raw_hex": "0x2E493A8",
+      "size": 28,
+      "size_hex": "0x1C",
+      "entry_size": 28,
+      "entry_count": 1
+    },
+    "debug_entries": [
+      {
+        "index": 0,
+        "characteristics": 0,
+        "time_date_stamp": 1789139178,
+        "time_date_stamp_hex": "0x6AA418EA",
+        "time_date_stamp_utc": "2026-09-11 15:06:18 UTC",
+        "version": "0.0",
+        "type": 2,
+        "type_name": "IMAGE_DEBUG_TYPE_CODEVIEW",
+        "data_size": 96,
+        "data_size_hex": "0x60",
+        "address_of_raw_data": 48540100,
+        "address_of_raw_data_hex": "0x2E4A9C4",
+        "pointer_to_raw_data": 48534468,
+        "pointer_to_raw_data_hex": "0x2E493C4",
+        "payload_sha256": "7ae4cc72a5505af04ffe584e1e26aa38a8a0190880e79979cb576e426d7b9f22"
+      }
+    ],
+    "codeview_entry_count": 1,
+    "codeview_is_unique": true,
+    "codeview": {
+      "debug_entry_index": 0,
+      "raw": 48534468,
+      "raw_hex": "0x2E493C4",
+      "rva": 48540100,
+      "rva_hex": "0x2E4A9C4",
+      "size": 96,
+      "signature": "RSDS",
+      "signature_is_rsds": true,
+      "guid": "cb927e36-3f3d-8d77-4c4c-44205044422e",
+      "guid_upper": "CB927E36-3F3D-8D77-4C4C-44205044422E",
+      "guid_bytes_le_hex": "367e92cb3d3f778d4c4c44205044422e",
+      "guid_raw": 48534472,
+      "guid_raw_hex": "0x2E493C8",
+      "age": 1,
+      "age_hex": "0x1",
+      "age_raw": 48534488,
+      "age_raw_hex": "0x2E493D8",
+      "debug_id": "CB927E363F3D8D774C4C44205044422E1",
+      "pdb_path": "C:\\gl\\builds\\cfx-fivem-0\\.build-cache\\bin\\five\\release\\dbg\\adhesive.pdb",
+      "pdb_path_sha256": "408077d29514dd7e9502ca8a839d9a89ce4e4d09dc92de3df6904fd8453448e5",
+      "pdb_path_bytes": 71,
+      "pdb_path_raw": 48534492,
+      "pdb_path_raw_hex": "0x2E493DC",
+      "pdb_path_rva": 48540124,
+      "pdb_path_rva_hex": "0x2E4A9DC",
+      "pdb_match_key": "929c1f6356bf1005b890f22897fc87a4fb3b5d1da819cfb023f89ffe9bdf5df0"
+    },
+    "pdb_availability": {
+      "search_root": "repository, excluding .git, build and .zcode",
+      "pdb_count": 4,
+      "pdbs": [
+        {
+          "path": "Bin/citizen/clr2/lib/mono/4.5/CitizenFX.Core.pdb",
+          "size": 146060,
+          "basename": "citizenfx.core.pdb"
+        },
+        {
+          "path": "Bin/citizen/clr2/lib/mono/4.5/ref/CitizenFX.Core.Server.pdb",
+          "size": 41356,
+          "basename": "citizenfx.core.server.pdb"
+        },
+        {
+          "path": "Bin/citizen/clr2/lib/mono/4.5/v2/CitizenFX.Core.pdb",
+          "size": 95916,
+          "basename": "citizenfx.core.pdb"
+        },
+        {
+          "path": "Bin/citizen/clr2/lib/mono/4.5/v2/CitizenFX.Server.pdb",
+          "size": 46796,
+          "basename": "citizenfx.server.pdb"
+        }
+      ],
+      "adhesive_pdb_present": false,
+      "adhesive_pdb_expected_name": "adhesive.pdb",
+      "symbol_resolution_available": false,
+      "symbol_resolution_reason": "no PDB matching the embedded GUID and age exists in the workspace, so no function, type or source line name can be attached to any address in this evidence set"
+    }
+  },
+  "linker": {
+    "linker_version_field": "14.0",
+    "linker_version_raw": "0x92",
+    "linker_version_semantics": "the PE field is an MSVC compatible value that lld-link has written for years; it is not a release number and it is overridable at link time",
+    "coff_timestamp_raw": "0x80",
+    "debug_entry_timestamp_matches_coff": true,
+    "pe_timestamp": {
+      "value": 1789139178,
+      "value_hex": "0x6AA418EA",
+      "utc": "2026-09-11 15:06:18 UTC",
+      "reproducible_build_note": "the COFF timestamp is writable by the linker, so it is a comparison value, not a provenance proof"
+    },
+    "build_id": {
+      "note_style_sections": [],
+      "gnu_build_id_note_section_present": false,
+      "probes": [
+        {
+          "probe": "LLD_upper",
+          "needle": "LLD",
+          "hit_count": 1,
+          "reported_hits": 1,
+          "hits": [
+            {
+              "raw": 48534480,
+              "raw_hex": "0x2E493D0",
+              "region": "inside_pdb_guid_field",
+              "printable_run": "LLD PDB.",
+              "context_hex": "367e92cb3d3f778d4c4c44205044422e01000000433a5c676c5c6275696c6473"
+            }
+          ],
+          "is_identity_marker": false
+        },
+        {
+          "probe": "lld_lower",
+          "needle": "lld",
+          "hit_count": 8,
+          "reported_hits": 8,
+          "hits": [
+            {
+              "raw": 48310944,
+              "raw_hex": "0x2E12AA0",
+              "region": "file_body",
+              "printable_run": "%lld",
+              "context_hex": "732d666f6c6400256c6c64007969656c6400646f5f6669656c64007061727365"
+            },
+            {
+              "raw": 48359276,
+              "raw_hex": "0x2E1E76C",
+              "region": "file_body",
+              "printable_run": "lldt",
+              "context_hex": "736c6474000000006c6c64740000000073696474000000006c69647400000000"
+            },
+            {
+              "raw": 48360614,
+              "raw_hex": "0x2E1ECA6",
+              "region": "file_body",
+              "printable_run": "pslldq",
+              "context_hex": "726c6471000070736c6c64710000767061646471000070616464710000006364"
+            },
+            {
+              "raw": 48363135,
+              "raw_hex": "0x2E1F67F",
+              "region": "file_body",
+              "printable_run": "pmulld",
+              "context_hex": "6c64000000706d756c6c6400007670736c6c64000070736c6c6400000066696c"
+            },
+            {
+              "raw": 48363143,
+              "raw_hex": "0x2E1F687",
+              "region": "file_body",
+              "printable_run": "vpslld",
+              "context_hex": "6c6c6400007670736c6c64000070736c6c6400000066696c640000000073686c"
+            },
+            {
+              "raw": 48363150,
+              "raw_hex": "0x2E1F68E",
+              "region": "file_body",
+              "printable_run": "pslld",
+              "context_hex": "736c6c64000070736c6c6400000066696c640000000073686c6400000000666c"
+            },
+            {
+              "raw": 48409715,
+              "raw_hex": "0x2E2AC73",
+              "region": "file_body",
+              "printable_run": "vpslldq",
+              "context_hex": "726c6471007670736c6c6471007670756e70636b6c647100000000000070756e"
+            },
+            {
+              "raw": 48459052,
+              "raw_hex": "0x2E36D2C",
+              "region": "file_body",
+              "printable_run": "vpmulld",
+              "context_hex": "6c64000076706d756c6c640063686172616374657269737469632d74776f2d66"
+            }
+          ],
+          "is_identity_marker": false
+        },
+        {
+          "probe": "lld-link",
+          "needle": "lld-link",
+          "hit_count": 0,
+          "reported_hits": 0,
+          "hits": [],
+          "is_identity_marker": true
+        },
+        {
+          "probe": "lld_link_flag",
+          "needle": "--lld-link",
+          "hit_count": 0,
+          "reported_hits": 0,
+          "hits": [],
+          "is_identity_marker": true
+        },
+        {
+          "probe": "GNU_note",
+          "needle": "GNU\u0000",
+          "hit_count": 0,
+          "reported_hits": 0,
+          "hits": [],
+          "is_identity_marker": false
+        },
+        {
+          "probe": "build-id_dash",
+          "needle": "build-id",
+          "hit_count": 0,
+          "reported_hits": 0,
+          "hits": [],
+          "is_identity_marker": false
+        },
+        {
+          "probe": "build_id_underscore",
+          "needle": "build_id",
+          "hit_count": 0,
+          "reported_hits": 0,
+          "hits": [],
+          "is_identity_marker": false
+        },
+        {
+          "probe": "note_section",
+          "needle": ".note",
+          "hit_count": 0,
+          "reported_hits": 0,
+          "hits": [],
+          "is_identity_marker": false
+        },
+        {
+          "probe": "llvm_lower",
+          "needle": "llvm",
+          "hit_count": 0,
+          "reported_hits": 0,
+          "hits": [],
+          "is_identity_marker": true
+        },
+        {
+          "probe": "clang",
+          "needle": "clang",
+          "hit_count": 0,
+          "reported_hits": 0,
+          "hits": [],
+          "is_identity_marker": true
+        },
+        {
+          "probe": "clang-cl",
+          "needle": "clang-cl",
+          "hit_count": 0,
+          "reported_hits": 0,
+          "hits": [],
+          "is_identity_marker": true
+        },
+        {
+          "probe": "visual_studio",
+          "needle": "Visual Studio",
+          "hit_count": 0,
+          "reported_hits": 0,
+          "hits": [],
+          "is_identity_marker": true
+        },
+        {
+          "probe": "msvc_token",
+          "needle": "MSVC",
+          "hit_count": 1,
+          "reported_hits": 1,
+          "hits": [
+            {
+              "raw": 48576078,
+              "raw_hex": "0x2E5364E",
+              "region": "file_body",
+              "printable_run": "MSVCP140.dll",
+              "context_hex": "6976652e646c6c004d535643503134302e646c6c00434f4e4352543134302e64"
+            }
+          ],
+          "is_identity_marker": false
+        },
+        {
+          "probe": "link_dot_exe",
+          "needle": "link.exe",
+          "hit_count": 0,
+          "reported_hits": 0,
+          "hits": [],
+          "is_identity_marker": false
+        }
+      ],
+      "identity_marker_found": false,
+      "lld_build_id_available": false,
+      "lld_build_id_reason": "PE/COFF has no standard build id field and lld-link emits none for PE targets, so no linker identity record survives here; the only uppercase `LLD ` byte occurrence sits inside the CodeView GUID field, which is a GUID byte coincidence, not a marker"
+    },
+    "rich_header": {
+      "e_lfanew": 120,
+      "e_lfanew_hex": "0x78",
+      "scan_region": {
+        "start": 64,
+        "start_hex": "0x40",
+        "end": 120,
+        "end_hex": "0x78",
+        "size": 56
+      },
+      "pre_pe_region_sha256": "bbec96f83a7ebfe16114934dab38b796ae296bfcc8ff6c8bc97511f872dec86d",
+      "pre_pe_region_size": 120,
+      "marker_offsets": {
+        "DanS": [],
+        "Rich": []
+      },
+      "marker_hit_count": {
+        "DanS": 0,
+        "Rich": 0
+      },
+      "present": false,
+      "rich_header_present": false,
+      "xor_key": null,
+      "xor_key_hex": null,
+      "consequence": "no Rich build id, no compiler or product tuple and no Visual Studio toolchain version is recoverable from this specimen"
+    },
+    "retpolne": {
+      "present": true,
+      "raw": 53500416,
+      "raw_hex": "0x3305A00",
+      "rva": 53526528,
+      "rva_hex": "0x330C000",
+      "virtual_size": 92,
+      "virtual_size_hex": "0x5C",
+      "raw_size": 512,
+      "raw_size_hex": "0x200",
+      "characteristics": 0,
+      "characteristics_hex": "0x0",
+      "tag": "RetpolineV1",
+      "tag_count": 4,
+      "tag_offsets_in_section": [
+        "0x0",
+        "0x10",
+        "0x2C",
+        "0x40"
+      ],
+      "tag_offsets_in_file": [
+        "0x3305A00",
+        "0x3305A10",
+        "0x3305A2C",
+        "0x3305A40"
+      ],
+      "tag_delta_in_section": [
+        "0x10",
+        "0x1C",
+        "0x14"
+      ],
+      "nonzero_content_end": 53500505,
+      "nonzero_content_end_hex": "0x3305A59",
+      "nonzero_content_size": 89,
+      "trailing_zero_bytes": 423,
+      "dwords_le": [
+        "0x70746552",
+        "0x6E696C6F",
+        "0x315665",
+        "0x0",
+        "0x70746552",
+        "0x6E696C6F",
+        "0x315665",
+        "0x10",
+        "0x3",
+        "0x4",
+        "0x10",
+        "0x70746552",
+        "0x6E696C6F",
+        "0x315665",
+        "0x0",
+        "0x0",
+        "0x70746552",
+        "0x6E696C6F",
+        "0x315665",
+        "0x10",
+        "0x3",
+        "0x8",
+        "0x10"
+      ],
+      "content_sha256": "306c626270dca9de0ba8886ce5467edcbdd6c07befb575c28239604f044ef12b",
+      "full_raw_sha256": "1254c61e63f786c1e16364cfa840c08b86aafb9c3c0202648e0f66171ab06c56",
+      "interpretation": "LLD COFF retpoline metadata marker. Only the byte positions and words are reported here; the record layout is not decoded, so the tag count is a raw fact and not a record count."
+    },
+    "lld_release_identified": false,
+    "lld_release_reason": "no linker identity record survives in the image; see build_id.lld_build_id_reason and rich_header.consequence"
+  },
+  "identity_resources": {
+    "version": {
+      "present": true,
+      "type_id": 16,
+      "name_id": 1,
+      "rva": 53555456,
+      "rva_hex": "0x3313100",
+      "raw": 53523200,
+      "raw_hex": "0x330B300",
+      "size": 736,
+      "size_hex": "0x2E0",
+      "payload_sha256": "ff5386d98671bbe900a4e9771328cfb7b59b2b6025cbadee0c3f2042c223cda1",
+      "fixed_file_info": {
+        "dw_signature": "0xFEEF04BD",
+        "dw_signature_is_feef04bd": true,
+        "dw_struct_version": "1.0",
+        "file_version_ms": 65536,
+        "file_version_ms_hex": "0x10000",
+        "file_version_ls": 36109,
+        "file_version_ls_hex": "0x8D0D",
+        "product_version_ms": 65536,
+        "product_version_ms_hex": "0x10000",
+        "product_version_ls": 36109,
+        "product_version_ls_hex": "0x8D0D",
+        "dw_file_flags_mask": "0x3F",
+        "dw_file_flags": "0x0",
+        "dw_file_os": "0x40004",
+        "dw_file_type": 1,
+        "dw_file_type_name": "VFT_APP",
+        "dw_file_subtype": "0x0",
+        "dw_file_date_ms": "0x0",
+        "dw_file_date_ls": "0x0"
+      },
+      "string_table": {
+        "CompanyName": "Cfx.re",
+        "FileDescription": "adhesive for FiveM",
+        "FileVersion": "1.0.0.36109",
+        "InternalName": "adhesive",
+        "LegalCopyright": "(C) 2015- CitizenFX Collective",
+        "OriginalFilename": "adhesive.dll",
+        "ProductName": "CitizenFX",
+        "ProductVersion": "1.0.0.36109"
+      },
+      "translations": [
+        "0x0409",
+        "0x04B0"
+      ],
+      "file_version_from_fixed_info": "1.0.0.36109",
+      "file_version_from_string_table": "1.0.0.36109",
+      "product_version_from_string_table": "1.0.0.36109",
+      "string_file_version_matches_fixed_info": true
+    },
+    "fxcomponent": {
+      "present": true,
+      "type_id": 115,
+      "name": "FXCOMPONENT",
+      "rva": 53556192,
+      "rva_hex": "0x33133E0",
+      "raw": 53523936,
+      "raw_hex": "0x330B5E0",
+      "size": 361,
+      "size_hex": "0x169",
+      "payload_sha256": "73c2ab07c65dc8a94faeaeb00f307bfb43773c32c8036f8420e873ed9affa05e",
+      "parsed": true,
+      "component_name": "adhesive",
+      "component_version": "0.1.0",
+      "provides": [],
+      "dependencies": [
+        "fx[2]",
+        "rage:device",
+        "gta:core",
+        "gta:streaming",
+        "vfs:core",
+        "net",
+        "citizen:scripting:core",
+        "citizen:resources:gta",
+        "citizen:legacy-net:resources",
+        "scripting",
+        "legitimacy",
+        "glue",
+        "vendor:openssl_ssl",
+        "vendor:imgui"
+      ],
+      "dependency_count": 14,
+      "dependencies_sorted": [
+        "citizen:legacy-net:resources",
+        "citizen:resources:gta",
+        "citizen:scripting:core",
+        "fx[2]",
+        "glue",
+        "gta:core",
+        "gta:streaming",
+        "legitimacy",
+        "net",
+        "rage:device",
+        "scripting",
+        "vendor:imgui",
+        "vendor:openssl_ssl",
+        "vfs:core"
+      ],
+      "dependencies_sha256": "67dff41515ad9eb164af3b3c21804560357ab3139f2984ae8a7e23ca596542e3",
+      "component_key_sha256": "3f427c6c2b88c3a86c4ab1851b095c10c690dc2903407ae03694ea812e47a158"
+    },
+    "company_name": "Cfx.re",
+    "file_description": "adhesive for FiveM",
+    "internal_name": "adhesive",
+    "original_filename": "adhesive.dll",
+    "product_name": "CitizenFX",
+    "legal_copyright": "(C) 2015- CitizenFX Collective",
+    "file_version": "1.0.0.36109",
+    "product_version": "1.0.0.36109",
+    "component_name": "adhesive",
+    "component_version": "0.1.0",
+    "version_layers_note": "the PE version and the FXCOMPONENT version are separate resource types and are not cross-linked in the specimen",
+    "resource_entry_count": 3,
+    "resource_leaf_sha256": {
+      "16/1/1033": "ff5386d98671bbe900a4e9771328cfb7b59b2b6025cbadee0c3f2042c223cda1",
+      "24/2/1033": "6f88bc7cb02ccb2dbc26b5f4ce53e355b331e31bb920b2ba8cbbcd1b5d4cd5a0",
+      "115/None/1033": "73c2ab07c65dc8a94faeaeb00f307bfb43773c32c8036f8420e873ed9affa05e"
+    }
+  },
+  "imports_exports": {
+    "import_descriptor_count": 42,
+    "import_symbol_count": 628,
+    "import_symbols_sha256": "1d36e13374c427dc482593545110a2762438150bc70a43c4aa1a19c22858e03c",
+    "delay_import_descriptor_count": 1,
+    "delay_import_symbol_count": 1,
+    "delay_import_symbols_sha256": "18d9f0cf6b9b8d45adf3006071ff0b5f330ab2d055fa310236b2d6510089722d",
+    "total_descriptor_count": 43,
+    "total_symbol_count": 629,
+    "total_symbols_sha256": "560b1668319b2e2f43ef6456bb2a22d7697bb950cad7d000ffe58337fea3aee9",
+    "ordinal_import_keys": [
+      "WS2_32.dll!#1",
+      "WS2_32.dll!#10",
+      "WS2_32.dll!#111",
+      "WS2_32.dll!#112",
+      "WS2_32.dll!#115",
+      "WS2_32.dll!#116",
+      "WS2_32.dll!#13",
+      "WS2_32.dll!#14",
+      "WS2_32.dll!#15",
+      "WS2_32.dll!#151",
+      "WS2_32.dll!#16",
+      "WS2_32.dll!#18",
+      "WS2_32.dll!#19",
+      "WS2_32.dll!#2",
+      "WS2_32.dll!#21",
+      "WS2_32.dll!#22",
+      "WS2_32.dll!#23",
+      "WS2_32.dll!#3",
+      "WS2_32.dll!#4",
+      "WS2_32.dll!#5",
+      "WS2_32.dll!#6",
+      "WS2_32.dll!#7",
+      "WS2_32.dll!#8",
+      "WS2_32.dll!#9"
+    ],
+    "export_module_name": "adhesive.dll",
+    "export_symbol_count": 1,
+    "export_forwarder_count": 0,
+    "export_symbol_names": [
+      "CreateComponent"
+    ],
+    "export_symbol_rvas": [
+      "0x101F80"
+    ],
+    "export_symbols_sha256": "c0d000fbab62681aea501a81100c312dfbc4ae093dd3993b7867efa4b94a9f9f",
+    "modules": [
+      {
+        "dll": "ADVAPI32.dll",
+        "symbol_count": 4,
+        "name_imports": 4,
+        "ordinal_imports": 0,
+        "is_fivem_client_module": false
+      },
+      {
+        "dll": "api-ms-win-crt-convert-l1-1-0.dll",
+        "symbol_count": 9,
+        "name_imports": 9,
+        "ordinal_imports": 0,
+        "is_fivem_client_module": false
+      },
+      {
+        "dll": "api-ms-win-crt-environment-l1-1-0.dll",
+        "symbol_count": 1,
+        "name_imports": 1,
+        "ordinal_imports": 0,
+        "is_fivem_client_module": false
+      },
+      {
+        "dll": "api-ms-win-crt-filesystem-l1-1-0.dll",
+        "symbol_count": 6,
+        "name_imports": 6,
+        "ordinal_imports": 0,
+        "is_fivem_client_module": false
+      },
+      {
+        "dll": "api-ms-win-crt-heap-l1-1-0.dll",
+        "symbol_count": 7,
+        "name_imports": 7,
+        "ordinal_imports": 0,
+        "is_fivem_client_module": false
+      },
+      {
+        "dll": "api-ms-win-crt-locale-l1-1-0.dll",
+        "symbol_count": 2,
+        "name_imports": 2,
+        "ordinal_imports": 0,
+        "is_fivem_client_module": false
+      },
+      {
+        "dll": "api-ms-win-crt-math-l1-1-0.dll",
+        "symbol_count": 15,
+        "name_imports": 15,
+        "ordinal_imports": 0,
+        "is_fivem_client_module": false
+      },
+      {
+        "dll": "api-ms-win-crt-runtime-l1-1-0.dll",
+        "symbol_count": 23,
+        "name_imports": 23,
+        "ordinal_imports": 0,
+        "is_fivem_client_module": false
+      },
+      {
+        "dll": "api-ms-win-crt-stdio-l1-1-0.dll",
+        "symbol_count": 29,
+        "name_imports": 29,
+        "ordinal_imports": 0,
+        "is_fivem_client_module": false
+      },
+      {
+        "dll": "api-ms-win-crt-string-l1-1-0.dll",
+        "symbol_count": 19,
+        "name_imports": 19,
+        "ordinal_imports": 0,
+        "is_fivem_client_module": false
+      },
+      {
+        "dll": "api-ms-win-crt-time-l1-1-0.dll",
+        "symbol_count": 4,
+        "name_imports": 4,
+        "ordinal_imports": 0,
+        "is_fivem_client_module": false
+      },
+      {
+        "dll": "api-ms-win-crt-utility-l1-1-0.dll",
+        "symbol_count": 2,
+        "name_imports": 2,
+        "ordinal_imports": 0,
+        "is_fivem_client_module": false
+      },
+      {
+        "dll": "bcrypt.dll",
+        "symbol_count": 1,
+        "name_imports": 1,
+        "ordinal_imports": 0,
+        "is_fivem_client_module": false
+      },
+      {
+        "dll": "CFGMGR32.dll",
+        "symbol_count": 2,
+        "name_imports": 2,
+        "ordinal_imports": 0,
+        "is_fivem_client_module": false
+      },
+      {
+        "dll": "citizen-resources-client.dll",
+        "symbol_count": 52,
+        "name_imports": 52,
+        "ordinal_imports": 0,
+        "is_fivem_client_module": true
+      },
+      {
+        "dll": "citizen-resources-core.dll",
+        "symbol_count": 5,
+        "name_imports": 5,
+        "ordinal_imports": 0,
+        "is_fivem_client_module": true
+      },
+      {
+        "dll": "CONCRT140.dll",
+        "symbol_count": 1,
+        "name_imports": 1,
+        "ordinal_imports": 0,
+        "is_fivem_client_module": false
+      },
+      {
+        "dll": "CRYPT32.dll",
+        "symbol_count": 13,
+        "name_imports": 13,
+        "ordinal_imports": 0,
+        "is_fivem_client_module": false
+      },
+      {
+        "dll": "gta-core-five.dll",
+        "symbol_count": 3,
+        "name_imports": 3,
+        "ordinal_imports": 0,
+        "is_fivem_client_module": true
+      },
+      {
+        "dll": "IPHLPAPI.DLL",
+        "symbol_count": 1,
+        "name_imports": 1,
+        "ordinal_imports": 0,
+        "is_fivem_client_module": false
+      },
+      {
+        "dll": "KERNEL32.dll",
+        "symbol_count": 142,
+        "name_imports": 142,
+        "ordinal_imports": 0,
+        "is_fivem_client_module": false
+      },
+      {
+        "dll": "legitimacy.dll",
+        "symbol_count": 1,
+        "name_imports": 1,
+        "ordinal_imports": 0,
+        "is_fivem_client_module": true
+      },
+      {
+        "dll": "libuv.dll",
+        "symbol_count": 9,
+        "name_imports": 9,
+        "ordinal_imports": 0,
+        "is_fivem_client_module": false
+      },
+      {
+        "dll": "MSVCP140.dll",
+        "symbol_count": 110,
+        "name_imports": 110,
+        "ordinal_imports": 0,
+        "is_fivem_client_module": false
+      },
+      {
+        "dll": "net-base.dll",
+        "symbol_count": 5,
+        "name_imports": 5,
+        "ordinal_imports": 0,
+        "is_fivem_client_module": true
+      },
+      {
+        "dll": "net-tcp-server.dll",
+        "symbol_count": 1,
+        "name_imports": 1,
+        "ordinal_imports": 0,
+        "is_fivem_client_module": true
+      },
+      {
+        "dll": "net.dll",
+        "symbol_count": 3,
+        "name_imports": 3,
+        "ordinal_imports": 0,
+        "is_fivem_client_module": true
+      },
+      {
+        "dll": "rage-device-five.dll",
+        "symbol_count": 1,
+        "name_imports": 1,
+        "ordinal_imports": 0,
+        "is_fivem_client_module": true
+      },
+      {
+        "dll": "rage-nutsnbolts-five.dll",
+        "symbol_count": 2,
+        "name_imports": 2,
+        "ordinal_imports": 0,
+        "is_fivem_client_module": true
+      },
+      {
+        "dll": "rage-scripting-five.dll",
+        "symbol_count": 1,
+        "name_imports": 1,
+        "ordinal_imports": 0,
+        "is_fivem_client_module": true
+      },
+      {
+        "dll": "RPCRT4.dll",
+        "symbol_count": 2,
+        "name_imports": 2,
+        "ordinal_imports": 0,
+        "is_fivem_client_module": false
+      },
+      {
+        "dll": "scripting-gta.dll",
+        "symbol_count": 2,
+        "name_imports": 2,
+        "ordinal_imports": 0,
+        "is_fivem_client_module": true
+      },
+      {
+        "dll": "SHELL32.dll",
+        "symbol_count": 2,
+        "name_imports": 2,
+        "ordinal_imports": 0,
+        "is_fivem_client_module": false
+      },
+      {
+        "dll": "SHLWAPI.dll",
+        "symbol_count": 1,
+        "name_imports": 1,
+        "ordinal_imports": 0,
+        "is_fivem_client_module": false
+      },
+      {
+        "dll": "USER32.dll",
+        "symbol_count": 4,
+        "name_imports": 4,
+        "ordinal_imports": 0,
+        "is_fivem_client_module": false
+      },
+      {
+        "dll": "v8-9.3.345.16.dll",
+        "symbol_count": 48,
+        "name_imports": 48,
+        "ordinal_imports": 0,
+        "is_fivem_client_module": false
+      },
+      {
+        "dll": "VCRUNTIME140.dll",
+        "symbol_count": 22,
+        "name_imports": 22,
+        "ordinal_imports": 0,
+        "is_fivem_client_module": false
+      },
+      {
+        "dll": "VCRUNTIME140_1.dll",
+        "symbol_count": 1,
+        "name_imports": 1,
+        "ordinal_imports": 0,
+        "is_fivem_client_module": false
+      },
+      {
+        "dll": "vfs-core.dll",
+        "symbol_count": 29,
+        "name_imports": 29,
+        "ordinal_imports": 0,
+        "is_fivem_client_module": true
+      },
+      {
+        "dll": "WINMM.dll",
+        "symbol_count": 1,
+        "name_imports": 1,
+        "ordinal_imports": 0,
+        "is_fivem_client_module": false
+      },
+      {
+        "dll": "WINTRUST.dll",
+        "symbol_count": 1,
+        "name_imports": 1,
+        "ordinal_imports": 0,
+        "is_fivem_client_module": false
+      },
+      {
+        "dll": "WS2_32.dll",
+        "symbol_count": 41,
+        "name_imports": 17,
+        "ordinal_imports": 24,
+        "is_fivem_client_module": false
+      }
+    ],
+    "delay_modules": [
+      {
+        "dll": "ole32.dll",
+        "symbol_count": 1
+      }
+    ],
+    "fivem_client_modules": [
+      "citizen-resources-client.dll",
+      "citizen-resources-core.dll",
+      "gta-core-five.dll",
+      "legitimacy.dll",
+      "net-base.dll",
+      "net-tcp-server.dll",
+      "net.dll",
+      "rage-device-five.dll",
+      "rage-nutsnbolts-five.dll",
+      "rage-scripting-five.dll",
+      "scripting-gta.dll",
+      "vfs-core.dll"
+    ],
+    "fivem_client_module_count": 12,
+    "fivem_client_modules_sha256": "994deeb381d6a575d126d387ba55a75848c7db4df00a2208b58525251676f451"
+  },
+  "sections": {
+    "count": 7,
+    "table_key_sha256": "997f49bedc801b2e7d60c138539773b16eb6424a5eaecabfb682052d09f67c32",
+    "content_key_sha256": "60e73392e828caae8e17652fccaa5c6ffdae48f34990be5a50d044152f01b964",
+    "entropy_key_sha256": "76286d424ed60b96598fcf0f0d87ea3bf29c2178b97665c8400fdd5cfa87a23a",
+    "sections": [
+      {
+        "index": 0,
+        "name": ".text",
+        "virtual_address": 4096,
+        "virtual_address_hex": "0x1000",
+        "virtual_size": 46060725,
+        "virtual_size_hex": "0x2BED4B5",
+        "raw_pointer": 1024,
+        "raw_pointer_hex": "0x400",
+        "raw_size": 46061056,
+        "raw_size_hex": "0x2BED600",
+        "characteristics": 1610612768,
+        "characteristics_hex": "0x60000020",
+        "content_size": 46060725,
+        "padding_bytes": 331,
+        "raw_sha256": "a53f71fc6e3ea66e8f7a401adba29d14820bd97055ac866f749bf603a8df2c7a",
+        "content_sha256": "edcea6f449b3cd8c0ed40c48c86fc148878db32e95f5db043da58e3fe84aed68",
+        "entropy": 6.354389118,
+        "entropy_content": 6.354410378,
+        "raw_rva_delta": -3072
+      },
+      {
+        "index": 1,
+        "name": ".rdata",
+        "virtual_address": 46067712,
+        "virtual_address_hex": "0x2BEF000",
+        "virtual_size": 5021660,
+        "virtual_size_hex": "0x4C9FDC",
+        "raw_pointer": 46062080,
+        "raw_pointer_hex": "0x2BEDA00",
+        "raw_size": 5021696,
+        "raw_size_hex": "0x4CA000",
+        "characteristics": 1073741888,
+        "characteristics_hex": "0x40000040",
+        "content_size": 5021660,
+        "padding_bytes": 36,
+        "raw_sha256": "d64f7f6831791a5ae5aab0c5bda1a0cc9729905ee0f14b97e6624923164a04a9",
+        "content_sha256": "eb50908de18f28cc4a56c4e14b9573eb4d9acd8ea6e601f6b66fc944f7627e0d",
+        "entropy": 6.067496729,
+        "entropy_content": 6.067524025,
+        "raw_rva_delta": -5632
+      },
+      {
+        "index": 2,
+        "name": ".data",
+        "virtual_address": 51089408,
+        "virtual_address_hex": "0x30B9000",
+        "virtual_size": 2434868,
+        "virtual_size_hex": "0x252734",
+        "raw_pointer": 51083776,
+        "raw_pointer_hex": "0x30B7A00",
+        "raw_size": 2416640,
+        "raw_size_hex": "0x24E000",
+        "characteristics": 3221225536,
+        "characteristics_hex": "0xC0000040",
+        "content_size": 2416640,
+        "padding_bytes": 0,
+        "raw_sha256": "93c96c9c1a9dca510b78529cb562bd0b8ecd77736bc95bd18eb8cb74d5049c08",
+        "content_sha256": "93c96c9c1a9dca510b78529cb562bd0b8ecd77736bc95bd18eb8cb74d5049c08",
+        "entropy": 3.837675197,
+        "entropy_content": 3.837675197,
+        "raw_rva_delta": -5632
+      },
+      {
+        "index": 3,
+        "name": ".retplne",
+        "virtual_address": 53526528,
+        "virtual_address_hex": "0x330C000",
+        "virtual_size": 92,
+        "virtual_size_hex": "0x5C",
+        "raw_pointer": 53500416,
+        "raw_pointer_hex": "0x3305A00",
+        "raw_size": 512,
+        "raw_size_hex": "0x200",
+        "characteristics": 0,
+        "characteristics_hex": "0x0",
+        "content_size": 92,
+        "padding_bytes": 420,
+        "raw_sha256": "1254c61e63f786c1e16364cfa840c08b86aafb9c3c0202648e0f66171ab06c56",
+        "content_sha256": "560b83b3d3d2f59144bcc8f9871fc492b87ef4c27edc0b439b9484b92ad58402",
+        "entropy": 0.845848782,
+        "entropy_content": 3.057506263,
+        "raw_rva_delta": -26112
+      },
+      {
+        "index": 4,
+        "name": ".tls",
+        "virtual_address": 53530624,
+        "virtual_address_hex": "0x330D000",
+        "virtual_size": 21665,
+        "virtual_size_hex": "0x54A1",
+        "raw_pointer": 53500928,
+        "raw_pointer_hex": "0x3305C00",
+        "raw_size": 22016,
+        "raw_size_hex": "0x5600",
+        "characteristics": 3221225536,
+        "characteristics_hex": "0xC0000040",
+        "content_size": 21665,
+        "padding_bytes": 351,
+        "raw_sha256": "39ea1b4fc0f0c82ab82814ea29189cd73e9953f8c74583131d8ad10ddb47ed63",
+        "content_sha256": "4041a370b52f4130b7119f5f8253bcbaefa6a88e7290ec3ff162c293e4c75bf5",
+        "entropy": 0.006117656,
+        "entropy_content": 0.006206065,
+        "raw_rva_delta": -29696
+      },
+      {
+        "index": 5,
+        "name": ".rsrc",
+        "virtual_address": 53555200,
+        "virtual_address_hex": "0x3313000",
+        "virtual_size": 1688,
+        "virtual_size_hex": "0x698",
+        "raw_pointer": 53522944,
+        "raw_pointer_hex": "0x330B200",
+        "raw_size": 2048,
+        "raw_size_hex": "0x800",
+        "characteristics": 1073741888,
+        "characteristics_hex": "0x40000040",
+        "content_size": 1688,
+        "padding_bytes": 360,
+        "raw_sha256": "4cb57bde48877f8f58341e1a180f4bdefe959eb220b696cfd79578c6def44ae5",
+        "content_sha256": "30bb5a3850495a2436ebd3a7b5794bbbe05e104dd4c1df364545ec7d0bdfa92f",
+        "entropy": 3.923277863,
+        "entropy_content": 4.49534812,
+        "raw_rva_delta": -32256
+      },
+      {
+        "index": 6,
+        "name": ".reloc",
+        "virtual_address": 53559296,
+        "virtual_address_hex": "0x3314000",
+        "virtual_size": 39632,
+        "virtual_size_hex": "0x9AD0",
+        "raw_pointer": 53524992,
+        "raw_pointer_hex": "0x330BA00",
+        "raw_size": 39936,
+        "raw_size_hex": "0x9C00",
+        "characteristics": 1107296320,
+        "characteristics_hex": "0x42000040",
+        "content_size": 39632,
+        "padding_bytes": 304,
+        "raw_sha256": "ab715fd3fe7c548a36793f16facbe7b712baad7189bcde7431504d05c7f53af0",
+        "content_sha256": "b65f8cc3987a2a7dbc9233e411079051556be595e421bae13d664c3fa9cf89f0",
+        "entropy": 5.477351016,
+        "entropy_content": 5.483004315,
+        "raw_rva_delta": -34304
+      }
+    ]
+  },
+  "exception_directory": {
+    "record_count": 142004,
+    "record_size": 12,
+    "rva_hex": "0x2E54E3C",
+    "raw_hex": "0x2E5383C",
+    "sorted_by_begin_address": true,
+    "duplicate_records": 0,
+    "overlapping_records": 0,
+    "unique_unwind_infos": 15533,
+    "unwind_info_sections": {
+      ".rdata": 15533
+    }
+  },
+  "embedded_build_paths": {
+    "extraction_rule": "NUL terminated printable ASCII runs of 8..300 bytes that start with `C:\\gl\\` or `..\\`",
+    "absolute_count": 278,
+    "relative_count": 39,
+    "vendor_absolute_count": 276,
+    "first_party_absolute_count": 2,
+    "private_relative_count": 2,
+    "client_source_count": 1,
+    "server_source_count": 0,
+    "client_or_server_evidence": "client",
+    "absolute_roots": [
+      "C:\\gl\\builds\\cfx-fivem-0\\.build-cache",
+      "C:\\gl\\builds\\cfx-fivem-0\\code",
+      "C:\\gl\\builds\\cfx-fivem-0\\vendor"
+    ],
+    "relative_roots": [
+      "..\\..\\..\\vendor",
+      "..\\..\\fivem-private\\components"
+    ],
+    "client_source_paths": [
+      "C:\\gl\\builds\\cfx-fivem-0\\code\\client\\shared\\Utils.cpp"
+    ],
+    "server_source_paths": [],
+    "first_party_absolute": [
+      "C:\\gl\\builds\\cfx-fivem-0\\.build-cache\\bin\\five\\release\\dbg\\adhesive.pdb",
+      "C:\\gl\\builds\\cfx-fivem-0\\code\\client\\shared\\Utils.cpp"
+    ],
+    "private_relative": [
+      "..\\..\\fivem-private\\components\\adhesive\\src\\botan\\botan_all.cpp",
+      "..\\..\\fivem-private\\components\\adhesive\\src\\botan\\botan_all.h"
+    ],
+    "corpus_sha256": "2e56a3b92553a4085591f5bee285f59d19154ed1187d8f2ea07a33f54059d0f8"
+  },
+  "authenticode": {
+    "image_digest": {
+      "algorithm": "sha256",
+      "value": "82d63cbaf1ead1cc9e2b9fc871f4778e68c2adc06f0df7144e1892b38a1e575a",
+      "header_region": {
+        "start": 0,
+        "end": 1024,
+        "end_hex": "0x400",
+        "excluded_fields": [
+          {
+            "name": "CheckSum",
+            "raw": "0xD0",
+            "size": 4
+          },
+          {
+            "name": "SecurityDataDirectory",
+            "raw": "0x120",
+            "size": 8
+          }
+        ]
+      },
+      "section_region": "full SizeOfRawData per section, section table order",
+      "certificate_table": {
+        "file_offset": 53564928,
+        "file_offset_hex": "0x3315600",
+        "size": 10336,
+        "size_hex": "0x2860",
+        "hashed": false
+      },
+      "cryptographic_operation": "none; this is a byte recomputation, not a signature verification and not a statement about chain validity"
+    },
+    "certificate_table": {
+      "present": true,
+      "file_offset": 53564928,
+      "file_offset_hex": "0x3315600",
+      "size": 10336,
+      "size_hex": "0x2860",
+      "end_offset": 53575264,
+      "end_offset_hex": "0x3317E60",
+      "reaches_file_end": true,
+      "win_certificate": {
+        "dw_length": 10336,
+        "w_revision": "0x200",
+        "w_certificate_type": "0x2",
+        "b_certificate_size": 10328
+      },
+      "sha256": "c670620dd04f80c823c66cc831d4481bd32d26e589dfbc3e57cfdc2ea0311951",
+      "pkcs7_sha256": "a429d46f0dc61647fb3d166b1cef17c150e33ad35aef230b2fbad77f72b60d17",
+      "pkcs7_size": 10328,
+      "embedded_digest": {
+        "extracted": true,
+        "reason": null,
+        "trace": [
+          "ContentInfo children=0x6,0xa0",
+          "SignedData fields=0x2,0x31,0x30,0xa0,0x31",
+          ".DigestInfo level tags=0x30,0x30",
+          "..DigestInfo level tags=0x30,0x4"
+        ],
+        "algorithm_oid_hex": "608648016503040201",
+        "algorithm_oid_tlv_hex": "0609608648016503040201",
+        "algorithm_is_sha256": true,
+        "length": 32,
+        "value": "82d63cbaf1ead1cc9e2b9fc871f4778e68c2adc06f0df7144e1892b38a1e575a",
+        "pkcs7_offset": 105
+      },
+      "embedded_digest_matches_recomputed_image_hash": true,
+      "signing_time": {
+        "extracted": true,
+        "oid_offsets": [
+          9613
+        ],
+        "oid_offset": 9613,
+        "framing": "Attribute SEQUENCE { OID 1.2.840.113549.1.9.5, SET { UTCTime } }",
+        "time_tag": "0x17",
+        "raw_value": "260911150846Z",
+        "value_length": 13,
+        "normalized_utc": "2026-09-11 15:08:46 UTC (two_digit_year)"
+      },
+      "cryptographically_verified": false,
+      "verification_note": "no chain validation and no revocation lookup is performed here, so nothing is asserted about signer identity, chain validity or revocation status; only bytes the signature already contains are compared"
+    }
+  },
+  "workspace": {
+    "text_reference_scope": [
+      ".gitignore",
+      "AGENTS.md",
+      "Bin/.gitignore",
+      "Bin/citizen/scripting/resource_init.lua",
+      "Bin/components.json",
+      "CMakeLists.txt",
+      "README.md",
+      "build.bat",
+      "cmake/app.manifest",
+      "cmake/payload.rc.in",
+      "dumper.log",
+      "src/core/Bundler.cpp",
+      "src/core/Bundler.h",
+      "src/core/Checkpoint.cpp",
+      "src/core/Checkpoint.h",
+      "src/core/HttpClient.cpp",
+      "src/core/HttpClient.h",
+      "src/core/Logger.cpp",
+      "src/core/Logger.h",
+      "src/core/ProcessScanner.cpp",
+      "src/core/ProcessScanner.h",
+      "src/crypto/AesCbc.cpp",
+      "src/crypto/AesCbc.h",
+      "src/crypto/ChaCha20.cpp",
+      "src/crypto/ChaCha20.h",
+      "src/crypto/Sha256.cpp",
+      "src/crypto/Sha256.h",
+      "src/dumper/Decryptor.cpp",
+      "src/dumper/Decryptor.h",
+      "src/dumper/FiveMDumper.cpp",
+      "src/dumper/FiveMDumper.h",
+      "src/main.cpp",
+      "src/utils/Json.cpp",
+      "src/utils/Json.h",
+      "src/utils/ProgressBar.h",
+      "src/utils/Str.cpp",
+      "src/utils/Str.h",
+      "src/utils/Term.h"
+    ],
+    "text_reference_file_count": 38,
+    "excluded_from_provenance_scan": {
+      ".git/": "vcs internals",
+      ".zcode/": "tool scratch space",
+      "Bin/** (non-config)": "opaque vendor binaries; covered by module name resolution only, their own identity is out of scope here",
+      "Servers/": "not present in this workspace",
+      "build/": "generated CMake output, reproducible from the sources above",
+      "reverse/*.md": "sibling analysis reports; they are the output of this evidence set, not a build-provenance source"
+    },
+    "identity_keyword_totals": {
+      "adhesive": 0,
+      "adhesive.pdb": 0,
+      "cfx-fivem": 0,
+      "cfx.re": 0,
+      "createcomponent": 0,
+      "fxcomponent": 0
+    },
+    "build_context_totals": {
+      ".build-cache": 0,
+      "cfx-fivem-0": 0,
+      "gl\\builds": 0,
+      "release\\dbg": 0
+    },
+    "identity_referencing_files": [],
+    "identity_reference_file_count": 0,
+    "workspace_contains_specimen_build_reference": false,
+    "ambient_keyword_totals": {
+      "citizenfx": 5,
+      "fivem": 115
+    },
+    "ambient_naming_note": "fivem and citizenfx hits come from the C++ `namespace fivem`, the project name and product prose; they are not build-provenance references to the specimen",
+    "ambient_naming_files": [
+      {
+        "path": "CMakeLists.txt",
+        "category": "project",
+        "ambient_keyword_counts": {
+          "fivem": 6
+        }
+      },
+      {
+        "path": "README.md",
+        "category": "documentation",
+        "ambient_keyword_counts": {
+          "fivem": 8
+        }
+      },
+      {
+        "path": "build.bat",
+        "category": "build",
+        "ambient_keyword_counts": {
+          "fivem": 2
+        }
+      },
+      {
+        "path": "dumper.log",
+        "category": "runtime_log",
+        "ambient_keyword_counts": {
+          "fivem": 2
+        }
+      },
+      {
+        "path": "src/core/Bundler.cpp",
+        "category": "project_source",
+        "ambient_keyword_counts": {
+          "fivem": 5
+        }
+      },
+      {
+        "path": "src/core/Bundler.h",
+        "category": "project_source",
+        "ambient_keyword_counts": {
+          "fivem": 3
+        }
+      },
+      {
+        "path": "src/core/Checkpoint.cpp",
+        "category": "project_source",
+        "ambient_keyword_counts": {
+          "fivem": 2
+        }
+      },
+      {
+        "path": "src/core/Checkpoint.h",
+        "category": "project_source",
+        "ambient_keyword_counts": {
+          "fivem": 2
+        }
+      },
+      {
+        "path": "src/core/HttpClient.cpp",
+        "category": "project_source",
+        "ambient_keyword_counts": {
+          "fivem": 3
+        }
+      },
+      {
+        "path": "src/core/HttpClient.h",
+        "category": "project_source",
+        "ambient_keyword_counts": {
+          "fivem": 2
+        }
+      },
+      {
+        "path": "src/core/Logger.cpp",
+        "category": "project_source",
+        "ambient_keyword_counts": {
+          "fivem": 2
+        }
+      },
+      {
+        "path": "src/core/Logger.h",
+        "category": "project_source",
+        "ambient_keyword_counts": {
+          "fivem": 3
+        }
+      },
+      {
+        "path": "src/core/ProcessScanner.cpp",
+        "category": "project_source",
+        "ambient_keyword_counts": {
+          "fivem": 8,
+          "citizenfx": 1
+        }
+      },
+      {
+        "path": "src/core/ProcessScanner.h",
+        "category": "project_source",
+        "ambient_keyword_counts": {
+          "fivem": 7,
+          "citizenfx": 1
+        }
+      },
+      {
+        "path": "src/crypto/AesCbc.cpp",
+        "category": "project_source",
+        "ambient_keyword_counts": {
+          "fivem": 2
+        }
+      },
+      {
+        "path": "src/crypto/AesCbc.h",
+        "category": "project_source",
+        "ambient_keyword_counts": {
+          "fivem": 2
+        }
+      },
+      {
+        "path": "src/crypto/ChaCha20.cpp",
+        "category": "project_source",
+        "ambient_keyword_counts": {
+          "fivem": 2
+        }
+      },
+      {
+        "path": "src/crypto/ChaCha20.h",
+        "category": "project_source",
+        "ambient_keyword_counts": {
+          "fivem": 2
+        }
+      },
+      {
+        "path": "src/crypto/Sha256.cpp",
+        "category": "project_source",
+        "ambient_keyword_counts": {
+          "fivem": 2
+        }
+      },
+      {
+        "path": "src/crypto/Sha256.h",
+        "category": "project_source",
+        "ambient_keyword_counts": {
+          "fivem": 2
+        }
+      },
+      {
+        "path": "src/dumper/Decryptor.cpp",
+        "category": "project_source",
+        "ambient_keyword_counts": {
+          "fivem": 2
+        }
+      },
+      {
+        "path": "src/dumper/Decryptor.h",
+        "category": "project_source",
+        "ambient_keyword_counts": {
+          "fivem": 2
+        }
+      },
+      {
+        "path": "src/dumper/FiveMDumper.cpp",
+        "category": "project_source",
+        "ambient_keyword_counts": {
+          "fivem": 15,
+          "citizenfx": 3
+        }
+      },
+      {
+        "path": "src/dumper/FiveMDumper.h",
+        "category": "project_source",
+        "ambient_keyword_counts": {
+          "fivem": 4
+        }
+      },
+      {
+        "path": "src/main.cpp",
+        "category": "project_source",
+        "ambient_keyword_counts": {
+          "fivem": 10
+        }
+      },
+      {
+        "path": "src/utils/Json.cpp",
+        "category": "project_source",
+        "ambient_keyword_counts": {
+          "fivem": 2
+        }
+      },
+      {
+        "path": "src/utils/Json.h",
+        "category": "project_source",
+        "ambient_keyword_counts": {
+          "fivem": 3
+        }
+      },
+      {
+        "path": "src/utils/ProgressBar.h",
+        "category": "project_source",
+        "ambient_keyword_counts": {
+          "fivem": 2
+        }
+      },
+      {
+        "path": "src/utils/Str.cpp",
+        "category": "project_source",
+        "ambient_keyword_counts": {
+          "fivem": 3
+        }
+      },
+      {
+        "path": "src/utils/Str.h",
+        "category": "project_source",
+        "ambient_keyword_counts": {
+          "fivem": 2
+        }
+      },
+      {
+        "path": "src/utils/Term.h",
+        "category": "project_source",
+        "ambient_keyword_counts": {
+          "fivem": 3
+        }
+      }
+    ],
+    "component_config": {
+      "present": true,
+      "parsed": true,
+      "path": "Bin/components.json",
+      "sha256": "1403f60649580bd624beffa4fd67c6d64a60b3456be652db7f01314e0dff6b6e",
+      "entry_count": 30,
+      "server_component_count": 9,
+      "non_server_component_count": 21,
+      "contains_adhesive": false,
+      "entries": [
+        "citizen:devtools",
+        "citizen:resources:core",
+        "citizen:resources:metadata:lua",
+        "citizen:scripting:core",
+        "citizen:scripting:lua",
+        "citizen:scripting:lua54",
+        "citizen:scripting:mono",
+        "citizen:scripting:mono-v2",
+        "citizen:scripting:node",
+        "citizen:scripting:v8node",
+        "citizen:server:fxdk",
+        "citizen:server:gui",
+        "citizen:server:impl",
+        "citizen:server:instance",
+        "citizen:server:main",
+        "citizen:server:monitor",
+        "citizen:server:net",
+        "citizen:server:state:fivesv",
+        "citizen:server:state:rdr3sv",
+        "conhost:server",
+        "http-client",
+        "net:base",
+        "net:http-server",
+        "net:packet",
+        "net:tcp-server",
+        "pool-sizes-state",
+        "scripting:server",
+        "vfs:core",
+        "vfs:impl:server",
+        "voip-server:mumble"
+      ]
+    },
+    "pdb_inventory": {
+      "search_root": "repository, excluding .git, build and .zcode",
+      "pdb_count": 4,
+      "pdbs": [
+        {
+          "path": "Bin/citizen/clr2/lib/mono/4.5/CitizenFX.Core.pdb",
+          "size": 146060,
+          "basename": "citizenfx.core.pdb"
+        },
+        {
+          "path": "Bin/citizen/clr2/lib/mono/4.5/ref/CitizenFX.Core.Server.pdb",
+          "size": 41356,
+          "basename": "citizenfx.core.server.pdb"
+        },
+        {
+          "path": "Bin/citizen/clr2/lib/mono/4.5/v2/CitizenFX.Core.pdb",
+          "size": 95916,
+          "basename": "citizenfx.core.pdb"
+        },
+        {
+          "path": "Bin/citizen/clr2/lib/mono/4.5/v2/CitizenFX.Server.pdb",
+          "size": 46796,
+          "basename": "citizenfx.server.pdb"
+        }
+      ],
+      "adhesive_pdb_present": false,
+      "adhesive_pdb_expected_name": "adhesive.pdb",
+      "symbol_resolution_available": false,
+      "symbol_resolution_reason": "no PDB matching the embedded GUID and age exists in the workspace, so no function, type or source line name can be attached to any address in this evidence set"
+    },
+    "import_module_resolution": {
+      "note": "the workspace Bin/ tree is the FXServer payload set while the specimen is a client component, so a partial overlap is expected and does not establish a shared build",
+      "declared_client_module_count": 12,
+      "present_count": 4,
+      "absent_count": 8,
+      "present": [
+        "citizen-resources-core.dll",
+        "net-base.dll",
+        "net-tcp-server.dll",
+        "vfs-core.dll"
+      ],
+      "absent": [
+        "citizen-resources-client.dll",
+        "gta-core-five.dll",
+        "legitimacy.dll",
+        "net.dll",
+        "rage-device-five.dll",
+        "rage-nutsnbolts-five.dll",
+        "rage-scripting-five.dll",
+        "scripting-gta.dll"
+      ],
+      "rows": [
+        {
+          "module": "citizen-resources-client.dll",
+          "present_in_bin": false,
+          "paths": []
+        },
+        {
+          "module": "citizen-resources-core.dll",
+          "present_in_bin": true,
+          "paths": [
+            "Bin/citizen-resources-core.dll"
+          ]
+        },
+        {
+          "module": "gta-core-five.dll",
+          "present_in_bin": false,
+          "paths": []
+        },
+        {
+          "module": "legitimacy.dll",
+          "present_in_bin": false,
+          "paths": []
+        },
+        {
+          "module": "net-base.dll",
+          "present_in_bin": true,
+          "paths": [
+            "Bin/net-base.dll"
+          ]
+        },
+        {
+          "module": "net-tcp-server.dll",
+          "present_in_bin": true,
+          "paths": [
+            "Bin/net-tcp-server.dll"
+          ]
+        },
+        {
+          "module": "net.dll",
+          "present_in_bin": false,
+          "paths": []
+        },
+        {
+          "module": "rage-device-five.dll",
+          "present_in_bin": false,
+          "paths": []
+        },
+        {
+          "module": "rage-nutsnbolts-five.dll",
+          "present_in_bin": false,
+          "paths": []
+        },
+        {
+          "module": "rage-scripting-five.dll",
+          "present_in_bin": false,
+          "paths": []
+        },
+        {
+          "module": "scripting-gta.dll",
+          "present_in_bin": false,
+          "paths": []
+        },
+        {
+          "module": "vfs-core.dll",
+          "present_in_bin": true,
+          "paths": [
+            "Bin/vfs-core.dll"
+          ]
+        }
+      ]
+    },
+    "build_context_intersection": {
+      "specimen_pdb_root": "C:\\gl\\builds\\cfx-fivem-0",
+      "specimen_pdb_root_present_in_workspace": false,
+      "specimen_first_party_source": "C:\\gl\\builds\\cfx-fivem-0\\code\\client\\shared\\Utils.cpp",
+      "specimen_first_party_source_present_in_workspace": false,
+      "specimen_private_repo_segment": "..\\..\\fivem-private\\components\\adhesive",
+      "specimen_private_repo_segment_present_in_workspace": false
+    }
+  },
+  "correlation_keys": {
+    "whole_file_sha256": "91cc0aa006d7315cb042c8fa8dca6c1e074a307bba7dcc9eb5509c8a7b81934e",
+    "whole_file_sha1": "ae5627c6aab786095a816fc43f0e4ce04cee8829",
+    "whole_file_size": 53575264,
+    "pdb_debug_id": "CB927E363F3D8D774C4C44205044422E1",
+    "pdb_guid": "cb927e36-3f3d-8d77-4c4c-44205044422e",
+    "pdb_age": 1,
+    "pdb_path": "C:\\gl\\builds\\cfx-fivem-0\\.build-cache\\bin\\five\\release\\dbg\\adhesive.pdb",
+    "pdb_path_sha256": "408077d29514dd7e9502ca8a839d9a89ce4e4d09dc92de3df6904fd8453448e5",
+    "pdb_match_key": "929c1f6356bf1005b890f22897fc87a4fb3b5d1da819cfb023f89ffe9bdf5df0",
+    "pe_time_date_stamp": 1789139178,
+    "pe_time_date_stamp_utc": "2026-09-11 15:06:18 UTC",
+    "linker_version_field": "14.0",
+    "rich_header_present": false,
+    "lld_build_id_available": false,
+    "authenticode_image_sha256": "82d63cbaf1ead1cc9e2b9fc871f4778e68c2adc06f0df7144e1892b38a1e575a",
+    "section_table_key": "997f49bedc801b2e7d60c138539773b16eb6424a5eaecabfb682052d09f67c32",
+    "section_content_key": "60e73392e828caae8e17652fccaa5c6ffdae48f34990be5a50d044152f01b964",
+    "section_entropy_key": "76286d424ed60b96598fcf0f0d87ea3bf29c2178b97665c8400fdd5cfa87a23a",
+    "import_symbols_key": "1d36e13374c427dc482593545110a2762438150bc70a43c4aa1a19c22858e03c",
+    "import_modules_key": "994deeb381d6a575d126d387ba55a75848c7db4df00a2208b58525251676f451",
+    "export_symbols_key": "c0d000fbab62681aea501a81100c312dfbc4ae093dd3993b7867efa4b94a9f9f",
+    "version_resource_key": "ff5386d98671bbe900a4e9771328cfb7b59b2b6025cbadee0c3f2042c223cda1",
+    "fxcomponent_key": "3f427c6c2b88c3a86c4ab1851b095c10c690dc2903407ae03694ea812e47a158",
+    "fxcomponent_dependency_key": "67dff41515ad9eb164af3b3c21804560357ab3139f2984ae8a7e23ca596542e3",
+    "build_path_corpus_key": "2e56a3b92553a4085591f5bee285f59d19154ed1187d8f2ea07a33f54059d0f8",
+    "certificate_table_sha256": "c670620dd04f80c823c66cc831d4481bd32d26e589dfbc3e57cfdc2ea0311951",
+    "correlation_vector_sha256": "8ce387f6ad87bd557178475b7dd05b7e8c5031b913971e5cc7b8969fe53adfce",
+    "recompute_recipe": {
+      "pdb_debug_id": "uppercase RSDS GUID without dashes, then the age as uppercase hex",
+      "pdb_match_key": "sha256 of b'\\x00'.join([lowercased pdb path with '/' replaced by '\\\\', guid_bytes_le, little-endian age])",
+      "authenticode_image_sha256": "sha256 over bytes [0, SizeOfHeaders) minus the 4 byte CheckSum field and the 8 byte Security directory entry, then each section's full SizeOfRawData in section table order",
+      "section_table_key": "sha256 of sorted 'name|rva|vsize|rawptr|rawsize|characteristics|raw_sha256' lines, LF terminated",
+      "section_content_key": "sha256 of sorted 'name#content_sha256' lines over the first min(SizeOfRawData, VirtualSize) bytes of each section",
+      "import_symbols_key": "sha256 of sorted 'dll!symbol' lines, ordinal imports written as 'dll!#ordinal'",
+      "fxcomponent_key": "sha256 of sorted 'name:..', 'version:..', 'dependency:..', 'provides:..' lines",
+      "build_path_corpus_key": "sha256 of sorted 'abs:<path>' and 'rel:<path>' lines for every extracted build path",
+      "correlation_vector_sha256": "sha256 of the compact sorted-key JSON of all other keys except whole_file_size and pdb_path"
+    }
+  },
+  "authenticity": {
+    "component_identification": "high",
+    "component_identification_basis": "CreateComponent export, FXCOMPONENT resource, CitizenFX version resource and the FiveM client import set",
+    "build_provenance": "undetermined",
+    "authentic_build_asserted": false,
+    "gates": {
+      "pdb_available_in_workspace": false,
+      "pdb_debug_id_matched_against_a_second_artifact": false,
+      "authenticode_table_present": true,
+      "embedded_digest_equals_recomputed_image_hash": true,
+      "authenticode_chain_cryptographically_verified_by_this_script": false,
+      "independent_same_build_reference_available": false,
+      "official_build_manifest_available": false
+    },
+    "satisfied_gates": [
+      "authenticode_table_present",
+      "embedded_digest_equals_recomputed_image_hash"
+    ],
+    "unsatisfied_gates": [
+      "authenticode_chain_cryptographically_verified_by_this_script",
+      "independent_same_build_reference_available",
+      "official_build_manifest_available",
+      "pdb_available_in_workspace",
+      "pdb_debug_id_matched_against_a_second_artifact"
+    ],
+    "component_list_contains_specimen": false,
+    "statement": "This artifact set does not assert that the specimen is an authentic vendor build. Component identity is established from the bytes; build provenance is not. The embedded Authenticode digest equals the recomputed PE image hash, which shows only that the signed bytes are the present bytes. No signature chain was validated, no PDB was located, and no second artifact of the same build exists in this workspace, so there is nothing to compare the debug ID or the section keys against.",
+    "requirements_to_lift": [
+      "locate adhesive.pdb with debug id CB927E363F3D8D774C4C44205044422E1 and age 1, verify its own stream identity, and resolve symbols through it",
+      "obtain a second artifact of the same 1.0.0.36109 build and compare correlation_vector_sha256",
+      "verify the Authenticode chain in a separate network-permitted step and record the verification result together with its timestamp",
+      "obtain the official build manifest that maps build number 36109 to a published artifact"
+    ]
+  },
+  "open_questions": [
+    {
+      "id": "OQ-01",
+      "priority": "P0",
+      "question": "Where is adhesive.pdb with debug id CB927E363F3D8D774C4C44205044422E1 and age 1, and can symbols be resolved through it?",
+      "status": "open",
+      "why_it_matters": "without the PDB no function, type or source line name can be attached to any address in this evidence set",
+      "closes_when": "the matching PDB is located and its stream identity is verified, or a symbol server entry is confirmed absent",
+      "blocks": [
+        "symbol level naming",
+        "source line correlation"
+      ]
+    },
+    {
+      "id": "OQ-02",
+      "priority": "P0",
+      "question": "Which official artifact corresponds to build 36109 of the CitizenFX 1.0.0.36109 client?",
+      "status": "open",
+      "why_it_matters": "the embedded PDB path names a build cache root, not a release; the PE version, the FXCOMPONENT version and the build number live in three different layers and are not cross-linked anywhere",
+      "closes_when": "an official build manifest or a second signed artifact of the same build number is available for comparison",
+      "blocks": [
+        "build provenance"
+      ]
+    },
+    {
+      "id": "OQ-03",
+      "priority": "P0",
+      "question": "Which exact LLVM LLD release performed the final link?",
+      "status": "open",
+      "why_it_matters": "the 14.0 linker field is an MSVC 2015 compatibility value, the Rich header is absent, and no build id survives, so the retpoline metadata is a behavioural fingerprint only",
+      "closes_when": "a build log, a reproducible rebuild with a pinned linker, or a toolchain marker from a same-family artifact becomes available",
+      "blocks": [
+        "toolchain attribution"
+      ]
+    },
+    {
+      "id": "OQ-04",
+      "priority": "P0",
+      "question": "Was the MSVC or the clang-cl frontend used, and which runtime build?",
+      "status": "open",
+      "why_it_matters": "both frontends produce the observed MSVC compatible ABI, dynamic MSVC/UCRT imports and load config layout, so the specimen cannot distinguish them",
+      "closes_when": "a toolchain fingerprint from a same-family artifact or a build log identifies frontend and CRT version",
+      "blocks": [
+        "toolchain attribution"
+      ]
+    },
+    {
+      "id": "OQ-05",
+      "priority": "P1",
+      "question": "Does the retpolne tag count of 4 (section offsets 0x0, 0x10, 0x2C, 0x40) contradict the peer report value of 3, or does that report count record pairs instead of tags?",
+      "status": "open",
+      "why_it_matters": "a tag count disagreement is a raw byte level conflict and must be settled before the section is used as a differential key between builds",
+      "closes_when": "the retpolne record layout is decoded and the peer report is corrected or confirmed",
+      "blocks": [
+        "retpolne based differential analysis"
+      ]
+    },
+    {
+      "id": "OQ-06",
+      "priority": "P1",
+      "question": "Why do 276 of the 278 embedded absolute build paths sit under vendor/, and only one under code/client/?",
+      "status": "open",
+      "why_it_matters": "retention of __FILE__ strings is a compiler and optimisation level property, and the ratio constrains which claims about first-party source layout are supportable",
+      "closes_when": "the set of translation units that emit __FILE__ under this toolchain is characterised, or a same-family build is compared",
+      "blocks": [
+        "source layout inference"
+      ]
+    },
+    {
+      "id": "OQ-07",
+      "priority": "P1",
+      "question": "Is the specimen from the same build campaign as the FXServer payload in Bin/, given that Bin/components.json lists server components and does not list adhesive, and several declared client modules are absent from Bin/?",
+      "status": "open",
+      "why_it_matters": "the workspace and the specimen are different product surfaces; correlating their build numbers without evidence would be a provenance error",
+      "closes_when": "the build numbers of the Bin/ payload artifacts are extracted and compared against 36109",
+      "blocks": [
+        "workspace provenance correlation"
+      ]
+    },
+    {
+      "id": "OQ-08",
+      "priority": "P1",
+      "question": "What is the version relationship between the PE version 1.0.0.36109 and the FXCOMPONENT version 0.1.0?",
+      "status": "open",
+      "why_it_matters": "both are component scoped yet stored in different resource types, and a correlation key that mixes them would be unstable across builds",
+      "closes_when": "two or more builds show whether the FXCOMPONENT version is bumped independently of the PE version",
+      "blocks": [
+        "stable component correlation key design"
+      ]
+    },
+    {
+      "id": "OQ-09",
+      "priority": "P2",
+      "question": "Is the embedded build path root C:\\gl\\builds\\cfx-fivem-0 a stable CI worker path or a per-agent path?",
+      "status": "open",
+      "why_it_matters": "a stable root makes the PDB path usable as a build key; a per-agent path makes it noise that must stay out of correlation vectors",
+      "closes_when": "two builds of the same component are compared and the path roots are shown to be identical or divergent",
+      "blocks": [
+        "pdb_path as correlation key"
+      ]
+    },
+    {
+      "id": "OQ-10",
+      "priority": "P2",
+      "question": "Do the section content hashes stay stable across rebuilds of the same build number, or does build-local absolute path material from .build-cache leak into .rdata and break the key?",
+      "status": "open",
+      "why_it_matters": "the section keys only serve build-to-build correlation if they are insensitive to the build directory layout",
+      "closes_when": "two artifacts of the same build number are compared at section level and the keys are either equal or the difference is explained",
+      "blocks": [
+        "section key reusability"
+      ]
+    },
+    {
+      "id": "OQ-11",
+      "priority": "P2",
+      "question": "Is the two digit year signingTime encoding inside the timestamp token byte-identical to the four digit year representation found in the same certificate table?",
+      "status": "open",
+      "why_it_matters": "two representations of the same instant in one blob affects which one a downstream tool treats as authoritative",
+      "closes_when": "both encodings are decoded and compared, and the timestamp token structure is documented",
+      "blocks": [
+        "timestamp evidence precision"
+      ]
+    }
+  ],
+  "reproduce": {
+    "command": "python reverse/scripts/pdb_correlate.py",
+    "verify_command": "python reverse/scripts/pdb_correlate.py --verify",
+    "specimen_sha256_expected": "91cc0aa006d7315cb042c8fa8dca6c1e074a307bba7dcc9eb5509c8a7b81934e",
+    "external_inputs": "none; the script reads the specimen, common.py and the workspace tree only",
+    "expected_exit_code": 0,
+    "expected_failure_exit_code": 1
+  },
+  "cross_check": {
+    "available": true,
+    "path": "reverse/evidence/baseline.json",
+    "note": "independent parse of the same bytes, compared against the stored baseline; a mismatch means the specimen or the parser changed",
+    "row_count": 39,
+    "failed_count": 0,
+    "rows": [
+      {
+        "key": "pe.machine",
+        "baseline": "34404",
+        "correlation": "34404",
+        "ok": true
+      },
+      {
+        "key": "pe.magic_hex",
+        "baseline": "0x20B",
+        "correlation": "0x20B",
+        "ok": true
+      },
+      {
+        "key": "pe.linker_version",
+        "baseline": "14.0",
+        "correlation": "14.0",
+        "ok": true
+      },
+      {
+        "key": "pe.time_date_stamp_hex",
+        "baseline": "0x6AA418EA",
+        "correlation": "0x6AA418EA",
+        "ok": true
+      },
+      {
+        "key": "pe.check_sum_hex",
+        "baseline": "0x33207EE",
+        "correlation": "0x33207EE",
+        "ok": true
+      },
+      {
+        "key": "pe.check_sum_matches",
+        "baseline": "true",
+        "correlation": "true",
+        "ok": true
+      },
+      {
+        "key": "pe.entry_point_rva_hex",
+        "baseline": "0x2AB2770",
+        "correlation": "0x2AB2770",
+        "ok": true
+      },
+      {
+        "key": "pe.image_base_hex",
+        "baseline": "0x180000000",
+        "correlation": "0x180000000",
+        "ok": true
+      },
+      {
+        "key": "pe.size_of_image_hex",
+        "baseline": "0x331E000",
+        "correlation": "0x331E000",
+        "ok": true
+      },
+      {
+        "key": "pe.dll_characteristics_hex",
+        "baseline": "0x160",
+        "correlation": "0x160",
+        "ok": true
+      },
+      {
+        "key": "sections[0].entropy",
+        "baseline": "6.354389118",
+        "correlation": "6.354389118",
+        "ok": true
+      },
+      {
+        "key": "sections[1].entropy",
+        "baseline": "6.067496729",
+        "correlation": "6.067496729",
+        "ok": true
+      },
+      {
+        "key": "sections[2].entropy",
+        "baseline": "3.837675197",
+        "correlation": "3.837675197",
+        "ok": true
+      },
+      {
+        "key": "sections[3].entropy",
+        "baseline": "0.845848782",
+        "correlation": "0.845848782",
+        "ok": true
+      },
+      {
+        "key": "sections[4].entropy",
+        "baseline": "0.006117656",
+        "correlation": "0.006117656",
+        "ok": true
+      },
+      {
+        "key": "sections[5].entropy",
+        "baseline": "3.923277863",
+        "correlation": "3.923277863",
+        "ok": true
+      },
+      {
+        "key": "sections[6].entropy",
+        "baseline": "5.477351016",
+        "correlation": "5.477351016",
+        "ok": true
+      },
+      {
+        "key": "sections[0].raw_size_hex",
+        "baseline": "0x2BED600",
+        "correlation": "0x2BED600",
+        "ok": true
+      },
+      {
+        "key": "sections[1].raw_size_hex",
+        "baseline": "0x4CA000",
+        "correlation": "0x4CA000",
+        "ok": true
+      },
+      {
+        "key": "sections[2].raw_size_hex",
+        "baseline": "0x24E000",
+        "correlation": "0x24E000",
+        "ok": true
+      },
+      {
+        "key": "sections[3].raw_size_hex",
+        "baseline": "0x200",
+        "correlation": "0x200",
+        "ok": true
+      },
+      {
+        "key": "sections[4].raw_size_hex",
+        "baseline": "0x5600",
+        "correlation": "0x5600",
+        "ok": true
+      },
+      {
+        "key": "sections[5].raw_size_hex",
+        "baseline": "0x800",
+        "correlation": "0x800",
+        "ok": true
+      },
+      {
+        "key": "sections[6].raw_size_hex",
+        "baseline": "0x9C00",
+        "correlation": "0x9C00",
+        "ok": true
+      },
+      {
+        "key": "sections[0].virtual_size_hex",
+        "baseline": "0x2BED4B5",
+        "correlation": "0x2BED4B5",
+        "ok": true
+      },
+      {
+        "key": "sections[1].virtual_size_hex",
+        "baseline": "0x4C9FDC",
+        "correlation": "0x4C9FDC",
+        "ok": true
+      },
+      {
+        "key": "sections[2].virtual_size_hex",
+        "baseline": "0x252734",
+        "correlation": "0x252734",
+        "ok": true
+      },
+      {
+        "key": "pdata.record_count",
+        "baseline": "142004",
+        "correlation": "142004",
+        "ok": true
+      },
+      {
+        "key": "imports.descriptor_count",
+        "baseline": "42",
+        "correlation": "42",
+        "ok": true
+      },
+      {
+        "key": "imports.symbol_count",
+        "baseline": "628",
+        "correlation": "628",
+        "ok": true
+      },
+      {
+        "key": "imports.name_imports",
+        "baseline": "604",
+        "correlation": "604",
+        "ok": true
+      },
+      {
+        "key": "imports.ordinal_imports",
+        "baseline": "24",
+        "correlation": "24",
+        "ok": true
+      },
+      {
+        "key": "imports.delay_descriptor_count",
+        "baseline": "1",
+        "correlation": "1",
+        "ok": true
+      },
+      {
+        "key": "imports.delay_symbol_count",
+        "baseline": "1",
+        "correlation": "1",
+        "ok": true
+      },
+      {
+        "key": "exports.symbol_count",
+        "baseline": "1",
+        "correlation": "1",
+        "ok": true
+      },
+      {
+        "key": "exports.module_name",
+        "baseline": "adhesive.dll",
+        "correlation": "adhesive.dll",
+        "ok": true
+      },
+      {
+        "key": "resources.entry_count",
+        "baseline": "3",
+        "correlation": "3",
+        "ok": true
+      },
+      {
+        "key": "certificate.sha256",
+        "baseline": "c670620dd04f80c823c66cc831d4481bd32d26e589dfbc3e57cfdc2ea0311951",
+        "correlation": "c670620dd04f80c823c66cc831d4481bd32d26e589dfbc3e57cfdc2ea0311951",
+        "ok": true
+      },
+      {
+        "key": "certificate.end_offset_hex",
+        "baseline": "0x3317E60",
+        "correlation": "0x3317E60",
+        "ok": true
+      }
+    ]
+  },
+  "validation": {
+    "check_count": 90,
+    "failed_count": 0,
+    "checks": [
+      {
+        "check": "specimen.sha256",
+        "expected": "91cc0aa006d7315cb042c8fa8dca6c1e074a307bba7dcc9eb5509c8a7b81934e",
+        "actual": "91cc0aa006d7315cb042c8fa8dca6c1e074a307bba7dcc9eb5509c8a7b81934e",
+        "ok": "true"
+      },
+      {
+        "check": "pdb.guid",
+        "expected": "cb927e36-3f3d-8d77-4c4c-44205044422e",
+        "actual": "cb927e36-3f3d-8d77-4c4c-44205044422e",
+        "ok": "true"
+      },
+      {
+        "check": "pdb.age",
+        "expected": "1",
+        "actual": "1",
+        "ok": "true"
+      },
+      {
+        "check": "pdb.path",
+        "expected": "C:\\gl\\builds\\cfx-fivem-0\\.build-cache\\bin\\five\\release\\dbg\\adhesive.pdb",
+        "actual": "C:\\gl\\builds\\cfx-fivem-0\\.build-cache\\bin\\five\\release\\dbg\\adhesive.pdb",
+        "ok": "true"
+      },
+      {
+        "check": "pdb.debug_id",
+        "expected": "CB927E363F3D8D774C4C44205044422E1",
+        "actual": "CB927E363F3D8D774C4C44205044422E1",
+        "ok": "true"
+      },
+      {
+        "check": "pdb.debug_entry_count",
+        "expected": "1",
+        "actual": "1",
+        "ok": "true"
+      },
+      {
+        "check": "linker.version_field",
+        "expected": "14.0",
+        "actual": "14.0",
+        "ok": "true"
+      },
+      {
+        "check": "linker.rich_header_absent",
+        "expected": "false",
+        "actual": "false",
+        "ok": "true"
+      },
+      {
+        "check": "linker.rich_markers_absent",
+        "expected": "{'DanS': 0, 'Rich': 0}",
+        "actual": "{'DanS': 0, 'Rich': 0}",
+        "ok": "true"
+      },
+      {
+        "check": "linker.debug_timestamp_matches_coff",
+        "expected": "true",
+        "actual": "true",
+        "ok": "true"
+      },
+      {
+        "check": "linker.lld_build_id_absent",
+        "expected": "false",
+        "actual": "false",
+        "ok": "true"
+      },
+      {
+        "check": "linker.no_gnu_build_id_note",
+        "expected": "false",
+        "actual": "false",
+        "ok": "true"
+      },
+      {
+        "check": "linker.no_identity_marker_string",
+        "expected": "false",
+        "actual": "false",
+        "ok": "true"
+      },
+      {
+        "check": "linker.retplne_tag_count",
+        "expected": "4",
+        "actual": "4",
+        "ok": "true"
+      },
+      {
+        "check": "linker.retplne_tag_offsets",
+        "expected": "['0x0', '0x10', '0x2C', '0x40']",
+        "actual": "['0x0', '0x10', '0x2C', '0x40']",
+        "ok": "true"
+      },
+      {
+        "check": "authen.image_digest",
+        "expected": "82d63cbaf1ead1cc9e2b9fc871f4778e68c2adc06f0df7144e1892b38a1e575a",
+        "actual": "82d63cbaf1ead1cc9e2b9fc871f4778e68c2adc06f0df7144e1892b38a1e575a",
+        "ok": "true"
+      },
+      {
+        "check": "authen.embedded_digest_matches",
+        "expected": "true",
+        "actual": "true",
+        "ok": "true"
+      },
+      {
+        "check": "authen.embedded_digest_is_sha256",
+        "expected": "true",
+        "actual": "true",
+        "ok": "true"
+      },
+      {
+        "check": "authen.signing_time",
+        "expected": "2026-09-11 15:08:46 UTC",
+        "actual": "2026-09-11 15:08:46 UTC",
+        "ok": "true"
+      },
+      {
+        "check": "authen.signing_time_oid_occurrence",
+        "expected": "1",
+        "actual": "1",
+        "ok": "true"
+      },
+      {
+        "check": "authen.chain_verified_by_this_script",
+        "expected": "false",
+        "actual": "false",
+        "ok": "true"
+      },
+      {
+        "check": "authen.cert_reaches_file_end",
+        "expected": "true",
+        "actual": "true",
+        "ok": "true"
+      },
+      {
+        "check": "version.fixed_info_signature",
+        "expected": "true",
+        "actual": "true",
+        "ok": "true"
+      },
+      {
+        "check": "version.file_version",
+        "expected": "1.0.0.36109",
+        "actual": "1.0.0.36109",
+        "ok": "true"
+      },
+      {
+        "check": "version.product_name",
+        "expected": "CitizenFX",
+        "actual": "CitizenFX",
+        "ok": "true"
+      },
+      {
+        "check": "version.fixed_and_table_agree",
+        "expected": "true",
+        "actual": "true",
+        "ok": "true"
+      },
+      {
+        "check": "fxcomponent.name",
+        "expected": "adhesive",
+        "actual": "adhesive",
+        "ok": "true"
+      },
+      {
+        "check": "fxcomponent.version",
+        "expected": "0.1.0",
+        "actual": "0.1.0",
+        "ok": "true"
+      },
+      {
+        "check": "fxcomponent.parsed",
+        "expected": "true",
+        "actual": "true",
+        "ok": "true"
+      },
+      {
+        "check": "imports.descriptor_count",
+        "expected": "42",
+        "actual": "42",
+        "ok": "true"
+      },
+      {
+        "check": "imports.symbol_count",
+        "expected": "628",
+        "actual": "628",
+        "ok": "true"
+      },
+      {
+        "check": "exports.symbol_count",
+        "expected": "1",
+        "actual": "1",
+        "ok": "true"
+      },
+      {
+        "check": "exports.name",
+        "expected": "CreateComponent",
+        "actual": "CreateComponent",
+        "ok": "true"
+      },
+      {
+        "check": "pdata.record_count",
+        "expected": "142004",
+        "actual": "142004",
+        "ok": "true"
+      },
+      {
+        "check": "sections.count",
+        "expected": "7",
+        "actual": "7",
+        "ok": "true"
+      },
+      {
+        "check": "buildpath.absolute_count",
+        "expected": "278",
+        "actual": "278",
+        "ok": "true"
+      },
+      {
+        "check": "buildpath.relative_count",
+        "expected": "39",
+        "actual": "39",
+        "ok": "true"
+      },
+      {
+        "check": "buildpath.vendor_count",
+        "expected": "276",
+        "actual": "276",
+        "ok": "true"
+      },
+      {
+        "check": "buildpath.first_party_client_source",
+        "expected": "['C:\\\\gl\\\\builds\\\\cfx-fivem-0\\\\code\\\\client\\\\shared\\\\Utils.cpp']",
+        "actual": "['C:\\\\gl\\\\builds\\\\cfx-fivem-0\\\\code\\\\client\\\\shared\\\\Utils.cpp']",
+        "ok": "true"
+      },
+      {
+        "check": "buildpath.no_server_source_paths",
+        "expected": "0",
+        "actual": "0",
+        "ok": "true"
+      },
+      {
+        "check": "buildpath.client_or_server",
+        "expected": "client",
+        "actual": "client",
+        "ok": "true"
+      },
+      {
+        "check": "workspace.no_adhesive_pdb",
+        "expected": "false",
+        "actual": "false",
+        "ok": "true"
+      },
+      {
+        "check": "workspace.component_list_without_adhesive",
+        "expected": "false",
+        "actual": "false",
+        "ok": "true"
+      },
+      {
+        "check": "workspace.component_config_has_server_components",
+        "expected": "true",
+        "actual": "true",
+        "ok": "true"
+      },
+      {
+        "check": "workspace.no_identity_keyword_reference",
+        "expected": "{'adhesive': 0, 'adhesive.pdb': 0, 'cfx-fivem': 0, 'cfx.re': 0, 'createcomponent': 0, 'fxcomponent': 0}",
+        "actual": "{'adhesive': 0, 'adhesive.pdb': 0, 'cfx-fivem': 0, 'cfx.re': 0, 'createcomponent': 0, 'fxcomponent': 0}",
+        "ok": "true"
+      },
+      {
+        "check": "workspace.no_build_context_reference",
+        "expected": "{'cfx-fivem-0': 0, 'gl\\\\builds': 0, '.build-cache': 0, 'release\\\\dbg': 0}",
+        "actual": "{'.build-cache': 0, 'cfx-fivem-0': 0, 'gl\\\\builds': 0, 'release\\\\dbg': 0}",
+        "ok": "true"
+      },
+      {
+        "check": "workspace.client_modules_partially_present",
+        "expected": "true",
+        "actual": "true",
+        "ok": "true"
+      },
+      {
+        "check": "authenticity.no_build_claim",
+        "expected": "false",
+        "actual": "false",
+        "ok": "true"
+      },
+      {
+        "check": "authenticity.build_provenance",
+        "expected": "undetermined",
+        "actual": "undetermined",
+        "ok": "true"
+      },
+      {
+        "check": "open_questions.recorded",
+        "expected": "true",
+        "actual": "true",
+        "ok": "true"
+      },
+      {
+        "check": "keys.correlation_vector_sha256",
+        "expected": "64",
+        "actual": "64",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.pe.machine",
+        "expected": "34404",
+        "actual": "34404",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.pe.magic_hex",
+        "expected": "0x20B",
+        "actual": "0x20B",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.pe.linker_version",
+        "expected": "14.0",
+        "actual": "14.0",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.pe.time_date_stamp_hex",
+        "expected": "0x6AA418EA",
+        "actual": "0x6AA418EA",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.pe.check_sum_hex",
+        "expected": "0x33207EE",
+        "actual": "0x33207EE",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.pe.check_sum_matches",
+        "expected": "true",
+        "actual": "true",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.pe.entry_point_rva_hex",
+        "expected": "0x2AB2770",
+        "actual": "0x2AB2770",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.pe.image_base_hex",
+        "expected": "0x180000000",
+        "actual": "0x180000000",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.pe.size_of_image_hex",
+        "expected": "0x331E000",
+        "actual": "0x331E000",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.pe.dll_characteristics_hex",
+        "expected": "0x160",
+        "actual": "0x160",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.sections[0].entropy",
+        "expected": "6.354389118",
+        "actual": "6.354389118",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.sections[1].entropy",
+        "expected": "6.067496729",
+        "actual": "6.067496729",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.sections[2].entropy",
+        "expected": "3.837675197",
+        "actual": "3.837675197",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.sections[3].entropy",
+        "expected": "0.845848782",
+        "actual": "0.845848782",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.sections[4].entropy",
+        "expected": "0.006117656",
+        "actual": "0.006117656",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.sections[5].entropy",
+        "expected": "3.923277863",
+        "actual": "3.923277863",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.sections[6].entropy",
+        "expected": "5.477351016",
+        "actual": "5.477351016",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.sections[0].raw_size_hex",
+        "expected": "0x2BED600",
+        "actual": "0x2BED600",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.sections[1].raw_size_hex",
+        "expected": "0x4CA000",
+        "actual": "0x4CA000",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.sections[2].raw_size_hex",
+        "expected": "0x24E000",
+        "actual": "0x24E000",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.sections[3].raw_size_hex",
+        "expected": "0x200",
+        "actual": "0x200",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.sections[4].raw_size_hex",
+        "expected": "0x5600",
+        "actual": "0x5600",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.sections[5].raw_size_hex",
+        "expected": "0x800",
+        "actual": "0x800",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.sections[6].raw_size_hex",
+        "expected": "0x9C00",
+        "actual": "0x9C00",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.sections[0].virtual_size_hex",
+        "expected": "0x2BED4B5",
+        "actual": "0x2BED4B5",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.sections[1].virtual_size_hex",
+        "expected": "0x4C9FDC",
+        "actual": "0x4C9FDC",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.sections[2].virtual_size_hex",
+        "expected": "0x252734",
+        "actual": "0x252734",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.pdata.record_count",
+        "expected": "142004",
+        "actual": "142004",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.imports.descriptor_count",
+        "expected": "42",
+        "actual": "42",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.imports.symbol_count",
+        "expected": "628",
+        "actual": "628",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.imports.name_imports",
+        "expected": "604",
+        "actual": "604",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.imports.ordinal_imports",
+        "expected": "24",
+        "actual": "24",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.imports.delay_descriptor_count",
+        "expected": "1",
+        "actual": "1",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.imports.delay_symbol_count",
+        "expected": "1",
+        "actual": "1",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.exports.symbol_count",
+        "expected": "1",
+        "actual": "1",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.exports.module_name",
+        "expected": "adhesive.dll",
+        "actual": "adhesive.dll",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.resources.entry_count",
+        "expected": "3",
+        "actual": "3",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.certificate.sha256",
+        "expected": "c670620dd04f80c823c66cc831d4481bd32d26e589dfbc3e57cfdc2ea0311951",
+        "actual": "c670620dd04f80c823c66cc831d4481bd32d26e589dfbc3e57cfdc2ea0311951",
+        "ok": "true"
+      },
+      {
+        "check": "baseline.certificate.end_offset_hex",
+        "expected": "0x3317E60",
+        "actual": "0x3317E60",
+        "ok": "true"
+      }
+    ]
+  }
+}

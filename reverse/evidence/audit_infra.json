@@ -1,0 +1,6003 @@
+{
+  "schema": "adhesive-dumper.audit-infra/1",
+  "audit": {
+    "script": "reverse/scripts/audit_infra.py",
+    "script_sha256": "ebf7f4f4547786ad52b780ca3f8ab2b10df8ab2890e2460d7eba5e08f2dc3e9b",
+    "method": "static file parsing only: the specimen is read as bytes and is never loaded, mapped as an image or executed, and the producer modules are never imported; their declared column orders and expected counts are read from source with ast",
+    "read_only_targets": true,
+    "determinism": {
+      "json_indent": 2,
+      "json_ensure_ascii": false,
+      "json_sort_keys": false,
+      "json_allow_nan": false,
+      "text_encoding": "utf-8",
+      "bom": false,
+      "line_terminator": "\\n",
+      "trailing_newline": true,
+      "payload_timestamps": false,
+      "payload_host_paths": false
+    }
+  },
+  "scope": {
+    "audited": [
+      "reverse/scripts/common.py",
+      "reverse/evidence/baseline.json",
+      "reverse/evidence/toolchain.json",
+      "reverse/evidence/pdata_stats.json",
+      "reverse/evidence/pdata_functions.csv",
+      "reverse/evidence/cfg_functions.csv",
+      "reverse/evidence/cfg_clusters.csv",
+      "reverse/evidence/xref_edges.csv",
+      "reverse/evidence/indirect_sites.csv",
+      "reverse/evidence/syscall_candidates_raw.csv",
+      "reverse/adhesive.dll"
+    ],
+    "out_of_scope": [
+      "reverse/evidence/apc_sites.csv",
+      "reverse/evidence/audit_handle_flow.json",
+      "reverse/evidence/audit_syscall_candidates.json",
+      "reverse/evidence/c856c0_callers.csv",
+      "reverse/evidence/c856c0_dataflow.json",
+      "reverse/evidence/c856c0_forward.json",
+      "reverse/evidence/patch_mechanisms_1dff0.csv",
+      "reverse/evidence/patch_mechanisms_1e270.csv",
+      "reverse/evidence/patch_mechanisms_helpers.csv",
+      "reverse/evidence/patch_record_table.json",
+      "reverse/evidence/pdb_correlation.json",
+      "reverse/evidence/syscall_arg_classes.json",
+      "reverse/evidence/syscall_arg_inventory.csv",
+      "reverse/evidence/syscall_inventory.csv",
+      "reverse/evidence/syscall_service_map.json",
+      "reverse/evidence/thread_context_map.json",
+      "reverse/evidence/unresolved_regions.csv",
+      "reverse/evidence/unresolved_regions.json"
+    ],
+    "method": "read only, static, specimen never executed"
+  },
+  "specimen": {
+    "path": "reverse/adhesive.dll",
+    "size": 53575264,
+    "sha256": "91cc0aa006d7315cb042c8fa8dca6c1e074a307bba7dcc9eb5509c8a7b81934e",
+    "sha1": "ae5627c6aab786095a816fc43f0e4ce04cee8829",
+    "md5": "2e24179cc01167e50190fdd3bcf6939a",
+    "executed": false,
+    "baseline_claim": {
+      "size": 53575264,
+      "sha256": "91cc0aa006d7315cb042c8fa8dca6c1e074a307bba7dcc9eb5509c8a7b81934e"
+    },
+    "toolchain_claim": {
+      "size": 53575264,
+      "sha256": "91cc0aa006d7315cb042c8fa8dca6c1e074a307bba7dcc9eb5509c8a7b81934e"
+    },
+    "pdata_stats_claim": {
+      "size": 53575264,
+      "sha256": "91cc0aa006d7315cb042c8fa8dca6c1e074a307bba7dcc9eb5509c8a7b81934e"
+    },
+    "baseline_sha256_self_claim": "91cc0aa006d7315cb042c8fa8dca6c1e074a307bba7dcc9eb5509c8a7b81934e",
+    "rederived": {
+      "runtime_function_records": 142004,
+      "unique_unwind_info": 15533,
+      "unwind_flag_value_distribution": {
+        "0": 137037,
+        "1": 65,
+        "2": 45,
+        "3": 2694,
+        "4": 2163
+      },
+      "handler_records": 2804,
+      "chain_records": 2163,
+      "begin_address_min": 4128,
+      "end_address_max": 46064821,
+      "covered_bytes": 37200748,
+      "exception_directory": {
+        "rva": 48582204,
+        "size": 1704048
+      }
+    }
+  },
+  "files": {
+    "reverse/scripts/common.py": {
+      "size": 46556,
+      "sha256": "4aa2ceec1af88b9cd72e64274b779f4fadf6b62d491fead2c865c3fa99eca750",
+      "bom": false,
+      "crlf": 0,
+      "lf": 1191,
+      "cr": 0,
+      "trailing_newline": true,
+      "nul_bytes": 0,
+      "utf8": true,
+      "line_endings": "lf",
+      "windows_path_tokens": 0,
+      "home_path_tokens": 0
+    },
+    "reverse/evidence/baseline.json": {
+      "size": 36512,
+      "sha256": "dc34cb50f1a002bae4f01e33064f35c0b28019fe7023add0988ab84fb8df67ea",
+      "bom": false,
+      "crlf": 0,
+      "lf": 1357,
+      "cr": 0,
+      "trailing_newline": true,
+      "nul_bytes": 0,
+      "utf8": true,
+      "line_endings": "lf",
+      "windows_path_tokens": 0,
+      "home_path_tokens": 0
+    },
+    "reverse/evidence/toolchain.json": {
+      "size": 27150,
+      "sha256": "72a1eed07d4d8a83df62cce8bd175a56cbba0da22982b34278fb537b15de0e6b",
+      "bom": false,
+      "crlf": 0,
+      "lf": 788,
+      "cr": 0,
+      "trailing_newline": true,
+      "nul_bytes": 0,
+      "utf8": true,
+      "line_endings": "lf",
+      "windows_path_tokens": 4,
+      "home_path_tokens": 4
+    },
+    "reverse/evidence/pdata_stats.json": {
+      "size": 18329,
+      "sha256": "df1e6ff4cc799afc907ac2c0a8568e87912bf14106bd6f5e88b14d5711a70be8",
+      "bom": false,
+      "crlf": 0,
+      "lf": 694,
+      "cr": 0,
+      "trailing_newline": true,
+      "nul_bytes": 0,
+      "utf8": true,
+      "line_endings": "lf",
+      "windows_path_tokens": 0,
+      "home_path_tokens": 0,
+      "observed": {
+        "csv_row_count": 142004,
+        "csv_sha256": "65ab914c1b38986fcb4bf07d55af0bdad16904a0dcd4271d73343ea7723d785b",
+        "gaps_count": 137103,
+        "validation_failed_count": 0
+      }
+    },
+    "reverse/evidence/pdata_functions.csv": {
+      "size": 29634365,
+      "sha256": "65ab914c1b38986fcb4bf07d55af0bdad16904a0dcd4271d73343ea7723d785b",
+      "bom": false,
+      "crlf": 0,
+      "lf": 142005,
+      "cr": 0,
+      "trailing_newline": true,
+      "nul_bytes": 0,
+      "utf8": true,
+      "line_endings": "lf",
+      "windows_path_tokens": 0,
+      "home_path_tokens": 0,
+      "header_columns": 43,
+      "header_matches_producer": true,
+      "observed": {
+        "row_count": 142004,
+        "unique_unwind_info": 15533,
+        "unwind_flag_value_distribution": {
+          "0": 137037,
+          "1": 65,
+          "2": 45,
+          "3": 2694,
+          "4": 2163
+        },
+        "covered_bytes": 37200748
+      }
+    },
+    "reverse/evidence/cfg_functions.csv": {
+      "size": 40180030,
+      "sha256": "041d2365e3be008fbacbcb6f957fbd10fe0ae08c52ee1cbc9090e04bb64df788",
+      "bom": false,
+      "crlf": 0,
+      "lf": 142005,
+      "cr": 0,
+      "trailing_newline": true,
+      "nul_bytes": 0,
+      "utf8": true,
+      "line_endings": "lf",
+      "windows_path_tokens": 0,
+      "home_path_tokens": 0,
+      "header_columns": 80,
+      "header_matches_producer": true,
+      "observed": {
+        "function_rows": 142004,
+        "cluster_rows": 233,
+        "clusters_referenced": 233
+      }
+    },
+    "reverse/evidence/cfg_clusters.csv": {
+      "size": 127104,
+      "sha256": "7d90d02c195e89357d8ec9a213a10140445dcffaf401e3bfe7c7c1871f1aa048",
+      "bom": false,
+      "crlf": 0,
+      "lf": 234,
+      "cr": 0,
+      "trailing_newline": true,
+      "nul_bytes": 0,
+      "utf8": true,
+      "line_endings": "lf",
+      "windows_path_tokens": 0,
+      "home_path_tokens": 0,
+      "header_columns": 65,
+      "header_matches_producer": true,
+      "observed": {
+        "function_rows": 142004,
+        "cluster_rows": 233,
+        "clusters_referenced": 233
+      }
+    },
+    "reverse/evidence/xref_edges.csv": {
+      "size": 11126183,
+      "sha256": "fc744f611f4b94caf3c619a874dbead3b57123ded4e5df55ba128d748334270a",
+      "bom": false,
+      "crlf": 0,
+      "lf": 57102,
+      "cr": 0,
+      "trailing_newline": true,
+      "nul_bytes": 0,
+      "utf8": true,
+      "line_endings": "lf",
+      "windows_path_tokens": 0,
+      "home_path_tokens": 0,
+      "header_columns": 22,
+      "header_matches_producer": true,
+      "observed": {
+        "rows": 57101,
+        "relations": {
+          "call_indirect_fnptr": 1449,
+          "call_indirect_iat": 3132,
+          "call_rel32_to_thunk": 6304,
+          "call_rel_to_code": 37969,
+          "fnptr_slot_code_target": 7192,
+          "iat_jmp_thunk_stub": 355,
+          "iat_slot_symbol_binding": 629,
+          "jmp_indirect_fnptr": 13,
+          "jmp_rel32_to_thunk": 32,
+          "jmp_rel_to_code": 26
+        },
+        "categories": {
+          "direct_call": 37969,
+          "direct_jmp": 26,
+          "global_fnptr": 1608,
+          "iat": 3761,
+          "thunk": 6691,
+          "vtable": 7046
+        },
+        "direct_iat_call_xrefs": 3132,
+        "thunk_mediated_call_xrefs": 6304,
+        "import_thunk_stubs": 355,
+        "thunk_mediated_jmp_edges": 32,
+        "thunk_stubs_reached_by_call": 193,
+        "iat_slots_bound": 629,
+        "iat_slots_reached_direct": 364,
+        "iat_slots_reached_via_thunk": 193,
+        "iat_slots_touched": 527,
+        "iat_slots_untouched": 102,
+        "call_xref_runtime_functions": 6039,
+        "call_xref_runtime_function_bytes": 5353470,
+        "thunk_stub_rows_covered_by_a_pdata_function": 0,
+        "thunk_stubs_hosted_inside_a_pdata_function": 39,
+        "thunk_stub_hosting_functions": {
+          "4912": 5,
+          "5158": 8,
+          "5831": 16,
+          "6240": 18,
+          "10812": 63,
+          "11257": 65,
+          "11654": 66,
+          "78093": 235,
+          "580514": 2137,
+          "583025": 2159,
+          "635558": 2291,
+          "679474": 2365,
+          "5915197": 19847,
+          "6787469": 22705,
+          "7337161": 23869,
+          "7540410": 24837,
+          "7540491": 24838,
+          "13169844": 38570,
+          "33094871": 102014,
+          "33133673": 102201,
+          "33159255": 102408,
+          "33950863": 105503,
+          "33971506": 105638,
+          "34054109": 106053,
+          "34324050": 107448,
+          "34438850": 108004,
+          "44190014": 136010,
+          "44662413": 136389,
+          "44691004": 136478,
+          "44698198": 136514,
+          "44771362": 136953,
+          "44771419": 136954,
+          "44771527": 136955,
+          "44775694": 136993,
+          "44779079": 137021,
+          "44779150": 137021,
+          "44779550": 137024,
+          "45561731": 140419,
+          "45778010": 141157
+        }
+      }
+    },
+    "reverse/evidence/indirect_sites.csv": {
+      "size": 27390456,
+      "sha256": "21e0e1af566ad8e7972647d78402a254f647c9fb588508e4c5f657cf6de940ee",
+      "bom": false,
+      "crlf": 0,
+      "lf": 157154,
+      "cr": 0,
+      "trailing_newline": true,
+      "nul_bytes": 0,
+      "utf8": true,
+      "line_endings": "lf",
+      "windows_path_tokens": 0,
+      "home_path_tokens": 0,
+      "header_columns": 28,
+      "header_matches_producer": true,
+      "observed": {
+        "rows": 157153,
+        "site_id_range": [
+          1,
+          157153
+        ],
+        "kinds": {
+          "call_mem_base": 5463,
+          "call_mem_rip": 5020,
+          "call_reg": 49709,
+          "jmp_mem_base": 70,
+          "jmp_mem_rip": 408,
+          "jmp_reg": 86356,
+          "raw_ff15_rejected": 16,
+          "write_rip": 10111
+        },
+        "sources": {
+          "pdata_decode": 156782,
+          "raw_scan": 371
+        },
+        "target_kinds": {
+          "data": 10308,
+          "global_fnptr_slot": 1448,
+          "iat_slot": 3526,
+          "outside_image": 5,
+          "reg": 136065,
+          "rejected": 16,
+          "unresolved": 5533,
+          "virtual_tail": 230,
+          "vtable_slot": 22
+        },
+        "thunk_stub_sites": 355,
+        "thunk_stub_sites_with_function_index": 0,
+        "thunk_stub_hosting_functions": {
+          "4912": 5,
+          "5158": 8,
+          "5831": 16,
+          "6240": 18,
+          "10812": 63,
+          "11257": 65,
+          "11654": 66,
+          "78093": 235,
+          "580514": 2137,
+          "583025": 2159,
+          "635558": 2291,
+          "679474": 2365,
+          "5915197": 19847,
+          "6787469": 22705,
+          "7337161": 23869,
+          "7540410": 24837,
+          "7540491": 24838,
+          "13169844": 38570,
+          "33094871": 102014,
+          "33133673": 102201,
+          "33159255": 102408,
+          "33950863": 105503,
+          "33971506": 105638,
+          "34054109": 106053,
+          "34324050": 107448,
+          "34438850": 108004,
+          "44190014": 136010,
+          "44662413": 136389,
+          "44691004": 136478,
+          "44698198": 136514,
+          "44771362": 136953,
+          "44771419": 136954,
+          "44771527": 136955,
+          "44775694": 136993,
+          "44779079": 137021,
+          "44779150": 137021,
+          "44779550": 137024,
+          "45561731": 140419,
+          "45778010": 141157
+        },
+        "thunk_stub_sites_annotated_outside_pdata": 316,
+        "thunk_stub_sites_annotated_outside_but_inside_pdata": 0,
+        "thunk_stub_sites_annotated_interior": 39,
+        "thunk_stub_sites_annotated_interior_hosted_in_pdata": 39,
+        "thunk_stub_interior_arithmetic_breaks": 0,
+        "rejected_raw_sites": 16
+      }
+    },
+    "reverse/evidence/syscall_candidates_raw.csv": {
+      "size": 920267,
+      "sha256": "7c99950c48c6320487a28bdde1cba5914a8d620b4ef2049ae3f2118a2fcc3e8a",
+      "bom": false,
+      "crlf": 0,
+      "lf": 3882,
+      "cr": 0,
+      "trailing_newline": true,
+      "nul_bytes": 0,
+      "utf8": true,
+      "line_endings": "lf",
+      "windows_path_tokens": 0,
+      "home_path_tokens": 0,
+      "header_columns": 33,
+      "header_matches_producer": true,
+      "observed": {
+        "rows": 3881,
+        "valid_candidates": 3627,
+        "false_positives": 254,
+        "inside_pdata_functions": 3836,
+        "rows_without_pdata_function": 45,
+        "pdata_word_boundary_ok": 972,
+        "dispositions": {
+          "covered_by_instruction": 209,
+          "instruction_start": 3627,
+          "no_pdata_function": 45
+        }
+      }
+    }
+  },
+  "provenance": {
+    "digests": {
+      "reverse/evidence/baseline.json": "dc34cb50f1a002bae4f01e33064f35c0b28019fe7023add0988ab84fb8df67ea",
+      "reverse/evidence/cfg_clusters.csv": "7d90d02c195e89357d8ec9a213a10140445dcffaf401e3bfe7c7c1871f1aa048",
+      "reverse/evidence/cfg_functions.csv": "041d2365e3be008fbacbcb6f957fbd10fe0ae08c52ee1cbc9090e04bb64df788",
+      "reverse/evidence/indirect_sites.csv": "21e0e1af566ad8e7972647d78402a254f647c9fb588508e4c5f657cf6de940ee",
+      "reverse/evidence/pdata_functions.csv": "65ab914c1b38986fcb4bf07d55af0bdad16904a0dcd4271d73343ea7723d785b",
+      "reverse/evidence/pdata_stats.json": "df1e6ff4cc799afc907ac2c0a8568e87912bf14106bd6f5e88b14d5711a70be8",
+      "reverse/evidence/syscall_candidates_raw.csv": "7c99950c48c6320487a28bdde1cba5914a8d620b4ef2049ae3f2118a2fcc3e8a",
+      "reverse/evidence/toolchain.json": "72a1eed07d4d8a83df62cce8bd175a56cbba0da22982b34278fb537b15de0e6b",
+      "reverse/evidence/xref_edges.csv": "fc744f611f4b94caf3c619a874dbead3b57123ded4e5df55ba128d748334270a",
+      "reverse/scripts/cfg_build.py": "320d8865ebcc2ec1005cd7ceeaa5ae127929d2fec1a132ec7ff38eb3554dbfdb",
+      "reverse/scripts/common.py": "4aa2ceec1af88b9cd72e64274b779f4fadf6b62d491fead2c865c3fa99eca750",
+      "reverse/scripts/pdata_map.py": "6772cfbfea0db607a626a91f5bcd4c5b2e1eb47d25a6e3c770b031e8c0f845b7",
+      "reverse/scripts/syscall_scan.py": "1710dd90b8e7bad04b29d9101f900c3a0040d83a16b8d35446556ed4b210cfc8",
+      "reverse/scripts/xref_build.py": "cbb48bccba566f417a7c70db1821ef1d51fc8841ffa2c897edc6fbcff0c538d9"
+    },
+    "digests_recorded": {
+      "reverse/evidence/baseline.json": "dc34cb50f1a002bae4f01e33064f35c0b28019fe7023add0988ab84fb8df67ea",
+      "reverse/evidence/pdata_functions.csv": "65ab914c1b38986fcb4bf07d55af0bdad16904a0dcd4271d73343ea7723d785b",
+      "reverse/scripts/common.py": "4aa2ceec1af88b9cd72e64274b779f4fadf6b62d491fead2c865c3fa99eca750",
+      "reverse/scripts/pdata_map.py": "6772cfbfea0db607a626a91f5bcd4c5b2e1eb47d25a6e3c770b031e8c0f845b7"
+    },
+    "digests_not_recorded": [
+      "reverse/evidence/toolchain.json",
+      "reverse/evidence/pdata_stats.json",
+      "reverse/evidence/cfg_functions.csv",
+      "reverse/evidence/cfg_clusters.csv",
+      "reverse/evidence/xref_edges.csv",
+      "reverse/evidence/indirect_sites.csv",
+      "reverse/evidence/syscall_candidates_raw.csv"
+    ],
+    "digests_not_recorded_in": "reverse/evidence/pdata_stats.json",
+    "digests_not_recorded_note": "this list is measured against pdata_stats.json alone, because that is the only producer that records an output digest. Whether an artifact is attested anywhere in the set, the toolchain digests block included, is decided by the toolchain.digests.digest_attested checks and the D-004 residual"
+  },
+  "documented_claims": {
+    "runtime_function_records": {
+      "source": "reverse/adhesive-02-pe-layout-security.md (adhesive-02 section 15 RUNTIME_FUNCTION records)",
+      "claimed": 142004,
+      "observed": 142004,
+      "check": "specimen.documented[runtime_function_records]",
+      "ok": true
+    },
+    "exception_directory_size_div_12": {
+      "source": "reverse/adhesive-02-pe-layout-security.md (adhesive-02 section 15 Size / 12 with no remainder)",
+      "claimed": 142004,
+      "observed": 142004,
+      "check": "specimen.documented[exception_directory_size_div_12]",
+      "ok": true
+    },
+    "unique_unwind_info": {
+      "source": "reverse/adhesive-02-pe-layout-security.md (adhesive-02 section 15 unique unwind info)",
+      "claimed": 15533,
+      "observed": 15533,
+      "check": "pdata.csv.documented[unique_unwind_info]",
+      "ok": true
+    },
+    "unwind_flag_zero": {
+      "source": "reverse/adhesive-02-pe-layout-security.md (adhesive-02 unwind flag distribution, value 0)",
+      "claimed": 137037,
+      "observed": 137037,
+      "check": "pdata.csv.documented[unwind_flag_zero]",
+      "ok": true
+    },
+    "unwind_flag_ehandler": {
+      "source": "reverse/adhesive-02-pe-layout-security.md (adhesive-02 unwind flag distribution, value 1)",
+      "claimed": 65,
+      "observed": 65,
+      "check": "pdata.csv.documented[unwind_flag_ehandler]",
+      "ok": true
+    },
+    "unwind_flag_uhandler": {
+      "source": "reverse/adhesive-02-pe-layout-security.md (adhesive-02 unwind flag distribution, value 2)",
+      "claimed": 45,
+      "observed": 45,
+      "check": "pdata.csv.documented[unwind_flag_uhandler]",
+      "ok": true
+    },
+    "unwind_flag_ehandler_uhandler": {
+      "source": "reverse/adhesive-02-pe-layout-security.md (adhesive-02 unwind flag distribution, value 3)",
+      "claimed": 2694,
+      "observed": 2694,
+      "check": "pdata.csv.documented[unwind_flag_ehandler_uhandler]",
+      "ok": true
+    },
+    "unwind_flag_chaininfo": {
+      "source": "reverse/adhesive-02-pe-layout-security.md (adhesive-02 unwind flag distribution, value 4)",
+      "claimed": 2163,
+      "observed": 2163,
+      "check": "pdata.csv.documented[unwind_flag_chaininfo]",
+      "ok": true
+    },
+    "handler_records": {
+      "source": "reverse/adhesive-02-pe-layout-security.md (adhesive-02 section 15 records carrying a handler flag)",
+      "claimed": 2804,
+      "observed": 2804,
+      "check": "pdata.csv.documented[handler_records]",
+      "ok": true
+    },
+    "chain_records": {
+      "source": "reverse/adhesive-02-pe-layout-security.md (adhesive-02 section 15 CHAININFO records)",
+      "claimed": 2163,
+      "observed": 2163,
+      "check": "pdata.csv.documented[chain_records]",
+      "ok": true
+    },
+    "direct_iat_call_xrefs": {
+      "source": "reverse/adhesive-03-imports-exports.md (adhesive-03 section 2 accepted direct call [IAT] xrefs)",
+      "claimed": 3132,
+      "observed": 3132,
+      "check": "xref.edges.documented[direct_iat_call_xrefs]",
+      "ok": true
+    },
+    "direct_iat_call_xrefs_regular": {
+      "source": "reverse/adhesive-03-imports-exports.md (adhesive-03 section 2 accepted direct call [IAT] xrefs, regular slots)",
+      "claimed": 3131,
+      "observed": 3131,
+      "check": "xref.edges.documented[direct_iat_call_xrefs_regular]",
+      "ok": true
+    },
+    "direct_iat_call_xrefs_delay": {
+      "source": "reverse/adhesive-03-imports-exports.md (adhesive-03 section 2 accepted direct call [IAT] xrefs, delay slot)",
+      "claimed": 1,
+      "observed": 1,
+      "check": "xref.edges.documented[direct_iat_call_xrefs_delay]",
+      "ok": true
+    },
+    "thunk_mediated_call_xrefs": {
+      "source": "reverse/adhesive-03-imports-exports.md (adhesive-03 section 2 call rel32 xrefs through an import thunk)",
+      "claimed": 6304,
+      "observed": 6304,
+      "check": "script.xref_build.doc03_claim[thunk_mediated_call_xrefs]",
+      "ok": true
+    },
+    "import_thunks": {
+      "source": "reverse/adhesive-03-imports-exports.md (adhesive-03 section 2 import jmp [IAT] thunks)",
+      "claimed": 355,
+      "observed": 355,
+      "check": "xref.edges.documented[import_thunks]",
+      "ok": true
+    },
+    "thunks_reached_by_call": {
+      "source": "reverse/adhesive-03-imports-exports.md (adhesive-03 section 2 import thunks reached by at least one CALL xref)",
+      "claimed": 193,
+      "observed": 193,
+      "check": "script.xref_build.doc03_claim[thunks_reached_by_call]",
+      "ok": true
+    },
+    "iat_slots_total": {
+      "source": "reverse/adhesive-03-imports-exports.md (adhesive-03 section 2 regular plus delay IAT slots)",
+      "claimed": 629,
+      "observed": 629,
+      "check": "xref.edges.documented[iat_slots_total]",
+      "ok": true
+    },
+    "iat_slots_reached_direct": {
+      "source": "reverse/adhesive-03-imports-exports.md (adhesive-03 section 2 IAT slots with a direct CALL xref)",
+      "claimed": 364,
+      "observed": 364,
+      "check": "xref.edges.documented[iat_slots_reached_direct]",
+      "ok": true
+    },
+    "iat_slots_touched": {
+      "source": "reverse/adhesive-03-imports-exports.md (adhesive-03 section 2 IAT slots touched by either xref kind)",
+      "claimed": 527,
+      "observed": 527,
+      "check": "xref.edges.documented[iat_slots_touched]",
+      "ok": true
+    },
+    "total_statistical_call_xrefs": {
+      "source": "reverse/adhesive-03-imports-exports.md (adhesive-03 section 2 all statistical CALL xrefs)",
+      "claimed": 9436,
+      "observed": 9436,
+      "check": "script.xref_build.doc03_claim[total_statistical_call_xrefs]",
+      "ok": true
+    },
+    "raw_ff15_candidates": {
+      "source": "reverse/adhesive-03-imports-exports.md (adhesive-03 section 9 raw FF 15 candidates onto an IAT slot)",
+      "claimed": 3148,
+      "observed": 3148,
+      "check": "xref.edges.documented[raw_ff15_candidates]",
+      "ok": true
+    },
+    "raw_ff15_rejected": {
+      "source": "reverse/adhesive-03-imports-exports.md (adhesive-03 section 9 raw candidates dropped by the pdata filter)",
+      "claimed": 16,
+      "observed": 16,
+      "check": "indirect.sites.documented[raw_ff15_rejected]",
+      "ok": true
+    },
+    "xref_runtime_functions": {
+      "source": "reverse/adhesive-03-imports-exports.md (adhesive-03 section 9 runtime functions carrying an accepted xref)",
+      "claimed": 6039,
+      "observed": 6039,
+      "check": "script.xref_build.doc03_claim[xref_runtime_functions]",
+      "ok": true
+    },
+    "xref_runtime_function_bytes": {
+      "source": "reverse/adhesive-03-imports-exports.md (adhesive-03 section 9 bytes of those runtime functions)",
+      "claimed": 5353470,
+      "observed": 5353470,
+      "check": "script.xref_build.doc03_claim[xref_runtime_function_bytes]",
+      "ok": true
+    },
+    "syscall_raw_hits": {
+      "source": "reverse/adhesive-12-risk-methodology-open-questions.md (adhesive-12 direct syscall scope raw 0F 05 hits)",
+      "claimed": 3881,
+      "observed": 3881,
+      "check": "syscall.candidates.documented[syscall_raw_hits]",
+      "ok": true
+    }
+  },
+  "summary": {
+    "check_count": 632,
+    "failed_count": 0,
+    "verdict": "pass",
+    "by_group": {
+      "cfg.clusters": {
+        "checks": 58,
+        "failed": 0
+      },
+      "cfg.functions": {
+        "checks": 19,
+        "failed": 0
+      },
+      "csv.format": {
+        "checks": 60,
+        "failed": 0
+      },
+      "discrepancy.integrity": {
+        "checks": 5,
+        "failed": 0
+      },
+      "indirect.sites": {
+        "checks": 19,
+        "failed": 0
+      },
+      "json.format": {
+        "checks": 23,
+        "failed": 0
+      },
+      "pdata.csv": {
+        "checks": 24,
+        "failed": 0
+      },
+      "pdata.stats": {
+        "checks": 52,
+        "failed": 0
+      },
+      "provenance": {
+        "checks": 8,
+        "failed": 0
+      },
+      "script.common": {
+        "checks": 37,
+        "failed": 0
+      },
+      "script.pdata_map": {
+        "checks": 6,
+        "failed": 0
+      },
+      "script.syscall_scan": {
+        "checks": 3,
+        "failed": 0
+      },
+      "script.xref_build": {
+        "checks": 6,
+        "failed": 0
+      },
+      "specimen": {
+        "checks": 68,
+        "failed": 0
+      },
+      "syscall.candidates": {
+        "checks": 27,
+        "failed": 0
+      },
+      "toolchain.digests": {
+        "checks": 21,
+        "failed": 0
+      },
+      "toolchain.host": {
+        "checks": 1,
+        "failed": 0
+      },
+      "toolchain.inventory": {
+        "checks": 9,
+        "failed": 0
+      },
+      "toolchain.libraries": {
+        "checks": 1,
+        "failed": 0
+      },
+      "toolchain.package_versions": {
+        "checks": 16,
+        "failed": 0
+      },
+      "toolchain.scripts": {
+        "checks": 136,
+        "failed": 0
+      },
+      "xref.edges": {
+        "checks": 33,
+        "failed": 0
+      }
+    },
+    "discrepancy_count": 4,
+    "discrepancy_open_count": 0,
+    "discrepancy_status": {
+      "D-001": "closed",
+      "D-002": "closed",
+      "D-003": "closed",
+      "D-004": "closed"
+    }
+  },
+  "failed_checks": [],
+  "checks": [
+    {
+      "group": "script.common",
+      "check": "reverse/scripts/common.py.encoding_utf8",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "script.common",
+      "check": "reverse/scripts/common.py.bom_absent",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "group": "script.common",
+      "check": "reverse/scripts/common.py.crlf_count",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "script.common",
+      "check": "reverse/scripts/common.py.bare_cr_count",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "script.common",
+      "check": "reverse/scripts/common.py.trailing_newline",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "script.common",
+      "check": "reverse/scripts/common.py.nul_bytes",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "script.common",
+      "check": "reverse/scripts/common.py.line_endings",
+      "expected": "lf",
+      "actual": "lf",
+      "ok": true
+    },
+    {
+      "group": "json.format",
+      "check": "reverse/evidence/baseline.json.encoding_utf8",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "json.format",
+      "check": "reverse/evidence/baseline.json.bom_absent",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "group": "json.format",
+      "check": "reverse/evidence/baseline.json.crlf_count",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "json.format",
+      "check": "reverse/evidence/baseline.json.bare_cr_count",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "json.format",
+      "check": "reverse/evidence/baseline.json.trailing_newline",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "json.format",
+      "check": "reverse/evidence/baseline.json.nul_bytes",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "json.format",
+      "check": "reverse/evidence/baseline.json.line_endings",
+      "expected": "lf",
+      "actual": "lf",
+      "ok": true
+    },
+    {
+      "group": "json.format",
+      "check": "reverse/evidence/baseline.json.host_independent_payload",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "group": "json.format",
+      "check": "reverse/evidence/toolchain.json.encoding_utf8",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "json.format",
+      "check": "reverse/evidence/toolchain.json.bom_absent",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "group": "json.format",
+      "check": "reverse/evidence/toolchain.json.crlf_count",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "json.format",
+      "check": "reverse/evidence/toolchain.json.bare_cr_count",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "json.format",
+      "check": "reverse/evidence/toolchain.json.trailing_newline",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "json.format",
+      "check": "reverse/evidence/toolchain.json.nul_bytes",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "json.format",
+      "check": "reverse/evidence/toolchain.json.line_endings",
+      "expected": "lf",
+      "actual": "lf",
+      "ok": true
+    },
+    {
+      "group": "json.format",
+      "check": "reverse/evidence/pdata_stats.json.encoding_utf8",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "json.format",
+      "check": "reverse/evidence/pdata_stats.json.bom_absent",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "group": "json.format",
+      "check": "reverse/evidence/pdata_stats.json.crlf_count",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "json.format",
+      "check": "reverse/evidence/pdata_stats.json.bare_cr_count",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "json.format",
+      "check": "reverse/evidence/pdata_stats.json.trailing_newline",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "json.format",
+      "check": "reverse/evidence/pdata_stats.json.nul_bytes",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "json.format",
+      "check": "reverse/evidence/pdata_stats.json.line_endings",
+      "expected": "lf",
+      "actual": "lf",
+      "ok": true
+    },
+    {
+      "group": "json.format",
+      "check": "reverse/evidence/pdata_stats.json.host_independent_payload",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/pdata_functions.csv.encoding_utf8",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/pdata_functions.csv.bom_absent",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/pdata_functions.csv.crlf_count",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/pdata_functions.csv.bare_cr_count",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/pdata_functions.csv.trailing_newline",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/pdata_functions.csv.nul_bytes",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/pdata_functions.csv.line_endings",
+      "expected": "lf",
+      "actual": "lf",
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/pdata_functions.csv.header_matches_producer_declaration",
+      "expected": "record_index,begin_address,begin_address_hex,end_address,end_address_hex,code_size,code_section,begin_raw,end_raw,record_raw,record_raw_hex,unwind_info_address,unwind_info_address_hex,unwind_info_raw,unwind_info_raw_hex,unwind_info_section,unwind_info_index,unwind_reference_count,unwind_first_record,unwind_version,unwind_flags,unwind_flag_names,unwind_size_of_prolog,unwind_count_of_codes,unwind_frame_register,unwind_frame_offset,unwind_extension_offset,unwind_info_end,unwind_code_size,has_handler,handler_rva,handler_rva_hex,handler_raw,handler_section,has_chain,chain_begin_address,chain_begin_address_hex,chain_end_address,chain_end_address_hex,chain_unwind_info_address,chain_depth,gap_before,gap_before_hex",
+      "actual": "record_index,begin_address,begin_address_hex,end_address,end_address_hex,code_size,code_section,begin_raw,end_raw,record_raw,record_raw_hex,unwind_info_address,unwind_info_address_hex,unwind_info_raw,unwind_info_raw_hex,unwind_info_section,unwind_info_index,unwind_reference_count,unwind_first_record,unwind_version,unwind_flags,unwind_flag_names,unwind_size_of_prolog,unwind_count_of_codes,unwind_frame_register,unwind_frame_offset,unwind_extension_offset,unwind_info_end,unwind_code_size,has_handler,handler_rva,handler_rva_hex,handler_raw,handler_section,has_chain,chain_begin_address,chain_begin_address_hex,chain_end_address,chain_end_address_hex,chain_unwind_info_address,chain_depth,gap_before,gap_before_hex",
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/pdata_functions.csv.column_count",
+      "expected": 43,
+      "actual": 43,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/pdata_functions.csv.host_independent_payload",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/cfg_functions.csv.encoding_utf8",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/cfg_functions.csv.bom_absent",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/cfg_functions.csv.crlf_count",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/cfg_functions.csv.bare_cr_count",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/cfg_functions.csv.trailing_newline",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/cfg_functions.csv.nul_bytes",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/cfg_functions.csv.line_endings",
+      "expected": "lf",
+      "actual": "lf",
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/cfg_functions.csv.header_matches_producer_declaration",
+      "expected": "func_index,begin_rva,begin_rva_hex,begin_va,begin_va_hex,end_rva,end_rva_hex,end_va,end_va_hex,size,section,raw,raw_hex,unwind_rva,unwind_rva_hex,unwind_version,unwind_flags,unwind_shared_by,overlap_role,overlap_partners,entry_internal,entry_external_calls,entry_external_jumps,entry_refs,basic_blocks,blocks_reached,blocks_linear_only,reached_ratio,instructions,decoded_bytes,undecoded_bytes,undecoded_regions,edges,max_indegree,blocks_indegree_gt1,back_edges,cross_calls,cross_jumps,cross_function_edges,cross_function_targets,term_call,term_jmp_direct,term_jmp_indirect,term_jcc,term_return,term_trap,term_invalid,term_range_end,exit_call,exit_branch,exit_cond,exit_switch,exit_indirect,exit_return,exit_trap,exit_invalid,exit_range_end,direct_calls,direct_jumps,indirect_calls,indirect_jumps,indirect_jumps_unresolved,iat_call_sites,iat_jump_sites,iat_module_count,iat_symbol_count,iat_symbols,switch_sites,switch_sites_validated,switch_sites_rejected,switch_cases,switch_reject_reasons,ret_sites,ud2_sites,int3_sites,trap_sites,syscall_sites,decode_status,doc_anchors,cluster_id",
+      "actual": "func_index,begin_rva,begin_rva_hex,begin_va,begin_va_hex,end_rva,end_rva_hex,end_va,end_va_hex,size,section,raw,raw_hex,unwind_rva,unwind_rva_hex,unwind_version,unwind_flags,unwind_shared_by,overlap_role,overlap_partners,entry_internal,entry_external_calls,entry_external_jumps,entry_refs,basic_blocks,blocks_reached,blocks_linear_only,reached_ratio,instructions,decoded_bytes,undecoded_bytes,undecoded_regions,edges,max_indegree,blocks_indegree_gt1,back_edges,cross_calls,cross_jumps,cross_function_edges,cross_function_targets,term_call,term_jmp_direct,term_jmp_indirect,term_jcc,term_return,term_trap,term_invalid,term_range_end,exit_call,exit_branch,exit_cond,exit_switch,exit_indirect,exit_return,exit_trap,exit_invalid,exit_range_end,direct_calls,direct_jumps,indirect_calls,indirect_jumps,indirect_jumps_unresolved,iat_call_sites,iat_jump_sites,iat_module_count,iat_symbol_count,iat_symbols,switch_sites,switch_sites_validated,switch_sites_rejected,switch_cases,switch_reject_reasons,ret_sites,ud2_sites,int3_sites,trap_sites,syscall_sites,decode_status,doc_anchors,cluster_id",
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/cfg_functions.csv.column_count",
+      "expected": 80,
+      "actual": 80,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/cfg_functions.csv.host_independent_payload",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/cfg_clusters.csv.encoding_utf8",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/cfg_clusters.csv.bom_absent",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/cfg_clusters.csv.crlf_count",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/cfg_clusters.csv.bare_cr_count",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/cfg_clusters.csv.trailing_newline",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/cfg_clusters.csv.nul_bytes",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/cfg_clusters.csv.line_endings",
+      "expected": "lf",
+      "actual": "lf",
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/cfg_clusters.csv.header_matches_producer_declaration",
+      "expected": "cluster_id,first_rva,first_rva_hex,last_end_rva,last_end_rva_hex,rva_span,section,function_count,size_min,size_max,size_total,size_average,span_bytes,code_bytes,gap_bytes,entropy_span,entropy_code,basic_blocks,blocks_reached,blocks_linear_only,reached_ratio,instructions,decoded_bytes,undecoded_bytes,undecoded_regions,edges,back_edges,max_indegree,cross_calls,cross_jumps,cross_function_edges,direct_calls,direct_jumps,indirect_calls,indirect_jumps,indirect_jumps_unresolved,iat_call_sites,iat_jump_sites,iat_module_count,iat_symbol_count,iat_symbols,switch_sites,switch_sites_validated,switch_sites_rejected,switch_cases,ret_sites,ud2_sites,int3_sites,trap_sites,syscall_sites,functions_with_linear_blocks,functions_with_undecoded,functions_with_entry_refs,functions_multi_entry,unwind_ehandler,unwind_uhandler,unwind_chaininfo,overlapping_functions,entry_point_inside,export_inside,doc_anchors,anchor_tags,anchor_evidence,anchor_count,anchor_truncated",
+      "actual": "cluster_id,first_rva,first_rva_hex,last_end_rva,last_end_rva_hex,rva_span,section,function_count,size_min,size_max,size_total,size_average,span_bytes,code_bytes,gap_bytes,entropy_span,entropy_code,basic_blocks,blocks_reached,blocks_linear_only,reached_ratio,instructions,decoded_bytes,undecoded_bytes,undecoded_regions,edges,back_edges,max_indegree,cross_calls,cross_jumps,cross_function_edges,direct_calls,direct_jumps,indirect_calls,indirect_jumps,indirect_jumps_unresolved,iat_call_sites,iat_jump_sites,iat_module_count,iat_symbol_count,iat_symbols,switch_sites,switch_sites_validated,switch_sites_rejected,switch_cases,ret_sites,ud2_sites,int3_sites,trap_sites,syscall_sites,functions_with_linear_blocks,functions_with_undecoded,functions_with_entry_refs,functions_multi_entry,unwind_ehandler,unwind_uhandler,unwind_chaininfo,overlapping_functions,entry_point_inside,export_inside,doc_anchors,anchor_tags,anchor_evidence,anchor_count,anchor_truncated",
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/cfg_clusters.csv.column_count",
+      "expected": 65,
+      "actual": 65,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/cfg_clusters.csv.host_independent_payload",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/xref_edges.csv.encoding_utf8",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/xref_edges.csv.bom_absent",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/xref_edges.csv.crlf_count",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/xref_edges.csv.bare_cr_count",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/xref_edges.csv.trailing_newline",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/xref_edges.csv.nul_bytes",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/xref_edges.csv.line_endings",
+      "expected": "lf",
+      "actual": "lf",
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/xref_edges.csv.header_matches_producer_declaration",
+      "expected": "edge_id,category,relation,evidence,src_rva,src_raw,code_instruction_function_index,code_instruction_function_begin,code_instruction_function_end,src_mnemonic,src_op_str,src_bytes,via_rva,target_thunk_function_index,target_thunk_function_begin,target_thunk_function_end,dst_kind,dst_rva,dst_raw,dst_module,dst_symbol,iat_rva",
+      "actual": "edge_id,category,relation,evidence,src_rva,src_raw,code_instruction_function_index,code_instruction_function_begin,code_instruction_function_end,src_mnemonic,src_op_str,src_bytes,via_rva,target_thunk_function_index,target_thunk_function_begin,target_thunk_function_end,dst_kind,dst_rva,dst_raw,dst_module,dst_symbol,iat_rva",
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/xref_edges.csv.column_count",
+      "expected": 22,
+      "actual": 22,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/xref_edges.csv.host_independent_payload",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/indirect_sites.csv.encoding_utf8",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/indirect_sites.csv.bom_absent",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/indirect_sites.csv.crlf_count",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/indirect_sites.csv.bare_cr_count",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/indirect_sites.csv.trailing_newline",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/indirect_sites.csv.nul_bytes",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/indirect_sites.csv.line_endings",
+      "expected": "lf",
+      "actual": "lf",
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/indirect_sites.csv.header_matches_producer_declaration",
+      "expected": "site_id,kind,source,insn_rva,insn_raw,code_instruction_function_index,code_instruction_function_begin,code_instruction_function_end,mnemonic,op_str,bytes,operand_kind,operand_reg,mem_base,mem_index,mem_scale,mem_disp,target_kind,target_rva,target_section,target_code_rva,target_thunk_function_index,target_thunk_function_begin,target_thunk_function_end,iat_rva,dll,symbol,annotation",
+      "actual": "site_id,kind,source,insn_rva,insn_raw,code_instruction_function_index,code_instruction_function_begin,code_instruction_function_end,mnemonic,op_str,bytes,operand_kind,operand_reg,mem_base,mem_index,mem_scale,mem_disp,target_kind,target_rva,target_section,target_code_rva,target_thunk_function_index,target_thunk_function_begin,target_thunk_function_end,iat_rva,dll,symbol,annotation",
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/indirect_sites.csv.column_count",
+      "expected": 28,
+      "actual": 28,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/indirect_sites.csv.host_independent_payload",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/syscall_candidates_raw.csv.encoding_utf8",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/syscall_candidates_raw.csv.bom_absent",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/syscall_candidates_raw.csv.crlf_count",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/syscall_candidates_raw.csv.bare_cr_count",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/syscall_candidates_raw.csv.trailing_newline",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/syscall_candidates_raw.csv.nul_bytes",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/syscall_candidates_raw.csv.line_endings",
+      "expected": "lf",
+      "actual": "lf",
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/syscall_candidates_raw.csv.header_matches_producer_declaration",
+      "expected": "hit_index,section_name,section_characteristics_hex,raw_offset,raw_offset_hex,rva,rva_hex,va,va_hex,bytes_hex,bytes_ok,in_code,in_data,in_pdata,pdata_function_index,pdata_function_start_rva_hex,pdata_function_end_rva_hex,pdata_function_size,pdata_function_offset,pdata_function_offset_hex,pdata_word_boundary_ok,capstone_checked,capstone_instruction,capstone_instruction_size,capstone_covering_rva_hex,capstone_covering_instruction,capstone_linear_stop_rva_hex,capstone_linear_stop_reason,capstone_candidate_disposition,capstone_boundary_ok,false_positive,false_positive_ok,valid_candidate",
+      "actual": "hit_index,section_name,section_characteristics_hex,raw_offset,raw_offset_hex,rva,rva_hex,va,va_hex,bytes_hex,bytes_ok,in_code,in_data,in_pdata,pdata_function_index,pdata_function_start_rva_hex,pdata_function_end_rva_hex,pdata_function_size,pdata_function_offset,pdata_function_offset_hex,pdata_word_boundary_ok,capstone_checked,capstone_instruction,capstone_instruction_size,capstone_covering_rva_hex,capstone_covering_instruction,capstone_linear_stop_rva_hex,capstone_linear_stop_reason,capstone_candidate_disposition,capstone_boundary_ok,false_positive,false_positive_ok,valid_candidate",
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/syscall_candidates_raw.csv.column_count",
+      "expected": 33,
+      "actual": 33,
+      "ok": true
+    },
+    {
+      "group": "csv.format",
+      "check": "reverse/evidence/syscall_candidates_raw.csv.host_independent_payload",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "baseline.specimen_size",
+      "expected": 53575264,
+      "actual": 53575264,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "baseline.specimen_sha256",
+      "expected": "91cc0aa006d7315cb042c8fa8dca6c1e074a307bba7dcc9eb5509c8a7b81934e",
+      "actual": "91cc0aa006d7315cb042c8fa8dca6c1e074a307bba7dcc9eb5509c8a7b81934e",
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "toolchain.specimen_size",
+      "expected": 53575264,
+      "actual": 53575264,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "toolchain.specimen_sha256",
+      "expected": "91cc0aa006d7315cb042c8fa8dca6c1e074a307bba7dcc9eb5509c8a7b81934e",
+      "actual": "91cc0aa006d7315cb042c8fa8dca6c1e074a307bba7dcc9eb5509c8a7b81934e",
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "pdata_stats.specimen_size",
+      "expected": 53575264,
+      "actual": 53575264,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "pdata_stats.specimen_sha256",
+      "expected": "91cc0aa006d7315cb042c8fa8dca6c1e074a307bba7dcc9eb5509c8a7b81934e",
+      "actual": "91cc0aa006d7315cb042c8fa8dca6c1e074a307bba7dcc9eb5509c8a7b81934e",
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "baseline.specimen_dll_block_matches_top_level",
+      "expected": "91cc0aa006d7315cb042c8fa8dca6c1e074a307bba7dcc9eb5509c8a7b81934e",
+      "actual": "91cc0aa006d7315cb042c8fa8dca6c1e074a307bba7dcc9eb5509c8a7b81934e",
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "pe.magic_is_pe32plus",
+      "expected": 523,
+      "actual": 523,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "pe.machine_amd64",
+      "expected": 34404,
+      "actual": 34404,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "pe.image_base",
+      "expected": 6442450944,
+      "actual": 6442450944,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "baseline.pe.image_base",
+      "expected": 6442450944,
+      "actual": 6442450944,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "baseline.pe.size_of_image",
+      "expected": 53600256,
+      "actual": 53600256,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "baseline.pe.size_of_headers",
+      "expected": 1024,
+      "actual": 1024,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "baseline.pe.section_alignment",
+      "expected": 4096,
+      "actual": 4096,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "baseline.pe.file_alignment",
+      "expected": 512,
+      "actual": 512,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "baseline.pe.characteristics",
+      "expected": 8226,
+      "actual": 8226,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "baseline.pe.dll_characteristics",
+      "expected": 352,
+      "actual": 352,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "baseline.sections",
+      "expected": [],
+      "actual": [],
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "section.count",
+      "expected": 7,
+      "actual": 7,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "section.names",
+      "expected": [
+        ".text",
+        ".rdata",
+        ".data",
+        ".retplne",
+        ".tls",
+        ".rsrc",
+        ".reloc"
+      ],
+      "actual": [
+        ".text",
+        ".rdata",
+        ".data",
+        ".retplne",
+        ".tls",
+        ".rsrc",
+        ".reloc"
+      ],
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "baseline.data_directories",
+      "expected": [],
+      "actual": [],
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "imports.descriptor_count",
+      "expected": 42,
+      "actual": 42,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "imports.symbol_count",
+      "expected": 628,
+      "actual": 628,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "imports.name_imports",
+      "expected": 604,
+      "actual": 604,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "imports.ordinal_imports",
+      "expected": 24,
+      "actual": 24,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "imports.delay_descriptor_count",
+      "expected": 1,
+      "actual": 1,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "imports.delay_symbol_count",
+      "expected": 1,
+      "actual": 1,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "imports.total_module_count",
+      "expected": 43,
+      "actual": 43,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "imports.total_symbol_count",
+      "expected": 629,
+      "actual": 629,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "imports.module_rows",
+      "expected": 42,
+      "actual": 42,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "imports.name_plus_ordinal_equals_symbol_count",
+      "expected": 628,
+      "actual": 628,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "imports.bound_import_size",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "imports.iat_rva",
+      "expected": 48550408,
+      "actual": 48550408,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "imports.iat_size",
+      "expected": 5360,
+      "actual": 5360,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "exports.present",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "exports.symbol_count",
+      "expected": 1,
+      "actual": 1,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "exports.forwarder_count",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "exports.symbol_rows",
+      "expected": 1,
+      "actual": 1,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "exports.rva",
+      "expected": 48544106,
+      "actual": 48544106,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "exports.size",
+      "expected": 79,
+      "actual": 79,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "overlay.equals_security_directory",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "overlay.unclaimed_trailing_bytes",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "certificate.reaches_file_end",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "security_directory.offset_equals_rva",
+      "expected": 53564928,
+      "actual": 53564928,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "security_directory.size",
+      "expected": 10336,
+      "actual": 10336,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "security_directory.end_equals_file_size",
+      "expected": 53575264,
+      "actual": 53575264,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "pdata.exception_rva",
+      "expected": 48582204,
+      "actual": 48582204,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "pdata.exception_size",
+      "expected": 1704048,
+      "actual": 1704048,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "pdata.record_size",
+      "expected": 12,
+      "actual": 12,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "pdata.record_count",
+      "expected": 142004,
+      "actual": 142004,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "pdata.record_remainder",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "documented[runtime_function_records]",
+      "expected": 142004,
+      "actual": 142004,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "documented[exception_directory_size_div_12]",
+      "expected": 142004,
+      "actual": 142004,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "pdata.parsed_records",
+      "expected": 142004,
+      "actual": 142004,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "pdata.sorted_by_begin_address",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "pdata.duplicate_records",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "pdata.overlapping_records",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "pdata.begin_address_min",
+      "expected": 4128,
+      "actual": 4128,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "pdata.end_address_max",
+      "expected": 46064821,
+      "actual": 46064821,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "pdata.unwind_info_address_null",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "pdata.unique_unwind_infos",
+      "expected": 15533,
+      "actual": 15533,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "pdata.unwind_info_rva_min",
+      "expected": 48281164,
+      "actual": 48281164,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "pdata.unwind_info_rva_max",
+      "expected": 51087840,
+      "actual": 51087840,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "pdata.unwind_records_out_of_image",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "pdata.unwind_version_invalid_records",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "pdata.unwind_info_sections",
+      "expected": {
+        ".rdata": 15533
+      },
+      "actual": {
+        ".rdata": 15533
+      },
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "pdata.unwind_flag_value_distribution",
+      "expected": {
+        "0": 137037,
+        "1": 65,
+        "2": 45,
+        "3": 2694,
+        "4": 2163
+      },
+      "actual": {
+        "0": 137037,
+        "1": 65,
+        "2": 45,
+        "3": 2694,
+        "4": 2163
+      },
+      "ok": true
+    },
+    {
+      "group": "specimen",
+      "check": "pdata.unwind_flag_distribution_per_unique_info",
+      "expected": {
+        "EHANDLER": 2719,
+        "UHANDLER": 2699,
+        "CHAININFO": 2044
+      },
+      "actual": {
+        "CHAININFO": 2044,
+        "EHANDLER": 2719,
+        "UHANDLER": 2699
+      },
+      "ok": true
+    },
+    {
+      "group": "script.common",
+      "check": "common.SCHEMA_BASELINE",
+      "expected": "adhesive-dumper.baseline/1",
+      "actual": "adhesive-dumper.baseline/1",
+      "ok": true
+    },
+    {
+      "group": "script.common",
+      "check": "common.SCHEMA_TOOLCHAIN",
+      "expected": "adhesive-dumper.toolchain/1",
+      "actual": "adhesive-dumper.toolchain/1",
+      "ok": true
+    },
+    {
+      "group": "script.common",
+      "check": "common.RUNTIME_FUNCTION_SIZE",
+      "expected": 12,
+      "actual": 12,
+      "ok": true
+    },
+    {
+      "group": "script.common",
+      "check": "common.EXPECTED_RUNTIME_FUNCTIONS",
+      "expected": 142004,
+      "actual": 142004,
+      "ok": true
+    },
+    {
+      "group": "script.common",
+      "check": "common.EXPECTED_RUNTIME_FUNCTION_SOURCE",
+      "expected": "reverse/adhesive-02-pe-layout-security.md#15",
+      "actual": "reverse/adhesive-02-pe-layout-security.md#15",
+      "ok": true
+    },
+    {
+      "group": "script.common",
+      "check": "reverse/adhesive-02-pe-layout-security.md.anchor_present[## 15. Exception / x64 unwind directory]",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "script.common",
+      "check": "reverse/adhesive-03-imports-exports.md.anchor_present[3 132]",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "script.common",
+      "check": "reverse/adhesive-12-risk-methodology-open-questions.md.anchor_present[3 881]",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "script.common",
+      "check": "common.absent[ctypes]",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "group": "script.common",
+      "check": "common.absent[WinDLL]",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "group": "script.common",
+      "check": "common.absent[CDLL]",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "group": "script.common",
+      "check": "common.absent[LoadLibrary]",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "group": "script.common",
+      "check": "common.absent[importlib.machinery]",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "group": "script.common",
+      "check": "common.absent[__import__]",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "group": "script.common",
+      "check": "common.absent[exec(]",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "group": "script.common",
+      "check": "common.absent[eval(]",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "group": "script.common",
+      "check": "common.uses_pefile",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "script.common",
+      "check": "toolchain.determinism_block",
+      "expected": {
+        "json_indent": 2,
+        "json_ensure_ascii": false,
+        "json_sort_keys": false,
+        "text_encoding": "utf-8",
+        "bom": false,
+        "line_terminator": "\\n",
+        "trailing_newline": true,
+        "payload_timestamps": false
+      },
+      "actual": {
+        "json_indent": 2,
+        "json_ensure_ascii": false,
+        "json_sort_keys": false,
+        "text_encoding": "utf-8",
+        "bom": false,
+        "line_terminator": "\\n",
+        "trailing_newline": true,
+        "payload_timestamps": false
+      },
+      "ok": true
+    },
+    {
+      "group": "script.common",
+      "check": "common.write_json_declares[json_indent]",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "script.common",
+      "check": "common.write_json_declares[json_ensure_ascii]",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "script.common",
+      "check": "common.write_json_declares[json_sort_keys]",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "script.common",
+      "check": "common.write_json_declares[json_allow_nan]",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "script.common",
+      "check": "common.writer_declares[newline=\"\\n\"]",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "script.common",
+      "check": "common.writer_declares[lineterminator=\"\\n\"]",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "script.common",
+      "check": "common.writer_declares[encoding=\"utf-8\"]",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "script.common",
+      "check": "common.hexs_uppercase",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "script.common",
+      "check": "common.scalar_text_bool_lowercase",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "script.common",
+      "check": "common.write_csv_extrasaction_raise",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "script.common",
+      "check": "toolchain.schema",
+      "expected": "adhesive-dumper.toolchain/1",
+      "actual": "adhesive-dumper.toolchain/1",
+      "ok": true
+    },
+    {
+      "group": "script.common",
+      "check": "baseline.schema",
+      "expected": "adhesive-dumper.baseline/1",
+      "actual": "adhesive-dumper.baseline/1",
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "inventory_names",
+      "expected": [
+        "apc_audit.py",
+        "audit_handle_flow.py",
+        "audit_infra.py",
+        "audit_syscall_candidates.py",
+        "c856c0_callers.py",
+        "cfg_build.py",
+        "common.py",
+        "defuse_slice.py",
+        "patch_audit_1dff0.py",
+        "patch_audit_helpers.py",
+        "patch_record_1e270.py",
+        "pdata_map.py",
+        "pdb_correlate.py",
+        "refresh_toolchain.py",
+        "syscall_args.py",
+        "syscall_scan.py",
+        "syscall_service_map.py",
+        "unresolved_regions.py",
+        "xref_build.py"
+      ],
+      "actual": [
+        "apc_audit.py",
+        "audit_handle_flow.py",
+        "audit_infra.py",
+        "audit_syscall_candidates.py",
+        "c856c0_callers.py",
+        "cfg_build.py",
+        "common.py",
+        "defuse_slice.py",
+        "patch_audit_1dff0.py",
+        "patch_audit_helpers.py",
+        "patch_record_1e270.py",
+        "pdata_map.py",
+        "pdb_correlate.py",
+        "refresh_toolchain.py",
+        "syscall_args.py",
+        "syscall_scan.py",
+        "syscall_service_map.py",
+        "unresolved_regions.py",
+        "xref_build.py"
+      ],
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "inventory_count",
+      "expected": 19,
+      "actual": 19,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "apc_audit.py.path",
+      "expected": "reverse/scripts/apc_audit.py",
+      "actual": "reverse/scripts/apc_audit.py",
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "apc_audit.py.size",
+      "expected": 72325,
+      "actual": 72325,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "apc_audit.py.sha256",
+      "expected": "9ba8429499ff1abd6207017aa22d2127611cbeeab7ff35da8a1462ce8f511976",
+      "actual": "9ba8429499ff1abd6207017aa22d2127611cbeeab7ff35da8a1462ce8f511976",
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "apc_audit.py.utf8_bom",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "apc_audit.py.crlf_line_count",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "apc_audit.py.lf_line_count",
+      "expected": 1768,
+      "actual": 1768,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "apc_audit.py.third_party_imports",
+      "expected": [
+        "capstone",
+        "numpy",
+        "pefile"
+      ],
+      "actual": [
+        "capstone",
+        "numpy",
+        "pefile"
+      ],
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "audit_handle_flow.py.path",
+      "expected": "reverse/scripts/audit_handle_flow.py",
+      "actual": "reverse/scripts/audit_handle_flow.py",
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "audit_handle_flow.py.size",
+      "expected": 103019,
+      "actual": 103019,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "audit_handle_flow.py.sha256",
+      "expected": "20e55254697f186fa29def538770502a204a3776f2b2b7c09ebf4fcfa6b6daef",
+      "actual": "20e55254697f186fa29def538770502a204a3776f2b2b7c09ebf4fcfa6b6daef",
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "audit_handle_flow.py.utf8_bom",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "audit_handle_flow.py.crlf_line_count",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "audit_handle_flow.py.lf_line_count",
+      "expected": 2011,
+      "actual": 2011,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "audit_handle_flow.py.third_party_imports",
+      "expected": [],
+      "actual": [],
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "audit_infra.py.path",
+      "expected": "reverse/scripts/audit_infra.py",
+      "actual": "reverse/scripts/audit_infra.py",
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "audit_infra.py.size",
+      "expected": 151067,
+      "actual": 151067,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "audit_infra.py.sha256",
+      "expected": "ebf7f4f4547786ad52b780ca3f8ab2b10df8ab2890e2460d7eba5e08f2dc3e9b",
+      "actual": "ebf7f4f4547786ad52b780ca3f8ab2b10df8ab2890e2460d7eba5e08f2dc3e9b",
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "audit_infra.py.utf8_bom",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "audit_infra.py.crlf_line_count",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "audit_infra.py.lf_line_count",
+      "expected": 3578,
+      "actual": 3578,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "audit_infra.py.third_party_imports",
+      "expected": [],
+      "actual": [],
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "audit_syscall_candidates.py.path",
+      "expected": "reverse/scripts/audit_syscall_candidates.py",
+      "actual": "reverse/scripts/audit_syscall_candidates.py",
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "audit_syscall_candidates.py.size",
+      "expected": 69878,
+      "actual": 69878,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "audit_syscall_candidates.py.sha256",
+      "expected": "dfd90442d93cd591bcbacf2999a85fe50f514f2796136f741c1c94c69114b7a5",
+      "actual": "dfd90442d93cd591bcbacf2999a85fe50f514f2796136f741c1c94c69114b7a5",
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "audit_syscall_candidates.py.utf8_bom",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "audit_syscall_candidates.py.crlf_line_count",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "audit_syscall_candidates.py.lf_line_count",
+      "expected": 1721,
+      "actual": 1721,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "audit_syscall_candidates.py.third_party_imports",
+      "expected": [
+        "capstone",
+        "pefile"
+      ],
+      "actual": [
+        "capstone",
+        "pefile"
+      ],
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "c856c0_callers.py.path",
+      "expected": "reverse/scripts/c856c0_callers.py",
+      "actual": "reverse/scripts/c856c0_callers.py",
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "c856c0_callers.py.size",
+      "expected": 115586,
+      "actual": 115586,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "c856c0_callers.py.sha256",
+      "expected": "7adb46051bc57e70689b9265d52cf381f5068dce65aa16354fda34da981bae74",
+      "actual": "7adb46051bc57e70689b9265d52cf381f5068dce65aa16354fda34da981bae74",
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "c856c0_callers.py.utf8_bom",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "c856c0_callers.py.crlf_line_count",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "c856c0_callers.py.lf_line_count",
+      "expected": 2734,
+      "actual": 2734,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "c856c0_callers.py.third_party_imports",
+      "expected": [
+        "capstone",
+        "pefile"
+      ],
+      "actual": [
+        "capstone",
+        "pefile"
+      ],
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "cfg_build.py.path",
+      "expected": "reverse/scripts/cfg_build.py",
+      "actual": "reverse/scripts/cfg_build.py",
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "cfg_build.py.size",
+      "expected": 69916,
+      "actual": 69916,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "cfg_build.py.sha256",
+      "expected": "320d8865ebcc2ec1005cd7ceeaa5ae127929d2fec1a132ec7ff38eb3554dbfdb",
+      "actual": "320d8865ebcc2ec1005cd7ceeaa5ae127929d2fec1a132ec7ff38eb3554dbfdb",
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "cfg_build.py.utf8_bom",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "cfg_build.py.crlf_line_count",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "cfg_build.py.lf_line_count",
+      "expected": 1945,
+      "actual": 1945,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "cfg_build.py.third_party_imports",
+      "expected": [
+        "capstone"
+      ],
+      "actual": [
+        "capstone"
+      ],
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "common.py.path",
+      "expected": "reverse/scripts/common.py",
+      "actual": "reverse/scripts/common.py",
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "common.py.size",
+      "expected": 46556,
+      "actual": 46556,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "common.py.sha256",
+      "expected": "4aa2ceec1af88b9cd72e64274b779f4fadf6b62d491fead2c865c3fa99eca750",
+      "actual": "4aa2ceec1af88b9cd72e64274b779f4fadf6b62d491fead2c865c3fa99eca750",
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "common.py.utf8_bom",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "common.py.crlf_line_count",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "common.py.lf_line_count",
+      "expected": 1191,
+      "actual": 1191,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "common.py.third_party_imports",
+      "expected": [
+        "pefile"
+      ],
+      "actual": [
+        "pefile"
+      ],
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "defuse_slice.py.path",
+      "expected": "reverse/scripts/defuse_slice.py",
+      "actual": "reverse/scripts/defuse_slice.py",
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "defuse_slice.py.size",
+      "expected": 68046,
+      "actual": 68046,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "defuse_slice.py.sha256",
+      "expected": "5c82f21d6127545afb7c7d3b7a3f0d1bf237ad84a8815c7bbf2718d395a6d650",
+      "actual": "5c82f21d6127545afb7c7d3b7a3f0d1bf237ad84a8815c7bbf2718d395a6d650",
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "defuse_slice.py.utf8_bom",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "defuse_slice.py.crlf_line_count",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "defuse_slice.py.lf_line_count",
+      "expected": 1695,
+      "actual": 1695,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "defuse_slice.py.third_party_imports",
+      "expected": [
+        "capstone"
+      ],
+      "actual": [
+        "capstone"
+      ],
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "patch_audit_1dff0.py.path",
+      "expected": "reverse/scripts/patch_audit_1dff0.py",
+      "actual": "reverse/scripts/patch_audit_1dff0.py",
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "patch_audit_1dff0.py.size",
+      "expected": 129344,
+      "actual": 129344,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "patch_audit_1dff0.py.sha256",
+      "expected": "a534deb69499d50f874c9fe4e5bbf6f694c985a49b071258ab03942fda4278b7",
+      "actual": "a534deb69499d50f874c9fe4e5bbf6f694c985a49b071258ab03942fda4278b7",
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "patch_audit_1dff0.py.utf8_bom",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "patch_audit_1dff0.py.crlf_line_count",
+      "expected": 2423,
+      "actual": 2423,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "patch_audit_1dff0.py.lf_line_count",
+      "expected": 2430,
+      "actual": 2430,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "patch_audit_1dff0.py.third_party_imports",
+      "expected": [
+        "capstone",
+        "pefile"
+      ],
+      "actual": [
+        "capstone",
+        "pefile"
+      ],
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "patch_audit_helpers.py.path",
+      "expected": "reverse/scripts/patch_audit_helpers.py",
+      "actual": "reverse/scripts/patch_audit_helpers.py",
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "patch_audit_helpers.py.size",
+      "expected": 93959,
+      "actual": 93959,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "patch_audit_helpers.py.sha256",
+      "expected": "2455508498db39a168998d5f8dd31e636f266db89b9cee09fe078793c1b1ebf7",
+      "actual": "2455508498db39a168998d5f8dd31e636f266db89b9cee09fe078793c1b1ebf7",
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "patch_audit_helpers.py.utf8_bom",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "patch_audit_helpers.py.crlf_line_count",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "patch_audit_helpers.py.lf_line_count",
+      "expected": 2329,
+      "actual": 2329,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "patch_audit_helpers.py.third_party_imports",
+      "expected": [
+        "capstone",
+        "pefile"
+      ],
+      "actual": [
+        "capstone",
+        "pefile"
+      ],
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "patch_record_1e270.py.path",
+      "expected": "reverse/scripts/patch_record_1e270.py",
+      "actual": "reverse/scripts/patch_record_1e270.py",
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "patch_record_1e270.py.size",
+      "expected": 99001,
+      "actual": 99001,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "patch_record_1e270.py.sha256",
+      "expected": "2ee4f1f9b356e6ba0cd20b27dbf15e3d6874c98b93c5b8eb7c9b42065ae4b550",
+      "actual": "2ee4f1f9b356e6ba0cd20b27dbf15e3d6874c98b93c5b8eb7c9b42065ae4b550",
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "patch_record_1e270.py.utf8_bom",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "patch_record_1e270.py.crlf_line_count",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "patch_record_1e270.py.lf_line_count",
+      "expected": 1999,
+      "actual": 1999,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "patch_record_1e270.py.third_party_imports",
+      "expected": [
+        "capstone",
+        "pefile"
+      ],
+      "actual": [
+        "capstone",
+        "pefile"
+      ],
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "pdata_map.py.path",
+      "expected": "reverse/scripts/pdata_map.py",
+      "actual": "reverse/scripts/pdata_map.py",
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "pdata_map.py.size",
+      "expected": 38995,
+      "actual": 38995,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "pdata_map.py.sha256",
+      "expected": "6772cfbfea0db607a626a91f5bcd4c5b2e1eb47d25a6e3c770b031e8c0f845b7",
+      "actual": "6772cfbfea0db607a626a91f5bcd4c5b2e1eb47d25a6e3c770b031e8c0f845b7",
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "pdata_map.py.utf8_bom",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "pdata_map.py.crlf_line_count",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "pdata_map.py.lf_line_count",
+      "expected": 982,
+      "actual": 982,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "pdata_map.py.third_party_imports",
+      "expected": [],
+      "actual": [],
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "pdb_correlate.py.path",
+      "expected": "reverse/scripts/pdb_correlate.py",
+      "actual": "reverse/scripts/pdb_correlate.py",
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "pdb_correlate.py.size",
+      "expected": 97422,
+      "actual": 97422,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "pdb_correlate.py.sha256",
+      "expected": "34132edcb926fe966227b4b03a558fcdd3cf95f8930e234be9188b3a9e40bc93",
+      "actual": "34132edcb926fe966227b4b03a558fcdd3cf95f8930e234be9188b3a9e40bc93",
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "pdb_correlate.py.utf8_bom",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "pdb_correlate.py.crlf_line_count",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "pdb_correlate.py.lf_line_count",
+      "expected": 2203,
+      "actual": 2203,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "pdb_correlate.py.third_party_imports",
+      "expected": [],
+      "actual": [],
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "refresh_toolchain.py.path",
+      "expected": "reverse/scripts/refresh_toolchain.py",
+      "actual": "reverse/scripts/refresh_toolchain.py",
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "refresh_toolchain.py.size",
+      "expected": 29120,
+      "actual": 29120,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "refresh_toolchain.py.sha256",
+      "expected": "7cfda978f999833f654c4942b02a343264ddcdba5b6ea13c96f980dee61d75ce",
+      "actual": "7cfda978f999833f654c4942b02a343264ddcdba5b6ea13c96f980dee61d75ce",
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "refresh_toolchain.py.utf8_bom",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "refresh_toolchain.py.crlf_line_count",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "refresh_toolchain.py.lf_line_count",
+      "expected": 709,
+      "actual": 709,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "refresh_toolchain.py.third_party_imports",
+      "expected": [],
+      "actual": [],
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "syscall_args.py.path",
+      "expected": "reverse/scripts/syscall_args.py",
+      "actual": "reverse/scripts/syscall_args.py",
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "syscall_args.py.size",
+      "expected": 113239,
+      "actual": 113239,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "syscall_args.py.sha256",
+      "expected": "a5c58df7020d8440a40a097833a95fc3bd136b695820d7aff75273992a9836b3",
+      "actual": "a5c58df7020d8440a40a097833a95fc3bd136b695820d7aff75273992a9836b3",
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "syscall_args.py.utf8_bom",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "syscall_args.py.crlf_line_count",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "syscall_args.py.lf_line_count",
+      "expected": 2951,
+      "actual": 2951,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "syscall_args.py.third_party_imports",
+      "expected": [
+        "capstone"
+      ],
+      "actual": [
+        "capstone"
+      ],
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "syscall_scan.py.path",
+      "expected": "reverse/scripts/syscall_scan.py",
+      "actual": "reverse/scripts/syscall_scan.py",
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "syscall_scan.py.size",
+      "expected": 24266,
+      "actual": 24266,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "syscall_scan.py.sha256",
+      "expected": "1710dd90b8e7bad04b29d9101f900c3a0040d83a16b8d35446556ed4b210cfc8",
+      "actual": "1710dd90b8e7bad04b29d9101f900c3a0040d83a16b8d35446556ed4b210cfc8",
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "syscall_scan.py.utf8_bom",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "syscall_scan.py.crlf_line_count",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "syscall_scan.py.lf_line_count",
+      "expected": 636,
+      "actual": 636,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "syscall_scan.py.third_party_imports",
+      "expected": [
+        "capstone"
+      ],
+      "actual": [
+        "capstone"
+      ],
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "syscall_service_map.py.path",
+      "expected": "reverse/scripts/syscall_service_map.py",
+      "actual": "reverse/scripts/syscall_service_map.py",
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "syscall_service_map.py.size",
+      "expected": 89433,
+      "actual": 89433,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "syscall_service_map.py.sha256",
+      "expected": "5e303021696ca6ac6061e1fa3e31914062661345e70f1e9ff75b27f5c26e60b6",
+      "actual": "5e303021696ca6ac6061e1fa3e31914062661345e70f1e9ff75b27f5c26e60b6",
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "syscall_service_map.py.utf8_bom",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "syscall_service_map.py.crlf_line_count",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "syscall_service_map.py.lf_line_count",
+      "expected": 2133,
+      "actual": 2133,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "syscall_service_map.py.third_party_imports",
+      "expected": [
+        "capstone"
+      ],
+      "actual": [
+        "capstone"
+      ],
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "unresolved_regions.py.path",
+      "expected": "reverse/scripts/unresolved_regions.py",
+      "actual": "reverse/scripts/unresolved_regions.py",
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "unresolved_regions.py.size",
+      "expected": 77828,
+      "actual": 77828,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "unresolved_regions.py.sha256",
+      "expected": "b4bf6677bc97e7102c05eb65fda9dc2317ea6a14f811b0a48f3586da51671323",
+      "actual": "b4bf6677bc97e7102c05eb65fda9dc2317ea6a14f811b0a48f3586da51671323",
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "unresolved_regions.py.utf8_bom",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "unresolved_regions.py.crlf_line_count",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "unresolved_regions.py.lf_line_count",
+      "expected": 2070,
+      "actual": 2070,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "unresolved_regions.py.third_party_imports",
+      "expected": [
+        "capstone"
+      ],
+      "actual": [
+        "capstone"
+      ],
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "xref_build.py.path",
+      "expected": "reverse/scripts/xref_build.py",
+      "actual": "reverse/scripts/xref_build.py",
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "xref_build.py.size",
+      "expected": 102838,
+      "actual": 102838,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "xref_build.py.sha256",
+      "expected": "cbb48bccba566f417a7c70db1821ef1d51fc8841ffa2c897edc6fbcff0c538d9",
+      "actual": "cbb48bccba566f417a7c70db1821ef1d51fc8841ffa2c897edc6fbcff0c538d9",
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "xref_build.py.utf8_bom",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "xref_build.py.crlf_line_count",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "xref_build.py.lf_line_count",
+      "expected": 2398,
+      "actual": 2398,
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "xref_build.py.third_party_imports",
+      "expected": [
+        "capstone",
+        "pefile"
+      ],
+      "actual": [
+        "capstone",
+        "pefile"
+      ],
+      "ok": true
+    },
+    {
+      "group": "toolchain.scripts",
+      "check": "recorded_census_is_internally_consistent",
+      "expected": {},
+      "actual": {},
+      "ok": true
+    },
+    {
+      "group": "toolchain.inventory",
+      "check": "root",
+      "expected": "reverse/scripts",
+      "actual": "reverse/scripts",
+      "ok": true
+    },
+    {
+      "group": "toolchain.inventory",
+      "check": "glob",
+      "expected": "*.py",
+      "actual": "*.py",
+      "ok": true
+    },
+    {
+      "group": "toolchain.inventory",
+      "check": "entry_count",
+      "expected": 19,
+      "actual": 19,
+      "ok": true
+    },
+    {
+      "group": "toolchain.inventory",
+      "check": "fields",
+      "expected": [
+        "path",
+        "name",
+        "size",
+        "sha256",
+        "utf8_bom",
+        "crlf_line_count",
+        "lf_line_count",
+        "third_party_imports"
+      ],
+      "actual": [
+        "path",
+        "name",
+        "size",
+        "sha256",
+        "utf8_bom",
+        "crlf_line_count",
+        "lf_line_count",
+        "third_party_imports"
+      ],
+      "ok": true
+    },
+    {
+      "group": "toolchain.inventory",
+      "check": "omitted",
+      "expected": [
+        "atime",
+        "ctime",
+        "mtime"
+      ],
+      "actual": [
+        "atime",
+        "ctime",
+        "mtime"
+      ],
+      "ok": true
+    },
+    {
+      "group": "toolchain.inventory",
+      "check": "omitted_reason_present",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "toolchain.inventory",
+      "check": "producer_names_both_stages",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "toolchain.inventory",
+      "check": "order_declares_file_name_ascending",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "toolchain.inventory",
+      "check": "every_entry_carries_exactly_the_declared_fields",
+      "expected": [],
+      "actual": [],
+      "ok": true
+    },
+    {
+      "group": "toolchain.package_versions",
+      "check": "axes",
+      "expected": [
+        "package_metadata",
+        "imported_module",
+        "native_engine"
+      ],
+      "actual": [
+        "package_metadata",
+        "imported_module",
+        "native_engine"
+      ],
+      "ok": true
+    },
+    {
+      "group": "toolchain.package_versions",
+      "check": "library_block_field_map",
+      "expected": {
+        "package_metadata.version": "distribution_version",
+        "imported_module.version": "module_version",
+        "native_engine.version": "engine_version"
+      },
+      "actual": {
+        "package_metadata.version": "distribution_version",
+        "imported_module.version": "module_version",
+        "native_engine.version": "engine_version"
+      },
+      "ok": true
+    },
+    {
+      "group": "toolchain.package_versions",
+      "check": "declared",
+      "expected": [
+        "capstone",
+        "lief",
+        "pefile"
+      ],
+      "actual": [
+        "capstone",
+        "lief",
+        "pefile"
+      ],
+      "ok": true
+    },
+    {
+      "group": "toolchain.package_versions",
+      "check": "every_package_is_versioned_on_all_axes",
+      "expected": [],
+      "actual": [],
+      "ok": true
+    },
+    {
+      "group": "toolchain.package_versions",
+      "check": "axes_are_never_reconciled",
+      "expected": [],
+      "actual": [],
+      "ok": true
+    },
+    {
+      "group": "toolchain.package_versions",
+      "check": "only_the_two_release_axes_are_compared",
+      "expected": [],
+      "actual": [],
+      "ok": true
+    },
+    {
+      "group": "toolchain.package_versions",
+      "check": "library_block_consistent_with_the_axes",
+      "expected": [],
+      "actual": [],
+      "ok": true
+    },
+    {
+      "group": "toolchain.package_versions",
+      "check": "every_disagreement_carries_an_assessment",
+      "expected": [],
+      "actual": [],
+      "ok": true
+    },
+    {
+      "group": "toolchain.package_versions",
+      "check": "every_disagreement_is_decidable_from_the_record",
+      "expected": [],
+      "actual": [],
+      "ok": true
+    },
+    {
+      "group": "toolchain.package_versions",
+      "check": "every_disagreement_names_the_documented_axis",
+      "expected": [],
+      "actual": [],
+      "ok": true
+    },
+    {
+      "group": "toolchain.package_versions",
+      "check": "documented_claim_flags_match_the_axis_values",
+      "expected": [],
+      "actual": [],
+      "ok": true
+    },
+    {
+      "group": "toolchain.package_versions",
+      "check": "effect_on_evidence_stated_for_every_package",
+      "expected": [],
+      "actual": [],
+      "ok": true
+    },
+    {
+      "group": "toolchain.package_versions",
+      "check": "imported_by_matches_the_inventory_census",
+      "expected": [],
+      "actual": [],
+      "ok": true
+    },
+    {
+      "group": "toolchain.package_versions",
+      "check": "imported_by_matches_the_audit_census",
+      "expected": [],
+      "actual": [],
+      "ok": true
+    },
+    {
+      "group": "toolchain.package_versions",
+      "check": "undeclared_imports_are_disclosed",
+      "expected": [],
+      "actual": [],
+      "ok": true
+    },
+    {
+      "group": "toolchain.package_versions",
+      "check": "import_census_matches_the_inventory_census",
+      "expected": {},
+      "actual": {},
+      "ok": true
+    },
+    {
+      "group": "script.pdata_map",
+      "check": "EXPECTED_UNIQUE_UNWIND",
+      "expected": 15533,
+      "actual": 15533,
+      "ok": true
+    },
+    {
+      "group": "script.pdata_map",
+      "check": "EXPECTED_HANDLER_RECORDS",
+      "expected": 2804,
+      "actual": 2804,
+      "ok": true
+    },
+    {
+      "group": "script.pdata_map",
+      "check": "EXPECTED_CHAIN_RECORDS",
+      "expected": 2163,
+      "actual": 2163,
+      "ok": true
+    },
+    {
+      "group": "script.pdata_map",
+      "check": "EXPECTED_FLAG_DISTRIBUTION",
+      "expected": {
+        "0": 137037,
+        "1": 65,
+        "2": 45,
+        "3": 2694,
+        "4": 2163
+      },
+      "actual": {
+        "0": 137037,
+        "1": 65,
+        "2": 45,
+        "3": 2694,
+        "4": 2163
+      },
+      "ok": true
+    },
+    {
+      "group": "script.pdata_map",
+      "check": "EXPECTED_UNWIND_SECTIONS",
+      "expected": {
+        ".rdata": 15533
+      },
+      "actual": {
+        ".rdata": 15533
+      },
+      "ok": true
+    },
+    {
+      "group": "script.pdata_map",
+      "check": "CSV_COLUMNS_present",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "script.xref_build",
+      "check": "doc03_claim[thunk_mediated_call_xrefs]",
+      "expected": 6304,
+      "actual": 6304,
+      "ok": true
+    },
+    {
+      "group": "script.xref_build",
+      "check": "doc03_claim[thunks_reached_by_call]",
+      "expected": 193,
+      "actual": 193,
+      "ok": true
+    },
+    {
+      "group": "script.xref_build",
+      "check": "doc03_claim[total_statistical_call_xrefs]",
+      "expected": 9436,
+      "actual": 9436,
+      "ok": true
+    },
+    {
+      "group": "script.xref_build",
+      "check": "doc03_claim[xref_runtime_functions]",
+      "expected": 6039,
+      "actual": 6039,
+      "ok": true
+    },
+    {
+      "group": "script.xref_build",
+      "check": "doc03_claim[xref_runtime_function_bytes]",
+      "expected": 5353470,
+      "actual": 5353470,
+      "ok": true
+    },
+    {
+      "group": "script.xref_build",
+      "check": "DOC03_TABLES_anchor",
+      "expected": "reverse/adhesive-03-imports-exports.md#10",
+      "actual": "reverse/adhesive-03-imports-exports.md#10",
+      "ok": true
+    },
+    {
+      "group": "script.syscall_scan",
+      "check": "EXPECTED_RAW_HITS",
+      "expected": 3881,
+      "actual": 3881,
+      "ok": true
+    },
+    {
+      "group": "script.syscall_scan",
+      "check": "PATTERN",
+      "expected": "0f05",
+      "actual": "0f05",
+      "ok": true
+    },
+    {
+      "group": "script.syscall_scan",
+      "check": "CSV_FIELDS_present",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "toolchain.host",
+      "check": "host_paths_confined_to_declared_fields",
+      "expected": [
+        "binutils.objdump.path",
+        "libraries.capstone.module_path",
+        "libraries.lief.module_path",
+        "libraries.pefile.module_path"
+      ],
+      "actual": [
+        "binutils.objdump.path",
+        "libraries.capstone.module_path",
+        "libraries.lief.module_path",
+        "libraries.pefile.module_path"
+      ],
+      "ok": true
+    },
+    {
+      "group": "toolchain.libraries",
+      "check": "declares_three_libraries",
+      "expected": [
+        "capstone",
+        "lief",
+        "pefile"
+      ],
+      "actual": [
+        "capstone",
+        "lief",
+        "pefile"
+      ],
+      "ok": true
+    },
+    {
+      "group": "toolchain.digests",
+      "check": "algorithm",
+      "expected": "sha256 over the file bytes, recomputed on every refresh",
+      "actual": "sha256 over the file bytes, recomputed on every refresh",
+      "ok": true
+    },
+    {
+      "group": "toolchain.digests",
+      "check": "entry_digests_recomputed",
+      "expected": [],
+      "actual": [],
+      "ok": true
+    },
+    {
+      "group": "toolchain.digests",
+      "check": "entries_exist_on_disk",
+      "expected": [],
+      "actual": [],
+      "ok": true
+    },
+    {
+      "group": "toolchain.digests",
+      "check": "no_entry_attests_the_payload",
+      "expected": [],
+      "actual": [],
+      "ok": true
+    },
+    {
+      "group": "toolchain.digests",
+      "check": "no_attested_artifact_records_the_payload_digest",
+      "expected": [],
+      "actual": [],
+      "ok": true
+    },
+    {
+      "group": "toolchain.digests",
+      "check": "cross_references_verified_independently",
+      "expected": [],
+      "actual": [],
+      "ok": true
+    },
+    {
+      "group": "toolchain.digests",
+      "check": "self_digest_is_null",
+      "expected": null,
+      "actual": null,
+      "ok": true
+    },
+    {
+      "group": "toolchain.digests",
+      "check": "self_path_is_the_payload",
+      "expected": "reverse/evidence/toolchain.json",
+      "actual": "reverse/evidence/toolchain.json",
+      "ok": true
+    },
+    {
+      "group": "toolchain.digests",
+      "check": "self_exclusion_names_the_producer_that_prints_it",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "toolchain.digests",
+      "check": "every_attested_digest_recomputes_from_the_bytes",
+      "expected": [],
+      "actual": [],
+      "ok": true
+    },
+    {
+      "group": "toolchain.digests",
+      "check": "digest_attested[reverse/scripts/common.py]",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "toolchain.digests",
+      "check": "digest_attested[reverse/evidence/baseline.json]",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "toolchain.digests",
+      "check": "self_exclusion_covers_the_payload",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "toolchain.digests",
+      "check": "digest_attested[reverse/evidence/pdata_stats.json]",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "toolchain.digests",
+      "check": "digest_attested[reverse/evidence/pdata_functions.csv]",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "toolchain.digests",
+      "check": "digest_attested[reverse/evidence/cfg_functions.csv]",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "toolchain.digests",
+      "check": "digest_attested[reverse/evidence/cfg_clusters.csv]",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "toolchain.digests",
+      "check": "digest_attested[reverse/evidence/xref_edges.csv]",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "toolchain.digests",
+      "check": "digest_attested[reverse/evidence/indirect_sites.csv]",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "toolchain.digests",
+      "check": "digest_attested[reverse/evidence/syscall_candidates_raw.csv]",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "toolchain.digests",
+      "check": "every_audited_artifact_is_attested",
+      "expected": [],
+      "actual": [],
+      "ok": true
+    },
+    {
+      "group": "pdata.csv",
+      "check": "row_count_matches_specimen_records",
+      "expected": 142004,
+      "actual": 142004,
+      "ok": true
+    },
+    {
+      "group": "pdata.csv",
+      "check": "record_index_contiguous_0_based",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "pdata.csv",
+      "check": "hex_columns_match_decimal_columns",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "pdata.csv",
+      "check": "code_size_and_gap_before_consistent",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "pdata.csv",
+      "check": "raw_offsets_match_section_map",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "pdata.csv",
+      "check": "record_order_strictly_ascending",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "pdata.csv",
+      "check": "csv_matches_exception_directory_bytes",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "pdata.csv",
+      "check": "unwind_info_index_is_ascending_rva_ordinal",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "pdata.csv",
+      "check": "unwind_reference_count_matches_group_size",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "pdata.csv",
+      "check": "unwind_first_record_is_group_minimum",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "pdata.csv",
+      "check": "unwind_version_all_one",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "pdata.csv",
+      "check": "handler_flag_consistency",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "pdata.csv",
+      "check": "chain_flag_consistency",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "pdata.csv",
+      "check": "section_labels_match_image",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "pdata.csv",
+      "check": "documented[unwind_flag_zero]",
+      "expected": 137037,
+      "actual": 137037,
+      "ok": true
+    },
+    {
+      "group": "pdata.csv",
+      "check": "documented[unwind_flag_ehandler]",
+      "expected": 65,
+      "actual": 65,
+      "ok": true
+    },
+    {
+      "group": "pdata.csv",
+      "check": "documented[unwind_flag_uhandler]",
+      "expected": 45,
+      "actual": 45,
+      "ok": true
+    },
+    {
+      "group": "pdata.csv",
+      "check": "documented[unwind_flag_ehandler_uhandler]",
+      "expected": 2694,
+      "actual": 2694,
+      "ok": true
+    },
+    {
+      "group": "pdata.csv",
+      "check": "documented[unwind_flag_chaininfo]",
+      "expected": 2163,
+      "actual": 2163,
+      "ok": true
+    },
+    {
+      "group": "pdata.csv",
+      "check": "documented[runtime_function_records]",
+      "expected": 142004,
+      "actual": 142004,
+      "ok": true
+    },
+    {
+      "group": "pdata.csv",
+      "check": "documented[unique_unwind_info]",
+      "expected": 15533,
+      "actual": 15533,
+      "ok": true
+    },
+    {
+      "group": "pdata.csv",
+      "check": "documented[handler_records]",
+      "expected": 2804,
+      "actual": 2804,
+      "ok": true
+    },
+    {
+      "group": "pdata.csv",
+      "check": "documented[chain_records]",
+      "expected": 2163,
+      "actual": 2163,
+      "ok": true
+    },
+    {
+      "group": "pdata.csv",
+      "check": "flag_distribution_sums_to_row_count",
+      "expected": 142004,
+      "actual": 142004,
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "schema",
+      "expected": "adhesive-dumper.pdata-stats/1",
+      "actual": "adhesive-dumper.pdata-stats/1",
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "expected.record_count",
+      "expected": 142004,
+      "actual": 142004,
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "expected.unique_unwind_info",
+      "expected": 15533,
+      "actual": 15533,
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "expected.flag_distribution_per_record",
+      "expected": {
+        "0": 137037,
+        "1": 65,
+        "2": 45,
+        "3": 2694,
+        "4": 2163
+      },
+      "actual": {
+        "0": 137037,
+        "1": 65,
+        "2": 45,
+        "3": 2694,
+        "4": 2163
+      },
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "expected.source",
+      "expected": "reverse/adhesive-02-pe-layout-security.md#15",
+      "actual": "reverse/adhesive-02-pe-layout-security.md#15",
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "csv.path",
+      "expected": "reverse/evidence/pdata_functions.csv",
+      "actual": "reverse/evidence/pdata_functions.csv",
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "csv.row_count",
+      "expected": 142004,
+      "actual": 142004,
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "csv.sha256",
+      "expected": "65ab914c1b38986fcb4bf07d55af0bdad16904a0dcd4271d73343ea7723d785b",
+      "actual": "65ab914c1b38986fcb4bf07d55af0bdad16904a0dcd4271d73343ea7723d785b",
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "csv.encoding",
+      "expected": "utf-8",
+      "actual": "utf-8",
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "csv.bom",
+      "expected": false,
+      "actual": false,
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "csv.line_terminator",
+      "expected": "\\n",
+      "actual": "\\n",
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "csv.column_count",
+      "expected": 43,
+      "actual": 43,
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "parsing.csv_columns_is_list",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "ordering.sorted_by_begin_address",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "ordering.duplicate_records",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "ordering.duplicate_begin_addresses",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "ordering.overlapping_records",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "ordering.out_of_order_pairs",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "ordering.begin_address_min",
+      "expected": 4128,
+      "actual": 4128,
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "ordering.end_address_max",
+      "expected": 46064821,
+      "actual": 46064821,
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "unwind_info.unique_count",
+      "expected": 15533,
+      "actual": 15533,
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "unwind_info.null_address_records",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "unwind_info.unmapped_records",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "unwind_info.invalid_header_records",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "unwind_info.version_invalid_records",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "unwind_info.end_outside_section_records",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "unwind_info.reference_count_max",
+      "expected": 93153,
+      "actual": 93153,
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "unwind_info.reference_count_median",
+      "expected": 1,
+      "actual": 1,
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "unwind_flags.value_distribution_per_record",
+      "expected": {
+        "0": 137037,
+        "1": 65,
+        "2": 45,
+        "3": 2694,
+        "4": 2163
+      },
+      "actual": {
+        "0": 137037,
+        "1": 65,
+        "2": 45,
+        "3": 2694,
+        "4": 2163
+      },
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "unwind_flags.records_with_handler",
+      "expected": 2804,
+      "actual": 2804,
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "unwind_flags.records_with_chain",
+      "expected": 2163,
+      "actual": 2163,
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "handlers.record_count",
+      "expected": 2804,
+      "actual": 2804,
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "chains.record_count",
+      "expected": 2163,
+      "actual": 2163,
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "chains.invalid_chained_entries",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "text_coverage.covered_bytes",
+      "expected": 37200748,
+      "actual": 37200748,
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "text_coverage.records_outside_text",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "text_coverage.uncovered_bytes",
+      "expected": 8859945,
+      "actual": 8859945,
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "text_coverage.span_bytes",
+      "expected": 46060693,
+      "actual": 46060693,
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "gaps.count",
+      "expected": 137103,
+      "actual": 137103,
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "gaps.total_bytes",
+      "expected": 8859945,
+      "actual": 8859945,
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "gaps.min_bytes",
+      "expected": 1,
+      "actual": 1,
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "gaps.max_bytes",
+      "expected": 175312,
+      "actual": 175312,
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "gaps.largest",
+      "expected": [
+        {
+          "offset": 18042624,
+          "previous_end": 17867312,
+          "size": 175312
+        },
+        {
+          "offset": 26783840,
+          "previous_end": 26685639,
+          "size": 98201
+        },
+        {
+          "offset": 9548608,
+          "previous_end": 9479232,
+          "size": 69376
+        },
+        {
+          "offset": 20650080,
+          "previous_end": 20606492,
+          "size": 43588
+        },
+        {
+          "offset": 15414720,
+          "previous_end": 15372688,
+          "size": 42032
+        },
+        {
+          "offset": 13505232,
+          "previous_end": 13463275,
+          "size": 41957
+        },
+        {
+          "offset": 13317600,
+          "previous_end": 13276805,
+          "size": 40795
+        },
+        {
+          "offset": 33355376,
+          "previous_end": 33314895,
+          "size": 40481
+        },
+        {
+          "offset": 16024080,
+          "previous_end": 15984175,
+          "size": 39905
+        },
+        {
+          "offset": 10106192,
+          "previous_end": 10067780,
+          "size": 38412
+        },
+        {
+          "offset": 11167440,
+          "previous_end": 11129355,
+          "size": 38085
+        },
+        {
+          "offset": 23786368,
+          "previous_end": 23751486,
+          "size": 34882
+        },
+        {
+          "offset": 2202480,
+          "previous_end": 2167715,
+          "size": 34765
+        },
+        {
+          "offset": 32752640,
+          "previous_end": 32720789,
+          "size": 31851
+        },
+        {
+          "offset": 31673552,
+          "previous_end": 31644944,
+          "size": 28608
+        },
+        {
+          "offset": 947744,
+          "previous_end": 920352,
+          "size": 27392
+        },
+        {
+          "offset": 1046208,
+          "previous_end": 1019227,
+          "size": 26981
+        },
+        {
+          "offset": 19403872,
+          "previous_end": 19378526,
+          "size": 25346
+        },
+        {
+          "offset": 12273024,
+          "previous_end": 12248791,
+          "size": 24233
+        },
+        {
+          "offset": 19510944,
+          "previous_end": 19486843,
+          "size": 24101
+        },
+        {
+          "offset": 14405168,
+          "previous_end": 14381612,
+          "size": 23556
+        },
+        {
+          "offset": 14236576,
+          "previous_end": 14213117,
+          "size": 23459
+        },
+        {
+          "offset": 1337760,
+          "previous_end": 1314577,
+          "size": 23183
+        },
+        {
+          "offset": 29587984,
+          "previous_end": 29565360,
+          "size": 22624
+        }
+      ],
+      "actual": [
+        {
+          "offset": 18042624,
+          "previous_end": 17867312,
+          "size": 175312
+        },
+        {
+          "offset": 26783840,
+          "previous_end": 26685639,
+          "size": 98201
+        },
+        {
+          "offset": 9548608,
+          "previous_end": 9479232,
+          "size": 69376
+        },
+        {
+          "offset": 20650080,
+          "previous_end": 20606492,
+          "size": 43588
+        },
+        {
+          "offset": 15414720,
+          "previous_end": 15372688,
+          "size": 42032
+        },
+        {
+          "offset": 13505232,
+          "previous_end": 13463275,
+          "size": 41957
+        },
+        {
+          "offset": 13317600,
+          "previous_end": 13276805,
+          "size": 40795
+        },
+        {
+          "offset": 33355376,
+          "previous_end": 33314895,
+          "size": 40481
+        },
+        {
+          "offset": 16024080,
+          "previous_end": 15984175,
+          "size": 39905
+        },
+        {
+          "offset": 10106192,
+          "previous_end": 10067780,
+          "size": 38412
+        },
+        {
+          "offset": 11167440,
+          "previous_end": 11129355,
+          "size": 38085
+        },
+        {
+          "offset": 23786368,
+          "previous_end": 23751486,
+          "size": 34882
+        },
+        {
+          "offset": 2202480,
+          "previous_end": 2167715,
+          "size": 34765
+        },
+        {
+          "offset": 32752640,
+          "previous_end": 32720789,
+          "size": 31851
+        },
+        {
+          "offset": 31673552,
+          "previous_end": 31644944,
+          "size": 28608
+        },
+        {
+          "offset": 947744,
+          "previous_end": 920352,
+          "size": 27392
+        },
+        {
+          "offset": 1046208,
+          "previous_end": 1019227,
+          "size": 26981
+        },
+        {
+          "offset": 19403872,
+          "previous_end": 19378526,
+          "size": 25346
+        },
+        {
+          "offset": 12273024,
+          "previous_end": 12248791,
+          "size": 24233
+        },
+        {
+          "offset": 19510944,
+          "previous_end": 19486843,
+          "size": 24101
+        },
+        {
+          "offset": 14405168,
+          "previous_end": 14381612,
+          "size": 23556
+        },
+        {
+          "offset": 14236576,
+          "previous_end": 14213117,
+          "size": 23459
+        },
+        {
+          "offset": 1337760,
+          "previous_end": 1314577,
+          "size": 23183
+        },
+        {
+          "offset": 29587984,
+          "previous_end": 29565360,
+          "size": 22624
+        }
+      ],
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "validation.check_count",
+      "expected": 37,
+      "actual": 37,
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "validation.failed_count",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "validation.stored_checks_all_ok",
+      "expected": [],
+      "actual": [],
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "producer.script",
+      "expected": "reverse/scripts/pdata_map.py",
+      "actual": "reverse/scripts/pdata_map.py",
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "producer.helper",
+      "expected": "reverse/scripts/common.py",
+      "actual": "reverse/scripts/common.py",
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "producer.script_sha256",
+      "expected": "6772cfbfea0db607a626a91f5bcd4c5b2e1eb47d25a6e3c770b031e8c0f845b7",
+      "actual": "6772cfbfea0db607a626a91f5bcd4c5b2e1eb47d25a6e3c770b031e8c0f845b7",
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "producer.helper_sha256",
+      "expected": "4aa2ceec1af88b9cd72e64274b779f4fadf6b62d491fead2c865c3fa99eca750",
+      "actual": "4aa2ceec1af88b9cd72e64274b779f4fadf6b62d491fead2c865c3fa99eca750",
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "producer.baseline_sha256",
+      "expected": "dc34cb50f1a002bae4f01e33064f35c0b28019fe7023add0988ab84fb8df67ea",
+      "actual": "dc34cb50f1a002bae4f01e33064f35c0b28019fe7023add0988ab84fb8df67ea",
+      "ok": true
+    },
+    {
+      "group": "pdata.stats",
+      "check": "producer.baseline_record_count",
+      "expected": 142004,
+      "actual": 142004,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "header_matches_producer_declaration",
+      "expected": "cluster_id,first_rva,first_rva_hex,last_end_rva,last_end_rva_hex,rva_span,section,function_count,size_min,size_max,size_total,size_average,span_bytes,code_bytes,gap_bytes,entropy_span,entropy_code,basic_blocks,blocks_reached,blocks_linear_only,reached_ratio,instructions,decoded_bytes,undecoded_bytes,undecoded_regions,edges,back_edges,max_indegree,cross_calls,cross_jumps,cross_function_edges,direct_calls,direct_jumps,indirect_calls,indirect_jumps,indirect_jumps_unresolved,iat_call_sites,iat_jump_sites,iat_module_count,iat_symbol_count,iat_symbols,switch_sites,switch_sites_validated,switch_sites_rejected,switch_cases,ret_sites,ud2_sites,int3_sites,trap_sites,syscall_sites,functions_with_linear_blocks,functions_with_undecoded,functions_with_entry_refs,functions_multi_entry,unwind_ehandler,unwind_uhandler,unwind_chaininfo,overlapping_functions,entry_point_inside,export_inside,doc_anchors,anchor_tags,anchor_evidence,anchor_count,anchor_truncated",
+      "actual": "cluster_id,first_rva,first_rva_hex,last_end_rva,last_end_rva_hex,rva_span,section,function_count,size_min,size_max,size_total,size_average,span_bytes,code_bytes,gap_bytes,entropy_span,entropy_code,basic_blocks,blocks_reached,blocks_linear_only,reached_ratio,instructions,decoded_bytes,undecoded_bytes,undecoded_regions,edges,back_edges,max_indegree,cross_calls,cross_jumps,cross_function_edges,direct_calls,direct_jumps,indirect_calls,indirect_jumps,indirect_jumps_unresolved,iat_call_sites,iat_jump_sites,iat_module_count,iat_symbol_count,iat_symbols,switch_sites,switch_sites_validated,switch_sites_rejected,switch_cases,ret_sites,ud2_sites,int3_sites,trap_sites,syscall_sites,functions_with_linear_blocks,functions_with_undecoded,functions_with_entry_refs,functions_multi_entry,unwind_ehandler,unwind_uhandler,unwind_chaininfo,overlapping_functions,entry_point_inside,export_inside,doc_anchors,anchor_tags,anchor_evidence,anchor_count,anchor_truncated",
+      "ok": true
+    },
+    {
+      "group": "cfg.functions",
+      "check": "row_count_equals_pdata_records",
+      "expected": 142004,
+      "actual": 142004,
+      "ok": true
+    },
+    {
+      "group": "cfg.functions",
+      "check": "func_index_not_contiguous",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.functions",
+      "check": "range_differs_from_pdata",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.functions",
+      "check": "size_column",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.functions",
+      "check": "hex_columns",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.functions",
+      "check": "begin_va",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.functions",
+      "check": "end_va",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.functions",
+      "check": "raw_column",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.functions",
+      "check": "overlapping_functions",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.functions",
+      "check": "blocks_not_split",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.functions",
+      "check": "reached_ratio",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.functions",
+      "check": "decoded_out_of_bounds",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.functions",
+      "check": "instruction_count",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.functions",
+      "check": "undecoded_regions",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.functions",
+      "check": "iat_symbol_count",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.functions",
+      "check": "iat_module_count",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.functions",
+      "check": "unwind_shared_by",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.functions",
+      "check": "unwind_version",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.functions",
+      "check": "cluster_id_not_reproducible_from_gap_rule",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "cluster_id_not_contiguous_1_based",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "cluster_without_functions",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "first_rva_hex",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "last_end_rva_hex",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "size_average",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "reached_ratio",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "anchor_count",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "iat_symbol_count",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "sum_basic_blocks",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "sum_blocks_reached",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "sum_blocks_linear_only",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "sum_instructions",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "sum_decoded_bytes",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "sum_undecoded_bytes",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "sum_undecoded_regions",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "sum_edges",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "sum_back_edges",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "sum_cross_calls",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "sum_cross_jumps",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "sum_direct_calls",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "sum_direct_jumps",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "sum_indirect_calls",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "sum_indirect_jumps",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "sum_indirect_jumps_unresolved",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "sum_iat_call_sites",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "sum_iat_jump_sites",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "sum_switch_sites",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "sum_switch_sites_validated",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "sum_switch_sites_rejected",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "sum_switch_cases",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "sum_ret_sites",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "sum_ud2_sites",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "sum_int3_sites",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "sum_trap_sites",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "sum_syscall_sites",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "function_count",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "size_min",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "size_max",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "size_total",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "max_indegree",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "first_rva",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "last_end_rva",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "rva_span",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "span_bytes",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "code_bytes",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "gap_bytes",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "cross_function_edges",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "functions_with_linear_blocks",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "functions_with_undecoded",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "functions_with_entry_refs",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "functions_multi_entry",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "unwind_ehandler",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "unwind_uhandler",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "unwind_chaininfo",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "overlapping_functions",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "entropy_recomputed_from_specimen",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "cfg.clusters",
+      "check": "cluster_rows_cover_all_function_references",
+      "expected": 233,
+      "actual": 233,
+      "ok": true
+    },
+    {
+      "group": "xref.edges",
+      "check": "edge_id_range",
+      "expected": [
+        1,
+        57101
+      ],
+      "actual": [
+        1,
+        57101
+      ],
+      "ok": true
+    },
+    {
+      "group": "xref.edges",
+      "check": "thunk_edge_targets_are_declared_stubs",
+      "expected": [],
+      "actual": [],
+      "ok": true
+    },
+    {
+      "group": "xref.edges",
+      "check": "thunk_stub_count_matches_documented_import_thunks",
+      "expected": "<= 355",
+      "actual": 355,
+      "ok": true
+    },
+    {
+      "group": "xref.edges",
+      "check": "thunk_stub_rows_declare_no_code_instruction_function",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "xref.edges",
+      "check": "code_instruction_function_columns_are_atomic",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "xref.edges",
+      "check": "target_thunk_function_columns_are_atomic",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "xref.edges",
+      "check": "thunk_stub_rows_covered_by_a_pdata_function",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "xref.edges",
+      "check": "thunk_stub_hosting_thunk_function_covers_the_stub_byte",
+      "expected": [],
+      "actual": [],
+      "ok": true
+    },
+    {
+      "group": "xref.edges",
+      "check": "edge_id_not_contiguous_1_based",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "xref.edges",
+      "check": "src_raw",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "xref.edges",
+      "check": "code_instruction_function_index",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "xref.edges",
+      "check": "code_instruction_function_range",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "xref.edges",
+      "check": "code_edge_without_function",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "xref.edges",
+      "check": "src_bytes",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "xref.edges",
+      "check": "target_thunk_function_index",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "xref.edges",
+      "check": "target_thunk_function_range",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "xref.edges",
+      "check": "iat_edge_without_iat_rva",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "xref.edges",
+      "check": "documented[direct_iat_call_xrefs]",
+      "expected": 3132,
+      "actual": 3132,
+      "ok": true
+    },
+    {
+      "group": "xref.edges",
+      "check": "documented[direct_iat_call_xrefs_regular]",
+      "expected": 3131,
+      "actual": 3131,
+      "ok": true
+    },
+    {
+      "group": "xref.edges",
+      "check": "documented[direct_iat_call_xrefs_delay]",
+      "expected": 1,
+      "actual": 1,
+      "ok": true
+    },
+    {
+      "group": "xref.edges",
+      "check": "documented[thunk_mediated_call_xrefs]",
+      "expected": 6304,
+      "actual": 6304,
+      "ok": true
+    },
+    {
+      "group": "xref.edges",
+      "check": "documented[import_thunks]",
+      "expected": 355,
+      "actual": 355,
+      "ok": true
+    },
+    {
+      "group": "xref.edges",
+      "check": "documented[thunks_reached_by_call]",
+      "expected": 193,
+      "actual": 193,
+      "ok": true
+    },
+    {
+      "group": "xref.edges",
+      "check": "documented[iat_slots_total]",
+      "expected": 629,
+      "actual": 629,
+      "ok": true
+    },
+    {
+      "group": "xref.edges",
+      "check": "documented[iat_slots_reached_direct]",
+      "expected": 364,
+      "actual": 364,
+      "ok": true
+    },
+    {
+      "group": "xref.edges",
+      "check": "documented[iat_slots_touched]",
+      "expected": 527,
+      "actual": 527,
+      "ok": true
+    },
+    {
+      "group": "xref.edges",
+      "check": "documented[total_statistical_call_xrefs]",
+      "expected": 9436,
+      "actual": 9436,
+      "ok": true
+    },
+    {
+      "group": "xref.edges",
+      "check": "documented[xref_runtime_functions]",
+      "expected": 6039,
+      "actual": 6039,
+      "ok": true
+    },
+    {
+      "group": "xref.edges",
+      "check": "documented[xref_runtime_function_bytes]",
+      "expected": 5353470,
+      "actual": 5353470,
+      "ok": true
+    },
+    {
+      "group": "xref.edges",
+      "check": "call_xrefs_equal_direct_plus_thunk",
+      "expected": 9436,
+      "actual": 9436,
+      "ok": true
+    },
+    {
+      "group": "xref.edges",
+      "check": "thunk_call_targets_are_declared_stubs",
+      "expected": "<= 355",
+      "actual": 193,
+      "ok": true
+    },
+    {
+      "group": "indirect.sites",
+      "check": "site_id_not_contiguous_1_based",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "indirect.sites",
+      "check": "insn_raw",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "indirect.sites",
+      "check": "code_instruction_function_index",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "indirect.sites",
+      "check": "code_instruction_function_range",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "indirect.sites",
+      "check": "bytes",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "indirect.sites",
+      "check": "empty_annotation",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "indirect.sites",
+      "check": "target_section",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "indirect.sites",
+      "check": "iat_target",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "indirect.sites",
+      "check": "target_thunk_function_index",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "indirect.sites",
+      "check": "target_thunk_function_range",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "indirect.sites",
+      "check": "documented[raw_ff15_rejected]",
+      "expected": 16,
+      "actual": 16,
+      "ok": true
+    },
+    {
+      "group": "indirect.sites",
+      "check": "rejected_candidates_outside_every_pdata_function",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "indirect.sites",
+      "check": "rejected_candidate_symbols",
+      "expected": {
+        "RtlVirtualUnwind": 16
+      },
+      "actual": {
+        "RtlVirtualUnwind": 16
+      },
+      "ok": true
+    },
+    {
+      "group": "indirect.sites",
+      "check": "thunk_stub_annotation_contradicted_by_own_function_columns",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "indirect.sites",
+      "check": "thunk_stub_rows_never_claim_a_code_instruction_function",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "indirect.sites",
+      "check": "thunk_stub_interior_rows_recompute_from_their_own_annotation",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "indirect.sites",
+      "check": "thunk_stub_interior_rows_name_their_hosting_thunk_function",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "indirect.sites",
+      "check": "code_instruction_function_columns_are_atomic",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "indirect.sites",
+      "check": "target_thunk_function_columns_are_atomic",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "xref.edges",
+      "check": "thunk_stub_hosting_thunk_function_agrees_with_indirect_sites",
+      "expected": {},
+      "actual": {},
+      "ok": true
+    },
+    {
+      "group": "xref.edges",
+      "check": "documented[raw_ff15_candidates]",
+      "expected": 3148,
+      "actual": 3148,
+      "ok": true
+    },
+    {
+      "group": "syscall.candidates",
+      "check": "hit_index_not_contiguous_0_based",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "syscall.candidates",
+      "check": "raw_offset_not_ascending",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "syscall.candidates",
+      "check": "raw_offset",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "syscall.candidates",
+      "check": "pattern_bytes",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "syscall.candidates",
+      "check": "bytes_column",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "syscall.candidates",
+      "check": "hex_columns",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "syscall.candidates",
+      "check": "va_column",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "syscall.candidates",
+      "check": "in_pdata_flag",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "syscall.candidates",
+      "check": "rva_outside_named_function",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "syscall.candidates",
+      "check": "pdata_function_start",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "syscall.candidates",
+      "check": "pdata_function_end",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "syscall.candidates",
+      "check": "pdata_function_size",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "syscall.candidates",
+      "check": "pdata_function_offset",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "syscall.candidates",
+      "check": "pdata_word_boundary",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "syscall.candidates",
+      "check": "capstone_checked",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "syscall.candidates",
+      "check": "false_positive_ok",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "syscall.candidates",
+      "check": "valid_candidate_vs_boundary",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "syscall.candidates",
+      "check": "false_positive_inverse",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "syscall.candidates",
+      "check": "disposition_start_without_valid",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "syscall.candidates",
+      "check": "disposition_nonstart_with_valid",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "group": "syscall.candidates",
+      "check": "documented[syscall_raw_hits]",
+      "expected": 3881,
+      "actual": 3881,
+      "ok": true
+    },
+    {
+      "group": "syscall.candidates",
+      "check": "valid_candidate_count",
+      "expected": 3627,
+      "actual": 3627,
+      "ok": true
+    },
+    {
+      "group": "syscall.candidates",
+      "check": "valid_plus_false_positive_equals_rows",
+      "expected": 3881,
+      "actual": 3881,
+      "ok": true
+    },
+    {
+      "group": "syscall.candidates",
+      "check": "disposition_totals_equal_rows",
+      "expected": 3881,
+      "actual": 3881,
+      "ok": true
+    },
+    {
+      "group": "syscall.candidates",
+      "check": "valid_candidates_equal_instruction_start_dispositions",
+      "expected": 3627,
+      "actual": 3627,
+      "ok": true
+    },
+    {
+      "group": "syscall.candidates",
+      "check": "in_pdata_equals_disposition_not_no_pdata",
+      "expected": 3836,
+      "actual": 3836,
+      "ok": true
+    },
+    {
+      "group": "syscall.candidates",
+      "check": "rows_without_pdata_function_have_empty_index",
+      "expected": 45,
+      "actual": 45,
+      "ok": true
+    },
+    {
+      "group": "provenance",
+      "check": "digest_recorded_for[reverse/evidence/baseline.json]",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "provenance",
+      "check": "digest_matches_recorded[reverse/evidence/baseline.json]",
+      "expected": "dc34cb50f1a002bae4f01e33064f35c0b28019fe7023add0988ab84fb8df67ea",
+      "actual": "dc34cb50f1a002bae4f01e33064f35c0b28019fe7023add0988ab84fb8df67ea",
+      "ok": true
+    },
+    {
+      "group": "provenance",
+      "check": "digest_recorded_for[reverse/evidence/pdata_functions.csv]",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "provenance",
+      "check": "digest_matches_recorded[reverse/evidence/pdata_functions.csv]",
+      "expected": "65ab914c1b38986fcb4bf07d55af0bdad16904a0dcd4271d73343ea7723d785b",
+      "actual": "65ab914c1b38986fcb4bf07d55af0bdad16904a0dcd4271d73343ea7723d785b",
+      "ok": true
+    },
+    {
+      "group": "provenance",
+      "check": "digest_recorded_for[reverse/scripts/common.py]",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "provenance",
+      "check": "digest_matches_recorded[reverse/scripts/common.py]",
+      "expected": "4aa2ceec1af88b9cd72e64274b779f4fadf6b62d491fead2c865c3fa99eca750",
+      "actual": "4aa2ceec1af88b9cd72e64274b779f4fadf6b62d491fead2c865c3fa99eca750",
+      "ok": true
+    },
+    {
+      "group": "provenance",
+      "check": "digest_recorded_for[reverse/scripts/pdata_map.py]",
+      "expected": true,
+      "actual": true,
+      "ok": true
+    },
+    {
+      "group": "provenance",
+      "check": "digest_matches_recorded[reverse/scripts/pdata_map.py]",
+      "expected": "6772cfbfea0db607a626a91f5bcd4c5b2e1eb47d25a6e3c770b031e8c0f845b7",
+      "actual": "6772cfbfea0db607a626a91f5bcd4c5b2e1eb47d25a6e3c770b031e8c0f845b7",
+      "ok": true
+    },
+    {
+      "group": "discrepancy.integrity",
+      "check": "every_evidence_check_resolves",
+      "expected": [],
+      "actual": [],
+      "ok": true
+    },
+    {
+      "group": "discrepancy.integrity",
+      "check": "every_failing_check_is_attributed_to_an_open_discrepancy",
+      "expected": [],
+      "actual": [],
+      "ok": true
+    },
+    {
+      "group": "discrepancy.integrity",
+      "check": "open_discrepancies_have_at_least_one_failing_check",
+      "expected": [],
+      "actual": [],
+      "ok": true
+    },
+    {
+      "group": "discrepancy.integrity",
+      "check": "closed_discrepancies_have_no_failing_evidence_check",
+      "expected": [],
+      "actual": [],
+      "ok": true
+    },
+    {
+      "group": "discrepancy.integrity",
+      "check": "register_holds_exactly_four_findings",
+      "expected": 4,
+      "actual": 4,
+      "ok": true
+    }
+  ],
+  "discrepancies": [
+    {
+      "id": "D-001",
+      "status": "closed",
+      "root_cause_closed": true,
+      "severity": "medium",
+      "area": "toolchain",
+      "title": "library versions are recorded on independent axes and each disagreement is decidable",
+      "detail": "toolchain.json no longer offers one collapsed version per library. The package_versions block versions every third-party package on the installed distribution metadata, the attribute the imported module exposes and the number the native engine reports, keeps the three side by side and never reconciles them, and the flat libraries block is checked against those axes instead of against itself. The earlier finding was that a reader could not tell which build produced the decoded evidence; that is now decidable per package. Observed disagreements: capstone imported_module='5.0.7' decided by imported_version_is_composed_from_binding_constants; lief imported_module='1.0.0-d05b3499b' decided by imported_version_re_exported_from_a_compiled_extension. Each carries an assessment naming the mechanism and a machine checkable proof of it: a version composed from the binding constants is a literal in the package source, a version re exported from a compiled extension is a build stamp baked in at build time. The two axes resolve in opposite directions, which is why no single axis is declared authoritative. documented_claims attributes the version named in adhesive-03 and adhesive-12 to the imported_module axis and flags that it does not match the distribution version, and effect_on_evidence names either the importing producers or states that the divergence cannot have changed any decoded artifact. native_engine is never compared against a release string.",
+      "bounded": {
+        "axis_values": {
+          "capstone": {
+            "package_metadata": "5.0.9",
+            "imported_module": "5.0.7",
+            "native_engine": [
+              5,
+              0,
+              1280
+            ]
+          },
+          "lief": {
+            "package_metadata": "1.0.0",
+            "imported_module": "1.0.0-d05b3499b",
+            "native_engine": null
+          },
+          "pefile": {
+            "package_metadata": "2024.8.26",
+            "imported_module": "2024.8.26",
+            "native_engine": null
+          }
+        },
+        "disagreements": {
+          "capstone": [
+            "imported_module"
+          ],
+          "lief": [
+            "imported_module"
+          ]
+        },
+        "disagreement_proofs": {
+          "capstone": {
+            "imported_module": "imported_version_is_composed_from_binding_constants"
+          },
+          "lief": {
+            "imported_module": "imported_version_re_exported_from_a_compiled_extension"
+          }
+        },
+        "declared_without_producer_importer": [
+          "lief"
+        ],
+        "undeclared_imports": [
+          "numpy"
+        ],
+        "affects_decoded_counts": false
+      },
+      "evidence_checks": [
+        "toolchain.package_versions.axes_are_never_reconciled",
+        "toolchain.package_versions.every_package_is_versioned_on_all_axes",
+        "toolchain.package_versions.only_the_two_release_axes_are_compared",
+        "toolchain.package_versions.library_block_consistent_with_the_axes",
+        "toolchain.package_versions.every_disagreement_carries_an_assessment",
+        "toolchain.package_versions.every_disagreement_is_decidable_from_the_record",
+        "toolchain.package_versions.every_disagreement_names_the_documented_axis",
+        "toolchain.package_versions.documented_claim_flags_match_the_axis_values",
+        "toolchain.package_versions.effect_on_evidence_stated_for_every_package",
+        "toolchain.package_versions.undeclared_imports_are_disclosed"
+      ],
+      "files": [
+        "reverse/evidence/toolchain.json",
+        "reverse/scripts/refresh_toolchain.py",
+        "reverse/scripts/common.py",
+        "reverse/adhesive-03-imports-exports.md",
+        "reverse/adhesive-12-risk-methodology-open-questions.md"
+      ]
+    },
+    {
+      "id": "D-002",
+      "status": "closed",
+      "root_cause_closed": true,
+      "severity": "low",
+      "area": "toolchain",
+      "title": "producer digests are attested but the stored payloads are pinned to older revisions",
+      "detail": "The root cause the earlier finding named is closed. toolchain.json now carries a script_inventory block that declares its root, glob, field set and the timestamps it deliberately omits, a sha256 for every producer under reverse/scripts including the ones that emitted the cfg, xref, indirect and syscall evidence, and a third_party_imports census per script that this audit re-derives from the script bytes with ast. The stored payloads have since been refreshed, so the inventory names all 19 producers under reverse/scripts and every recorded size, line count, encoding flag and sha256 reproduces from the script bytes, the package_versions importer lists agree with the census this audit derives with ast, and the digests cross referenced out of pdata_stats.json and out of the toolchain digests block reproduce as well. The ordering constraint the digests block introduces is that it now hashes pdata_stats.json, so reverse/scripts/refresh_toolchain.py has to run after pdata_map.py; over an unchanged tree it rewrites nothing. No decoded count depends on a script digest, so the finding stays bounded to the attestation of the producer tree and every check behind it is re-run on each audit.",
+      "bounded": {
+        "missing_from_inventory": [],
+        "drifted_entries": {},
+        "stored_entries": 19,
+        "on_disk_entries": 19,
+        "attestation_checks": [
+          "pdata.stats.producer.baseline_sha256",
+          "pdata.stats.producer.helper_sha256",
+          "pdata.stats.producer.script_sha256",
+          "provenance.digest_matches_recorded[reverse/evidence/baseline.json]",
+          "provenance.digest_matches_recorded[reverse/evidence/pdata_functions.csv]",
+          "provenance.digest_matches_recorded[reverse/scripts/common.py]",
+          "provenance.digest_matches_recorded[reverse/scripts/pdata_map.py]",
+          "toolchain.digests.cross_references_verified_independently",
+          "toolchain.digests.entry_digests_recomputed",
+          "toolchain.package_versions.imported_by_matches_the_audit_census",
+          "toolchain.package_versions.imported_by_matches_the_inventory_census"
+        ],
+        "failing_attestation_checks": [],
+        "affects_decoded_counts": false
+      },
+      "evidence_checks": [
+        "toolchain.scripts.inventory_names",
+        "toolchain.scripts.inventory_count",
+        "toolchain.scripts.recorded_census_is_internally_consistent",
+        "pdata.stats.producer.baseline_sha256",
+        "pdata.stats.producer.helper_sha256",
+        "pdata.stats.producer.script_sha256",
+        "provenance.digest_matches_recorded[reverse/evidence/baseline.json]",
+        "provenance.digest_matches_recorded[reverse/evidence/pdata_functions.csv]",
+        "provenance.digest_matches_recorded[reverse/scripts/common.py]",
+        "provenance.digest_matches_recorded[reverse/scripts/pdata_map.py]",
+        "toolchain.digests.cross_references_verified_independently",
+        "toolchain.digests.entry_digests_recomputed",
+        "toolchain.package_versions.imported_by_matches_the_audit_census",
+        "toolchain.package_versions.imported_by_matches_the_inventory_census"
+      ],
+      "files": [
+        "reverse/evidence/toolchain.json",
+        "reverse/evidence/pdata_stats.json",
+        "reverse/scripts/refresh_toolchain.py"
+      ]
+    },
+    {
+      "id": "D-003",
+      "status": "closed",
+      "root_cause_closed": true,
+      "severity": "high",
+      "area": "xref",
+      "title": "import thunk stub rows no longer claim an owner their annotation denies",
+      "detail": "The earlier finding was that all 355 raw scan stub rows carried import_thunk_stub_outside_every_pdata_runtime_function while sitting at RVAs a .pdata runtime function covers, so the annotation and the function columns of the same row contradicted each other. The producer now separates the two cases in the annotation and in the column names. The 316 rows that really are outside every runtime function keep that claim and leave both function column groups empty, and the audit re-derives from .pdata that they are outside. The remaining 39 rows are marker bytes in the interior of an already decoded seven byte jmp, so they carry import_thunk_stub_interior_byte_of_a_decoded_jmp_inside_a_pdata_function plus the byte offset, the instruction start and the covering first byte; the audit recomputes all three from the specimen bytes and recomputes the owning runtime function from .pdata. Those rows correctly leave code_instruction_function empty, because the marker byte is not an instruction start, and populate target_thunk_function with the runtime function that hosts the jmp; 39 xref_edges iat_jmp_thunk_stub rows name the same function for the same RVA, so the two evidence files now agree instead of contradicting each other. The 6 304 thunk mediated CALL xrefs and the 355 stub count are unchanged and remain equal to the doc 03 claims.",
+      "bounded": {
+        "stub_rows": 355,
+        "annotated_outside_every_pdata_function": 316,
+        "annotated_interior_of_a_decoded_jmp": 39,
+        "interior_rows_hosted_in_a_pdata_function": 39,
+        "contradicted_rows": 0,
+        "affects_decoded_counts": false
+      },
+      "evidence_checks": [
+        "indirect.sites.thunk_stub_annotation_contradicted_by_own_function_columns",
+        "indirect.sites.thunk_stub_rows_never_claim_a_code_instruction_function",
+        "indirect.sites.thunk_stub_interior_rows_recompute_from_their_own_annotation",
+        "indirect.sites.thunk_stub_interior_rows_name_their_hosting_thunk_function",
+        "indirect.sites.code_instruction_function_columns_are_atomic",
+        "indirect.sites.target_thunk_function_columns_are_atomic",
+        "indirect.sites.target_thunk_function_index",
+        "indirect.sites.target_thunk_function_range",
+        "xref.edges.thunk_stub_rows_declare_no_code_instruction_function",
+        "xref.edges.code_instruction_function_columns_are_atomic",
+        "xref.edges.target_thunk_function_columns_are_atomic",
+        "xref.edges.thunk_stub_rows_covered_by_a_pdata_function",
+        "xref.edges.thunk_stub_hosting_thunk_function_covers_the_stub_byte",
+        "xref.edges.target_thunk_function_index",
+        "xref.edges.target_thunk_function_range",
+        "xref.edges.thunk_stub_hosting_thunk_function_agrees_with_indirect_sites"
+      ],
+      "files": [
+        "reverse/evidence/indirect_sites.csv",
+        "reverse/evidence/xref_edges.csv",
+        "reverse/scripts/xref_build.py"
+      ]
+    },
+    {
+      "id": "D-004",
+      "status": "closed",
+      "root_cause_closed": true,
+      "severity": "low",
+      "area": "provenance",
+      "title": "digest entry rule is enforced and covers every audited artifact",
+      "detail": "The rule the earlier finding lacked is now stated in the payload and independently verified here. toolchain.json carries a digests block that names the algorithm, records size and sha256 for the 9 files the rest of the set is built on and decoded from (reverse/evidence/baseline.json, reverse/evidence/cfg_clusters.csv, reverse/evidence/cfg_functions.csv, reverse/evidence/indirect_sites.csv, reverse/evidence/pdata_stats.json, reverse/evidence/syscall_candidates_raw.csv, reverse/evidence/unresolved_regions.json, reverse/evidence/xref_edges.csv, reverse/scripts/common.py), lists each cross reference to the field that records the same digest elsewhere and marks whether it matches, and explains why the payload cannot contain its own digest and which script prints it. This audit recomputes every one of those digests from the file bytes and re-derives the cross referenced values out of pdata_stats.json rather than trusting the matches_recomputed flag, and it records which record attests each artifact: 7 of them (reverse/evidence/cfg_clusters.csv, reverse/evidence/cfg_functions.csv, reverse/evidence/indirect_sites.csv, reverse/evidence/pdata_stats.json, reverse/evidence/syscall_candidates_raw.csv, reverse/evidence/unresolved_regions.json, reverse/evidence/xref_edges.csv) are attested by the toolchain block alone, because no producer of theirs records an output digest the way pdata_map.py does. The rule counts a digest recorded by the toolchain block as attestation on the same footing as one recorded by a producer. The earlier wording of the rule credited a producer recorded digest only, which is why these artifacts were reported as unattested even though the block the evidence set is read against already covered them. That is the refinement, and it is enforced rather than asserted in prose: every attested digest has to reproduce from the bytes, coverage of the audited artifact list is a check in its own right rather than an inference from an empty residual, and two cycle guards keep the block out of a fixed point it could never reach, one rejecting the payload as an attested target and one rejecting an attested artifact whose bytes carry the payload digest. 9 of the 10 audited artifacts carry a recorded digest and the payload is the single exclusion, so nothing in the audited set is left without a stored value to detect drift against.",
+      "bounded": {
+        "attested_by_any_record": [
+          "reverse/evidence/baseline.json",
+          "reverse/evidence/cfg_clusters.csv",
+          "reverse/evidence/cfg_functions.csv",
+          "reverse/evidence/indirect_sites.csv",
+          "reverse/evidence/pdata_functions.csv",
+          "reverse/evidence/pdata_stats.json",
+          "reverse/evidence/syscall_candidates_raw.csv",
+          "reverse/evidence/unresolved_regions.json",
+          "reverse/evidence/xref_edges.csv",
+          "reverse/scripts/common.py",
+          "reverse/scripts/pdata_map.py"
+        ],
+        "attested_by": {
+          "reverse/evidence/baseline.json": {
+            "reverse/evidence/pdata_stats.json": "dc34cb50f1a002bae4f01e33064f35c0b28019fe7023add0988ab84fb8df67ea",
+            "reverse/evidence/toolchain.json#digests.entries": "dc34cb50f1a002bae4f01e33064f35c0b28019fe7023add0988ab84fb8df67ea"
+          },
+          "reverse/evidence/cfg_clusters.csv": {
+            "reverse/evidence/toolchain.json#digests.entries": "7d90d02c195e89357d8ec9a213a10140445dcffaf401e3bfe7c7c1871f1aa048"
+          },
+          "reverse/evidence/cfg_functions.csv": {
+            "reverse/evidence/toolchain.json#digests.entries": "041d2365e3be008fbacbcb6f957fbd10fe0ae08c52ee1cbc9090e04bb64df788"
+          },
+          "reverse/evidence/indirect_sites.csv": {
+            "reverse/evidence/toolchain.json#digests.entries": "21e0e1af566ad8e7972647d78402a254f647c9fb588508e4c5f657cf6de940ee"
+          },
+          "reverse/evidence/pdata_functions.csv": {
+            "reverse/evidence/pdata_stats.json": "65ab914c1b38986fcb4bf07d55af0bdad16904a0dcd4271d73343ea7723d785b"
+          },
+          "reverse/evidence/pdata_stats.json": {
+            "reverse/evidence/toolchain.json#digests.entries": "df1e6ff4cc799afc907ac2c0a8568e87912bf14106bd6f5e88b14d5711a70be8"
+          },
+          "reverse/evidence/syscall_candidates_raw.csv": {
+            "reverse/evidence/toolchain.json#digests.entries": "7c99950c48c6320487a28bdde1cba5914a8d620b4ef2049ae3f2118a2fcc3e8a"
+          },
+          "reverse/evidence/unresolved_regions.json": {
+            "reverse/evidence/toolchain.json#digests.entries": "0092fef1f0e07798fd2573909dc3d0cd4d79a84859e42ca24576b407337b34cd"
+          },
+          "reverse/evidence/xref_edges.csv": {
+            "reverse/evidence/toolchain.json#digests.entries": "fc744f611f4b94caf3c619a874dbead3b57123ded4e5df55ba128d748334270a"
+          },
+          "reverse/scripts/common.py": {
+            "reverse/evidence/pdata_stats.json": "4aa2ceec1af88b9cd72e64274b779f4fadf6b62d491fead2c865c3fa99eca750",
+            "reverse/evidence/toolchain.json#digests.entries": "4aa2ceec1af88b9cd72e64274b779f4fadf6b62d491fead2c865c3fa99eca750"
+          },
+          "reverse/scripts/pdata_map.py": {
+            "reverse/evidence/pdata_stats.json": "6772cfbfea0db607a626a91f5bcd4c5b2e1eb47d25a6e3c770b031e8c0f845b7"
+          }
+        },
+        "attested_only_by_the_toolchain_block": [
+          "reverse/evidence/cfg_clusters.csv",
+          "reverse/evidence/cfg_functions.csv",
+          "reverse/evidence/indirect_sites.csv",
+          "reverse/evidence/pdata_stats.json",
+          "reverse/evidence/syscall_candidates_raw.csv",
+          "reverse/evidence/unresolved_regions.json",
+          "reverse/evidence/xref_edges.csv"
+        ],
+        "unattested": [],
+        "self_excluded": "reverse/evidence/toolchain.json",
+        "cross_references": 2,
+        "rule": {
+          "accepted_records": [
+            "reverse/evidence/pdata_stats.json",
+            "reverse/evidence/toolchain.json#digests.entries"
+          ],
+          "cycle_guards": [
+            "toolchain.digests.no_entry_attests_the_payload",
+            "toolchain.digests.no_attested_artifact_records_the_payload_digest"
+          ],
+          "refined": "the residual used to be measured against producer recorded digests only, so a toolchain level attestation did not close the finding and a digest only had to be present to count. The source is now named per artifact, every recorded digest has to reproduce from the bytes, and coverage of the audited artifact list is asserted by a check rather than implied by an empty residual."
+        },
+        "affects_decoded_counts": false
+      },
+      "evidence_checks": [
+        "toolchain.digests.algorithm",
+        "toolchain.digests.entry_digests_recomputed",
+        "toolchain.digests.entries_exist_on_disk",
+        "toolchain.digests.no_entry_attests_the_payload",
+        "toolchain.digests.no_attested_artifact_records_the_payload_digest",
+        "toolchain.digests.every_attested_digest_recomputes_from_the_bytes",
+        "toolchain.digests.every_audited_artifact_is_attested",
+        "toolchain.digests.cross_references_verified_independently",
+        "toolchain.digests.self_digest_is_null",
+        "toolchain.digests.self_path_is_the_payload",
+        "toolchain.digests.self_exclusion_names_the_producer_that_prints_it",
+        "toolchain.digests.self_exclusion_covers_the_payload"
+      ],
+      "files": [
+        "reverse/evidence/toolchain.json",
+        "reverse/evidence/pdata_stats.json",
+        "reverse/evidence/baseline.json",
+        "reverse/evidence/cfg_clusters.csv",
+        "reverse/evidence/cfg_functions.csv",
+        "reverse/evidence/indirect_sites.csv",
+        "reverse/evidence/pdata_stats.json",
+        "reverse/evidence/syscall_candidates_raw.csv",
+        "reverse/evidence/unresolved_regions.json",
+        "reverse/evidence/xref_edges.csv",
+        "reverse/scripts/common.py"
+      ]
+    }
+  ]
+}

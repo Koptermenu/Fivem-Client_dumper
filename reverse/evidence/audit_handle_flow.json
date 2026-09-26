@@ -1,0 +1,3212 @@
+{
+  "schema": "adhesive-dumper.audit-handle-flow/1",
+  "audit": {
+    "id": "AFH-2026-09-26",
+    "title": "independent recomputation audit of the 0xC856C0 handle flow numbers",
+    "target_document": "reverse/adhesive-14-c856c0-handle-producer-dataflow.md",
+    "audited_questions": [
+      "how many slots does one dispatch table hold",
+      "how many direct syscall branches",
+      "how many wrapper call branches",
+      "how many wrapper functions, 6 allocation plus 6 transfer or something else",
+      "how many syscall sites in total",
+      "how many handle loads",
+      "how many consumer edges",
+      "where the producer and caller boundary sits",
+      "what the 21 wrapper_forwarding service map predicate counts, by scope"
+    ],
+    "verdict": {
+      "checked_items": [
+        "B-01",
+        "B-02",
+        "D-01",
+        "D-02",
+        "D-03",
+        "H-01",
+        "H-02",
+        "P-01",
+        "S-01",
+        "W-01",
+        "X-04",
+        "X-06"
+      ],
+      "agree": [
+        "B-01",
+        "B-02",
+        "D-01",
+        "D-02",
+        "D-03",
+        "H-01",
+        "H-02",
+        "P-01",
+        "S-01",
+        "W-01"
+      ],
+      "contested": [
+        "X-04",
+        "X-06"
+      ],
+      "contested_statements": [
+        "CF-01",
+        "CF-02",
+        "CF-03",
+        "CF-04",
+        "CF-05",
+        "CF-06",
+        "CF-07"
+      ],
+      "statement": "The eight arithmetic questions resolve as the document states them: two tables of 16 slots, 16 direct syscall branches, 16 wrapper call branches, 12 wrapper functions split 6 plus 6, 28 syscall sites, 2 handle loads, 32 consumer edges, and a closed producer and caller boundary at 0xC85650 that leaves the producer open. Seven statements elsewhere in the document are not reproducible from the 7 attested inputs and are listed in the contested section. No audited count changes."
+    }
+  },
+  "observation": {
+    "role": "what this audit read at run time, reported for the record and not attested",
+    "is_attestation": false,
+    "carries_a_verdict": false,
+    "absent_from": "the inputs block and the audit block, so no digest in this payload claims the audited document",
+    "audited_document": {
+      "path": "reverse/adhesive-14-c856c0-handle-producer-dataflow.md",
+      "size": 101147,
+      "sha256": "eebcd7c7af63a694b547c6723e45c563ffd1f8608e3d12fd9e1c33dad676017b"
+    },
+    "why_not_attested": "reverse/evidence/audit_handle_flow.json is itself digested by the audited document, so a digest recorded here for that document would close a cycle: editing either file invalidates the digest the other one records, and no state of the tree can make both pins fresh at once. The value is therefore an observation of the bytes this run read, it is excluded from the attested inputs, and no check in the validation block is derived from it. The attested inputs are the evidence artifacts alone."
+  },
+  "script": {
+    "path": "reverse/scripts/audit_handle_flow.py",
+    "sha256": "20e55254697f186fa29def538770502a204a3776f2b2b7c09ebf4fcfa6b6daef"
+  },
+  "specimen_reference": {
+    "path": "reverse/adhesive.dll",
+    "size": 53575264,
+    "sha256": "91cc0aa006d7315cb042c8fa8dca6c1e074a307bba7dcc9eb5509c8a7b81934e",
+    "image_base_hex": "0x180000000",
+    "source": "quoted from c856c0_forward.json#specimen and c856c0_dataflow.json#specimen",
+    "specimen_file_opened_by_this_audit": false
+  },
+  "scope": {
+    "question": "does adhesive-14 state the 0xC856C0 handle flow numbers correctly",
+    "method": "every audited quantity is recomputed from the 7 attested inputs only; no fresh disassembly and no PE parse is performed, so the audit can confirm or refute internal consistency and the report's reading of the evidence, and cannot extend the evidence",
+    "direction": "recomputation over published evidence, not a new extraction",
+    "execution": "static file parsing of csv and json evidence only; the specimen is never opened, mapped, loaded, patched or executed",
+    "independence": "the audit reads the payloads and the report but writes neither; adhesive-14 is left byte for byte unchanged",
+    "no_actionable_output": "this payload records counts, an authoritative table, a contested list and correction proposals. It names no service, no target process, no producer and no patch, and it contains no exploit, bypass or shellcode guidance",
+    "determinism": {
+      "iteration": "sorted by rva, then by label, then by branch index",
+      "payload_timestamps": false,
+      "json_indent": 2,
+      "json_ensure_ascii": false,
+      "json_sort_keys": false,
+      "line_terminator": "\\n",
+      "trailing_newline": true
+    },
+    "libraries": [
+      "python standard library csv and json"
+    ],
+    "libraries_note": "the repository helper reverse/scripts/common.py supplies the writer, the check record, the hex formatting and the sha256 helper; its pefile dependency is imported but never exercised by this audit"
+  },
+  "inputs": [
+    {
+      "path": "reverse/evidence/c856c0_dataflow.json",
+      "sha256": "c39d281aee1a31885737b5e2eade78790c08793558cd172826711c5871d426d5",
+      "size": 255083
+    },
+    {
+      "path": "reverse/evidence/c856c0_forward.json",
+      "sha256": "1b33efb7e6daa8a7610ef25ed2eb8455aa9a5d702092ffe38e08f1c8f6cd97e4",
+      "size": 694730
+    },
+    {
+      "path": "reverse/evidence/c856c0_callers.csv",
+      "sha256": "a12f3e35df3191ed8b4bcc4124fced58bd19063b57c172dfda3557c32d2065af",
+      "size": 50631
+    },
+    {
+      "path": "reverse/evidence/syscall_inventory.csv",
+      "sha256": "bb1879aa251407b5ee753ababe088af3644250d80e3171c83d12a40eac07ed76",
+      "size": 5993935
+    },
+    {
+      "path": "reverse/evidence/syscall_service_map.json",
+      "sha256": "25e29583be2f90d9902c984b880799ed25971e13e0547d7344d685b2bae481bb",
+      "size": 19589
+    },
+    {
+      "path": "reverse/evidence/cfg_functions.csv",
+      "sha256": "041d2365e3be008fbacbcb6f957fbd10fe0ae08c52ee1cbc9090e04bb64df788",
+      "size": 40180030
+    },
+    {
+      "path": "reverse/evidence/xref_edges.csv",
+      "sha256": "fc744f611f4b94caf3c619a874dbead3b57123ded4e5df55ba128d748334270a",
+      "size": 11126183
+    }
+  ],
+  "inputs_note": "the attested inputs are the evidence artifacts this audit recomputed from. The audited document is read but not attested here, because reverse/evidence/audit_handle_flow.json is digested by that document and a digest of the document in this payload would close a cycle. Its digest is reported under the observation block instead.",
+  "csv_contract": {
+    "c856c0_callers.csv": {
+      "row_count": 444,
+      "column_count": 9,
+      "header": "level,scope,target_fn,edge_kind,callsite,caller_fn,evidence,confidence,open",
+      "trailing_newline": true
+    },
+    "cfg_functions.csv": {
+      "row_count": 142004,
+      "column_count": 80,
+      "header": "func_index,begin_rva,begin_rva_hex,begin_va,begin_va_hex,end_rva,end_rva_hex,end_va,end_va_hex,size,section,raw,raw_hex,unwind_rva,unwind_rva_hex,unwind_version,unwind_flags,unwind_shared_by,overlap_role,overlap_partners,entry_internal,entry_external_calls,entry_external_jumps,entry_refs,basic_blocks,blocks_reached,blocks_linear_only,reached_ratio,instructions,decoded_bytes,undecoded_bytes,undecoded_regions,edges,max_indegree,blocks_indegree_gt1,back_edges,cross_calls,cross_jumps,cross_function_edges,cross_function_targets,term_call,term_jmp_direct,term_jmp_indirect,term_jcc,term_return,term_trap,term_invalid,term_range_end,exit_call,exit_branch,exit_cond,exit_switch,exit_indirect,exit_return,exit_trap,exit_invalid,exit_range_end,direct_calls,direct_jumps,indirect_calls,indirect_jumps,indirect_jumps_unresolved,iat_call_sites,iat_jump_sites,iat_module_count,iat_symbol_count,iat_symbols,switch_sites,switch_sites_validated,switch_sites_rejected,switch_cases,switch_reject_reasons,ret_sites,ud2_sites,int3_sites,trap_sites,syscall_sites,decode_status,doc_anchors,cluster_id"
+    },
+    "syscall_inventory.csv": {
+      "row_count": 3627,
+      "column_count": 106,
+      "header": "hit_index,rva_hex,va_hex,raw_offset_hex,section_name,insn_mnemonic,insn_bytes_hex,pdata_function_index,pdata_function_start_rva_hex,pdata_function_end_rva_hex,cfg_function_index,cfg_function_begin_rva_hex,cfg_function_end_rva_hex,cfg_decode_status,window_start_rva_hex,window_bytes,window_instruction_count,window_decode_status,window_stack_delta,window_control_flow,entry_spill,stack_slots_detected,allocation_calls,site_signature,rw_pair_arguments,allocation_write_arguments,nt_service,nt_service_status,arg1_source,arg1_raw,arg1_def,arg1_const,arg1_addr,arg1_pseudo,arg1_class,arg1_len,arg1_reason,arg1_rw_pair,arg1_alloc_write,arg1_evidence,arg2_source,arg2_raw,arg2_def,arg2_const,arg2_addr,arg2_pseudo,arg2_class,arg2_len,arg2_reason,arg2_rw_pair,arg2_alloc_write,arg2_evidence,arg3_source,arg3_raw,arg3_def,arg3_const,arg3_addr,arg3_pseudo,arg3_class,arg3_len,arg3_reason,arg3_rw_pair,arg3_alloc_write,arg3_evidence,arg4_source,arg4_raw,arg4_def,arg4_const,arg4_addr,arg4_pseudo,arg4_class,arg4_len,arg4_reason,arg4_rw_pair,arg4_alloc_write,arg4_evidence,arg5_source,arg5_raw,arg5_def,arg5_const,arg5_addr,arg5_pseudo,arg5_class,arg5_len,arg5_reason,arg5_rw_pair,arg5_alloc_write,arg5_evidence,arg6_source,arg6_raw,arg6_def,arg6_const,arg6_addr,arg6_pseudo,arg6_class,arg6_len,arg6_reason,arg6_rw_pair,arg6_alloc_write,arg6_evidence,svc_producer_rva,producer_chain,nt_confidence,mapping_basis,service_class,status"
+    },
+    "xref_edges.csv": {
+      "row_count": 57101,
+      "column_count": 22,
+      "header": "edge_id,category,relation,evidence,src_rva,src_raw,code_instruction_function_index,code_instruction_function_begin,code_instruction_function_end,src_mnemonic,src_op_str,src_bytes,via_rva,target_thunk_function_index,target_thunk_function_begin,target_thunk_function_end,dst_kind,dst_rva,dst_raw,dst_module,dst_symbol,iat_rva",
+      "numeric_column_unit": "decimal"
+    },
+    "note": "the rva columns of xref_edges.csv and the *_rva_hex columns of syscall_inventory.csv carry the base in the column name. Reading a decimal column in the wrong base is the root cause of contested item CF-02."
+  },
+  "authoritative_table": [
+    {
+      "id": "D-01",
+      "quantity": "how many slots does one dispatch table hold",
+      "authoritative_value": 16,
+      "decomposition": null,
+      "agreement_with_adhesive_14": "AGREE",
+      "document_anchor": "`table_entries = 16`",
+      "document_anchor_present": true,
+      "document_value": 16,
+      "source_of_truth": [
+        "c856c0_dataflow.json#dispatch.table_entries",
+        "c856c0_dataflow.json#dispatch.tables[].branches"
+      ]
+    },
+    {
+      "id": "D-02",
+      "quantity": "how many dispatch tables are there and how many slots in total",
+      "authoritative_value": 32,
+      "decomposition": {
+        "tables": 2,
+        "slots_total": 32,
+        "per_table": [
+          16,
+          16
+        ]
+      },
+      "agreement_with_adhesive_14": "AGREE",
+      "document_anchor": "16 + 16 = 32",
+      "document_anchor_present": true,
+      "document_value": 32,
+      "source_of_truth": [
+        "c856c0_dataflow.json#dispatch.tables"
+      ]
+    },
+    {
+      "id": "D-03",
+      "quantity": "is the second table byte adjacent to the first",
+      "authoritative_value": true,
+      "decomposition": {
+        "first_table_rva": "0x2CFB1F8",
+        "second_table_rva": "0x2CFB238",
+        "offset_bytes": 64,
+        "adjacent": true
+      },
+      "agreement_with_adhesive_14": "AGREE",
+      "document_anchor": "`tables_are_adjacent` | `true`",
+      "document_anchor_present": true,
+      "document_value": "true",
+      "source_of_truth": [
+        "c856c0_dataflow.json#dispatch.tables_are_adjacent"
+      ]
+    },
+    {
+      "id": "B-01",
+      "quantity": "how many branches carry a direct syscall in the anchor",
+      "authoritative_value": 16,
+      "decomposition": {
+        "total": 16,
+        "per_stage": {
+          "alloc": 8,
+          "transfer": 8
+        },
+        "cfg_functions_csv_syscall_sites": 16
+      },
+      "agreement_with_adhesive_14": "AGREE",
+      "document_anchor": "16 inline syscall + 16 wrapper-branch",
+      "document_anchor_present": true,
+      "document_value": 16,
+      "source_of_truth": [
+        "c856c0_dataflow.json#dispatch.tables[].branches[].sink_kind"
+      ]
+    },
+    {
+      "id": "B-02",
+      "quantity": "how many branches call a wrapper instead of issuing a syscall",
+      "authoritative_value": 16,
+      "decomposition": {
+        "total": 16,
+        "per_stage": {
+          "alloc": 8,
+          "transfer": 8
+        }
+      },
+      "agreement_with_adhesive_14": "AGREE",
+      "document_anchor": "16 inline syscall + 16 wrapper-branch",
+      "document_anchor_present": true,
+      "document_value": 16,
+      "source_of_truth": [
+        "c856c0_dataflow.json#dispatch.tables[].branches[].sink_kind"
+      ]
+    },
+    {
+      "id": "W-01",
+      "quantity": "how many wrapper functions are there, 6 allocation plus 6 transfer or something else",
+      "authoritative_value": 12,
+      "decomposition": {
+        "total": 12,
+        "allocation": 6,
+        "transfer": 6,
+        "syscalls_per_wrapper": 1,
+        "rvas": [
+          "0x51D680",
+          "0x51D880",
+          "0x51DAB0",
+          "0x51DC60",
+          "0x51DDE0",
+          "0x51DFF0",
+          "0xC8F650",
+          "0xC8F880",
+          "0xC8FAA0",
+          "0xC8FC00",
+          "0xC8FDE0",
+          "0xC8FF60"
+        ]
+      },
+      "agreement_with_adhesive_14": "AGREE",
+      "document_anchor": "**12** distinct wrapper (6 allokációs + 6 transzfer)",
+      "document_anchor_present": true,
+      "document_value": 12,
+      "source_of_truth": [
+        "c856c0_forward.json#wrappers",
+        "cfg_functions.csv#syscall_sites on the wrapper rows"
+      ]
+    },
+    {
+      "id": "S-01",
+      "quantity": "how many syscall sites are there in the whole forward subject set",
+      "authoritative_value": 28,
+      "decomposition": {
+        "inline_in_anchor": 16,
+        "in_wrappers": 12,
+        "total": 28,
+        "cfg_functions_csv_breakdown": {
+          "anchor": 16,
+          "entry_function": 0,
+          "growth_helper": 0,
+          "wrapper:0x51D680": 1,
+          "wrapper:0x51D880": 1,
+          "wrapper:0x51DAB0": 1,
+          "wrapper:0x51DC60": 1,
+          "wrapper:0x51DDE0": 1,
+          "wrapper:0x51DFF0": 1,
+          "wrapper:0xC8F650": 1,
+          "wrapper:0xC8F880": 1,
+          "wrapper:0xC8FAA0": 1,
+          "wrapper:0xC8FC00": 1,
+          "wrapper:0xC8FDE0": 1,
+          "wrapper:0xC8FF60": 1
+        }
+      },
+      "agreement_with_adhesive_14": "AGREE",
+      "document_anchor": "**28** syscall-hely",
+      "document_anchor_present": true,
+      "document_value": 28,
+      "source_of_truth": [
+        "c856c0_forward.json#inline_syscalls",
+        "c856c0_forward.json#wrappers[].syscall",
+        "cfg_functions.csv#syscall_sites"
+      ]
+    },
+    {
+      "id": "H-01",
+      "quantity": "how many times is the descriptor field read",
+      "authoritative_value": 2,
+      "decomposition": {
+        "count": 2,
+        "sites": [
+          "0xC856F3",
+          "0xC86440"
+        ],
+        "carriers": [
+          "r14",
+          "rbx"
+        ],
+        "separate_reads": true,
+        "fields_observed": [
+          0
+        ]
+      },
+      "agreement_with_adhesive_14": "AGREE",
+      "document_anchor": "**Két** különálló olvasás",
+      "document_anchor_present": true,
+      "document_value": 2,
+      "source_of_truth": [
+        "c856c0_dataflow.json#handle.loads"
+      ]
+    },
+    {
+      "id": "H-02",
+      "quantity": "how many consumer edges does the handle have",
+      "authoritative_value": 32,
+      "decomposition": {
+        "use_sites": 32,
+        "per_stage": {
+          "alloc": 16,
+          "transfer": 16
+        },
+        "argument_register_split": {
+          "r10": 16,
+          "rdx": 16
+        },
+        "carriers": [
+          "r14",
+          "rbx"
+        ]
+      },
+      "agreement_with_adhesive_14": "AGREE",
+      "document_anchor": "32 fogyasztó él",
+      "document_anchor_present": true,
+      "document_value": 32,
+      "source_of_truth": [
+        "c856c0_dataflow.json#handle.use_sites",
+        "c856c0_forward.json#handle_lifetime.consume_sites"
+      ]
+    },
+    {
+      "id": "P-01",
+      "quantity": "where does the producer and caller boundary sit",
+      "authoritative_value": "OPEN",
+      "decomposition": {
+        "anchor_inbound_rel32_call_sites": 1,
+        "anchor_inbound_site": "0xC85681",
+        "anchor_inbound_site_bytes": "e8 3a 00 00 00",
+        "entry_function": "0xC85650",
+        "entry_inbound_forms_enumerated": [
+          "absolute_pointer",
+          "api_target",
+          "code_pointer_slot",
+          "rel32_call",
+          "rel32_jmp",
+          "rip_relative_materialisation"
+        ],
+        "entry_inbound_forms_with_zero_sites": [
+          "absolute_pointer",
+          "api_target",
+          "code_pointer_slot",
+          "rel32_call",
+          "rel32_jmp",
+          "rip_relative_materialisation"
+        ],
+        "frontier_after_last_level": [],
+        "closure_rows_per_level": {
+          "0": 14,
+          "1": 429,
+          "2": 1
+        },
+        "closure_rows_per_edge_kind": {
+          "direct_call": 429,
+          "forward_subject": 14,
+          "no_inbound_edge_in_enumerated_forms": 1
+        },
+        "producer_status": "OPEN",
+        "producer_identified": false,
+        "ownership": "OPEN"
+      },
+      "agreement_with_adhesive_14": "AGREE",
+      "document_anchor": "Handle producer | **OPEN**",
+      "document_anchor_present": true,
+      "document_value": "OPEN",
+      "source_of_truth": [
+        "c856c0_forward.json#caller_closure.negative_forms",
+        "c856c0_forward.json#caller_closure.scopes",
+        "c856c0_dataflow.json#handle.producer"
+      ]
+    },
+    {
+      "id": "X-01",
+      "quantity": "caller function count attributed to the twelve wrappers",
+      "authoritative_value": 37,
+      "decomposition": {
+        "level_one_rows_for_the_12_wrappers": 408,
+        "distinct_caller_functions_of_the_12_wrappers": 37,
+        "callers_outside_the_cluster_range": 36,
+        "callers_inside_the_cluster_range": 1,
+        "callers_inside_the_cluster_range_list": [
+          "0xC856C0"
+        ],
+        "distinct_caller_functions_over_all_13_forward_sinks": 54,
+        "distinct_caller_functions_inside_the_cluster_range_over_all_13": 2,
+        "growth_helper_distinct_callers": 17,
+        "per_wrapper_distinct_callers": {
+          "0x51D680": 35,
+          "0x51D880": 35,
+          "0x51DAB0": 35,
+          "0x51DC60": 35,
+          "0x51DDE0": 35,
+          "0x51DFF0": 35,
+          "0xC8F650": 3,
+          "0xC8F880": 3,
+          "0xC8FAA0": 3,
+          "0xC8FC00": 3,
+          "0xC8FDE0": 3,
+          "0xC8FF60": 3
+        }
+      },
+      "agreement_with_adhesive_14": "NOT_CHECKED_AGAINST_DOCUMENT",
+      "document_anchor": "`wrapper_distinct_caller_functions` | 54",
+      "document_anchor_present": false,
+      "document_value": 54,
+      "source_of_truth": [
+        "c856c0_forward.json#caller_closure.rows",
+        "c856c0_callers.csv"
+      ]
+    },
+    {
+      "id": "X-02",
+      "quantity": "how the forward reachable set splits by pdata coverage",
+      "authoritative_value": 23,
+      "decomposition": {
+        "distinct_targets": 37,
+        "with_a_runtime_function_record": 23,
+        "without_a_runtime_function_record": 14,
+        "without_record_list": [
+          "0x2A98530",
+          "0x2AAE840",
+          "0x2AB2418",
+          "0x2BEDDF0",
+          "0x2BEE110",
+          "0x2BEE1E0",
+          "0x5219A0",
+          "0x5219C0",
+          "0xCAC0D0",
+          "0xCAC0F0",
+          "0xCAC110",
+          "0xCAC130",
+          "0xCAC150",
+          "0xCAC170"
+        ],
+        "per_depth": {
+          "0": 2,
+          "1": 22,
+          "2": 6,
+          "3": 5,
+          "4": 2
+        }
+      },
+      "agreement_with_adhesive_14": "NOT_CHECKED_AGAINST_DOCUMENT",
+      "document_anchor": "21 függvény mellett 16 olyan cél is van",
+      "document_anchor_present": false,
+      "document_value": 21,
+      "source_of_truth": [
+        "c856c0_forward.json#forward_reachable_set.functions",
+        "c856c0_forward.json#forward_reachable_set.targets_outside_pdata"
+      ]
+    },
+    {
+      "id": "X-03",
+      "quantity": "published edge set source address coverage of the anchor code cluster",
+      "authoritative_value": 17,
+      "decomposition": {
+        "src_rva_unit": "decimal",
+        "src_rva_min": "0x1105",
+        "src_rva_max": "0x3306F60",
+        "true_hex_high_nibble_histogram": {
+          "0x0": 57101
+        },
+        "decimal_leading_digit_histogram": {
+          "1": 6496,
+          "2": 8716,
+          "3": 18317,
+          "4": 19210,
+          "5": 1194,
+          "6": 1022,
+          "7": 1119,
+          "8": 500,
+          "9": 527
+        },
+        "in_cluster_source_rows": 17,
+        "in_cluster_source_functions": [
+          "0xC81EE0",
+          "0xC871F0",
+          "0xC873C0",
+          "0xC87830",
+          "0xC87900"
+        ],
+        "in_cluster_source_by_relation": {
+          "call_indirect_iat": 6,
+          "call_rel_to_code": 11
+        },
+        "in_cluster_imports_reached": [
+          "KERNEL32.dll!VirtualAlloc",
+          "KERNEL32.dll!VirtualFree",
+          "KERNEL32.dll!VirtualQuery",
+          "api-ms-win-crt-runtime-l1-1-0.dll!_invalid_parameter_noinfo_noreturn"
+        ],
+        "close_handle_in_cluster_rows": 0
+      },
+      "agreement_with_adhesive_14": "NOT_CHECKED_AGAINST_DOCUMENT",
+      "document_anchor": "nulla** forrásoldali él származik",
+      "document_anchor_present": false,
+      "document_value": 0,
+      "source_of_truth": [
+        "xref_edges.csv#src_rva",
+        "xref_edges.csv#code_instruction_function_begin"
+      ]
+    },
+    {
+      "id": "X-04",
+      "quantity": "which global address thunk the 0xC8FEE4 call site targets",
+      "authoritative_value": "0xCAC150",
+      "decomposition": {
+        "backward_pass_thunk_list": [
+          "0xCAC0D0",
+          "0xCAC0F0",
+          "0xCAC110",
+          "0xCAC130",
+          "0xCAC170"
+        ],
+        "forward_pass_target_of_0xC8FEE4": [
+          "0xCAC150"
+        ],
+        "wrapper_helper_call_at_0xC8FEE4": [
+          "0xCAC150"
+        ],
+        "document_claims_for_this_callsite": [
+          "0xCAC0D0"
+        ]
+      },
+      "agreement_with_adhesive_14": "CONTESTED",
+      "document_anchor": "0xC8FEE4",
+      "document_anchor_present": true,
+      "document_value": "0xCAC0D0",
+      "source_of_truth": [
+        "c856c0_dataflow.json#global_address_thunks",
+        "c856c0_forward.json#forward_reachable_set.targets_outside_pdata",
+        "c856c0_forward.json#wrappers[].helper_calls"
+      ]
+    },
+    {
+      "id": "X-05",
+      "quantity": "branch body instruction count, backward pass against forward pass",
+      "authoritative_value": "8–9 in the forward pass, 9–10 in the backward pass",
+      "decomposition": {
+        "field_compared": "c856c0_dataflow.json block_instruction_count against c856c0_forward.json instruction_count",
+        "branches_that_differ": 16,
+        "delta_per_differing_branch": [
+          -1
+        ],
+        "forward_pass_wrapper_body_range": [
+          8,
+          9
+        ],
+        "backward_pass_wrapper_body_range": [
+          9,
+          10
+        ],
+        "forward_pass_inline_body_range": [
+          41,
+          113
+        ],
+        "inline_ranges_agree": true,
+        "affected_branches": [
+          {
+            "stage": "alloc",
+            "branch_index": 0,
+            "forward_pass_instruction_count": 9,
+            "backward_pass_block_instruction_count": 10,
+            "forward_minus_backward": -1
+          },
+          {
+            "stage": "alloc",
+            "branch_index": 1,
+            "forward_pass_instruction_count": 9,
+            "backward_pass_block_instruction_count": 10,
+            "forward_minus_backward": -1
+          },
+          {
+            "stage": "alloc",
+            "branch_index": 3,
+            "forward_pass_instruction_count": 9,
+            "backward_pass_block_instruction_count": 10,
+            "forward_minus_backward": -1
+          },
+          {
+            "stage": "alloc",
+            "branch_index": 5,
+            "forward_pass_instruction_count": 9,
+            "backward_pass_block_instruction_count": 10,
+            "forward_minus_backward": -1
+          },
+          {
+            "stage": "alloc",
+            "branch_index": 7,
+            "forward_pass_instruction_count": 9,
+            "backward_pass_block_instruction_count": 10,
+            "forward_minus_backward": -1
+          },
+          {
+            "stage": "alloc",
+            "branch_index": 8,
+            "forward_pass_instruction_count": 9,
+            "backward_pass_block_instruction_count": 10,
+            "forward_minus_backward": -1
+          },
+          {
+            "stage": "alloc",
+            "branch_index": 10,
+            "forward_pass_instruction_count": 9,
+            "backward_pass_block_instruction_count": 10,
+            "forward_minus_backward": -1
+          },
+          {
+            "stage": "alloc",
+            "branch_index": 13,
+            "forward_pass_instruction_count": 9,
+            "backward_pass_block_instruction_count": 10,
+            "forward_minus_backward": -1
+          },
+          {
+            "stage": "transfer",
+            "branch_index": 0,
+            "forward_pass_instruction_count": 8,
+            "backward_pass_block_instruction_count": 9,
+            "forward_minus_backward": -1
+          },
+          {
+            "stage": "transfer",
+            "branch_index": 1,
+            "forward_pass_instruction_count": 8,
+            "backward_pass_block_instruction_count": 9,
+            "forward_minus_backward": -1
+          },
+          {
+            "stage": "transfer",
+            "branch_index": 3,
+            "forward_pass_instruction_count": 8,
+            "backward_pass_block_instruction_count": 9,
+            "forward_minus_backward": -1
+          },
+          {
+            "stage": "transfer",
+            "branch_index": 5,
+            "forward_pass_instruction_count": 8,
+            "backward_pass_block_instruction_count": 9,
+            "forward_minus_backward": -1
+          },
+          {
+            "stage": "transfer",
+            "branch_index": 7,
+            "forward_pass_instruction_count": 8,
+            "backward_pass_block_instruction_count": 9,
+            "forward_minus_backward": -1
+          },
+          {
+            "stage": "transfer",
+            "branch_index": 8,
+            "forward_pass_instruction_count": 8,
+            "backward_pass_block_instruction_count": 9,
+            "forward_minus_backward": -1
+          },
+          {
+            "stage": "transfer",
+            "branch_index": 10,
+            "forward_pass_instruction_count": 8,
+            "backward_pass_block_instruction_count": 9,
+            "forward_minus_backward": -1
+          },
+          {
+            "stage": "transfer",
+            "branch_index": 13,
+            "forward_pass_instruction_count": 8,
+            "backward_pass_block_instruction_count": 9,
+            "forward_minus_backward": -1
+          }
+        ]
+      },
+      "agreement_with_adhesive_14": "NOT_CHECKED_AGAINST_DOCUMENT",
+      "document_anchor": "| Törzs hossza | 8–9 utasítás | 41–113 utasítás |",
+      "document_anchor_present": false,
+      "document_value": "8–9",
+      "source_of_truth": [
+        "c856c0_dataflow.json#dispatch.tables[].branches[].block_instruction_count",
+        "c856c0_forward.json#stages[].branches[].instruction_count"
+      ]
+    },
+    {
+      "id": "X-06",
+      "quantity": "does cluster_id 85 mean the sixteen function anchor range",
+      "authoritative_value": false,
+      "decomposition": {
+        "anchor_range": [
+          "0xC85000",
+          "0xC88000"
+        ],
+        "anchor_range_function_count": 16,
+        "anchor_cluster_id": 85,
+        "transfer_wrapper_cluster_id": 85,
+        "transfer_wrappers_inside_the_anchor_range": [],
+        "note": "cluster_id is a cfg_functions.csv proximity group and is not the sixteen function 0xC85000..0xC88000 range"
+      },
+      "agreement_with_adhesive_14": "CONTESTED",
+      "document_anchor": "tehát a klaszteren belül",
+      "document_anchor_present": true,
+      "document_value": "true",
+      "source_of_truth": [
+        "cfg_functions.csv#cluster_id",
+        "c856c0_dataflow.json#cluster"
+      ]
+    },
+    {
+      "id": "X-07",
+      "quantity": "published edge set inbound edges for the anchor, the entry function and the growth helper",
+      "authoritative_value": 0,
+      "decomposition": {
+        "dst_rows_for_anchor": 0,
+        "dst_rows_for_entry_function": 0,
+        "dst_rows_for_growth_helper": 0,
+        "rel32_call_sites_for_anchor_in_the_dedicated_pass": 1,
+        "rel32_call_sites_for_growth_helper_in_the_dedicated_pass": 20,
+        "method": "every 0xE8 and 0xE9 byte in .text decoded as a signed 32 bit displacement, no address range restriction",
+        "note": "the two subject functions have zero published edges, which is consistent. The growth helper does not, it has 20 rel32 call sites in the dedicated pass and 0 published edges, so the published set is not a complete call inventory even inside the low rva band."
+      },
+      "agreement_with_adhesive_14": "NOT_CHECKED_AGAINST_DOCUMENT",
+      "document_anchor": null,
+      "document_anchor_present": null,
+      "document_value": null,
+      "source_of_truth": [
+        "xref_edges.csv#dst_rva",
+        "c856c0_forward.json#caller_closure.rows"
+      ]
+    }
+  ],
+  "recompute_detail": {
+    "dispatch": {
+      "table_count": 2,
+      "table_rvas": [
+        "0x2CFB1F8",
+        "0x2CFB238"
+      ],
+      "table_raws": [
+        "0x2CF9BF8",
+        "0x2CF9C38"
+      ],
+      "slots_per_table": [
+        16,
+        16
+      ],
+      "slots_total": 32,
+      "slot_step_bytes": [
+        4,
+        4
+      ],
+      "table_delta_bytes": 64,
+      "materialised_by": [
+        "0xC856FB",
+        "0xC86448"
+      ],
+      "merge_rvas": [
+        "0xC86426",
+        "0xC870E1"
+      ],
+      "selectors": [
+        {
+          "stage_label": "alloc",
+          "rdtsc_rva": "0xC856F6",
+          "mask_rva": "0xC856F8",
+          "mask_text": "and eax, 0xf",
+          "mask_bytes": "83 e0 0f",
+          "indirect_jmp_rva": "0xC85709"
+        },
+        {
+          "stage_label": "transfer",
+          "rdtsc_rva": "0xC86443",
+          "mask_rva": "0xC86445",
+          "mask_text": "and eax, 0xf",
+          "mask_bytes": "83 e0 0f",
+          "indirect_jmp_rva": "0xC86456"
+        }
+      ],
+      "tables_are_adjacent": true,
+      "distinct_block_targets_per_table": [
+        16,
+        16
+      ]
+    },
+    "branches": {
+      "per_stage": {
+        "alloc": {
+          "branches": 16,
+          "inline": 8,
+          "wrapper": 8,
+          "distinct_wrapper_targets": 6
+        },
+        "transfer": {
+          "branches": 16,
+          "inline": 8,
+          "wrapper": 8,
+          "distinct_wrapper_targets": 6
+        }
+      },
+      "inline_total": 16,
+      "wrapper_total": 16,
+      "argument_register_split": {
+        "r10": 16,
+        "rdx": 16
+      },
+      "join_kind_split": {
+        "inline_syscall:fall_through_after_syscall": 16,
+        "wrapper_call:unconditional_jump": 16
+      },
+      "merge_reachability_split": {
+        "inline_syscall:NOT_ASSERTED": 16,
+        "wrapper_call:None": 16
+      },
+      "status_tested_after_sink_split": {
+        "inline_syscall:False": 16,
+        "wrapper_call:False": 16
+      },
+      "indirect_call_site_count_split": {
+        "inline_syscall:0": 16,
+        "wrapper_call:0": 16
+      },
+      "other_calls_split": {
+        "inline_syscall:True": 16,
+        "wrapper_call:False": 16
+      },
+      "schema_agreement_per_stage": {
+        "alloc": {
+          "branch_count": 16,
+          "branches_matching_schema": 16,
+          "branches_diverging_from_schema": 0,
+          "syscall_level_positions": 6,
+          "call_level_positions": 7
+        },
+        "transfer": {
+          "branch_count": 16,
+          "branches_matching_schema": 16,
+          "branches_diverging_from_schema": 0,
+          "syscall_level_positions": 5,
+          "call_level_positions": 6
+        }
+      },
+      "block_instruction_count": {
+        "forward_pass": {
+          "alloc:0": 9,
+          "alloc:1": 9,
+          "alloc:2": 79,
+          "alloc:3": 9,
+          "alloc:4": 87,
+          "alloc:5": 9,
+          "alloc:6": 41,
+          "alloc:7": 9,
+          "alloc:8": 9,
+          "alloc:9": 88,
+          "alloc:10": 9,
+          "alloc:11": 105,
+          "alloc:12": 79,
+          "alloc:13": 9,
+          "alloc:14": 87,
+          "alloc:15": 61,
+          "transfer:0": 8,
+          "transfer:1": 8,
+          "transfer:2": 73,
+          "transfer:3": 8,
+          "transfer:4": 59,
+          "transfer:5": 8,
+          "transfer:6": 113,
+          "transfer:7": 8,
+          "transfer:8": 8,
+          "transfer:9": 65,
+          "transfer:10": 8,
+          "transfer:11": 102,
+          "transfer:12": 73,
+          "transfer:13": 8,
+          "transfer:14": 59,
+          "transfer:15": 85
+        },
+        "backward_pass": {
+          "alloc:0": 10,
+          "alloc:1": 10,
+          "alloc:2": 79,
+          "alloc:3": 10,
+          "alloc:4": 87,
+          "alloc:5": 10,
+          "alloc:6": 41,
+          "alloc:7": 10,
+          "alloc:8": 10,
+          "alloc:9": 88,
+          "alloc:10": 10,
+          "alloc:11": 105,
+          "alloc:12": 79,
+          "alloc:13": 10,
+          "alloc:14": 87,
+          "alloc:15": 61,
+          "transfer:0": 9,
+          "transfer:1": 9,
+          "transfer:2": 73,
+          "transfer:3": 9,
+          "transfer:4": 59,
+          "transfer:5": 9,
+          "transfer:6": 113,
+          "transfer:7": 9,
+          "transfer:8": 9,
+          "transfer:9": 65,
+          "transfer:10": 9,
+          "transfer:11": 102,
+          "transfer:12": 73,
+          "transfer:13": 9,
+          "transfer:14": 59,
+          "transfer:15": 85
+        },
+        "delta_rows": [
+          {
+            "stage": "alloc",
+            "branch_index": 0,
+            "forward_pass_instruction_count": 9,
+            "backward_pass_block_instruction_count": 10,
+            "forward_minus_backward": -1
+          },
+          {
+            "stage": "alloc",
+            "branch_index": 1,
+            "forward_pass_instruction_count": 9,
+            "backward_pass_block_instruction_count": 10,
+            "forward_minus_backward": -1
+          },
+          {
+            "stage": "alloc",
+            "branch_index": 3,
+            "forward_pass_instruction_count": 9,
+            "backward_pass_block_instruction_count": 10,
+            "forward_minus_backward": -1
+          },
+          {
+            "stage": "alloc",
+            "branch_index": 5,
+            "forward_pass_instruction_count": 9,
+            "backward_pass_block_instruction_count": 10,
+            "forward_minus_backward": -1
+          },
+          {
+            "stage": "alloc",
+            "branch_index": 7,
+            "forward_pass_instruction_count": 9,
+            "backward_pass_block_instruction_count": 10,
+            "forward_minus_backward": -1
+          },
+          {
+            "stage": "alloc",
+            "branch_index": 8,
+            "forward_pass_instruction_count": 9,
+            "backward_pass_block_instruction_count": 10,
+            "forward_minus_backward": -1
+          },
+          {
+            "stage": "alloc",
+            "branch_index": 10,
+            "forward_pass_instruction_count": 9,
+            "backward_pass_block_instruction_count": 10,
+            "forward_minus_backward": -1
+          },
+          {
+            "stage": "alloc",
+            "branch_index": 13,
+            "forward_pass_instruction_count": 9,
+            "backward_pass_block_instruction_count": 10,
+            "forward_minus_backward": -1
+          },
+          {
+            "stage": "transfer",
+            "branch_index": 0,
+            "forward_pass_instruction_count": 8,
+            "backward_pass_block_instruction_count": 9,
+            "forward_minus_backward": -1
+          },
+          {
+            "stage": "transfer",
+            "branch_index": 1,
+            "forward_pass_instruction_count": 8,
+            "backward_pass_block_instruction_count": 9,
+            "forward_minus_backward": -1
+          },
+          {
+            "stage": "transfer",
+            "branch_index": 3,
+            "forward_pass_instruction_count": 8,
+            "backward_pass_block_instruction_count": 9,
+            "forward_minus_backward": -1
+          },
+          {
+            "stage": "transfer",
+            "branch_index": 5,
+            "forward_pass_instruction_count": 8,
+            "backward_pass_block_instruction_count": 9,
+            "forward_minus_backward": -1
+          },
+          {
+            "stage": "transfer",
+            "branch_index": 7,
+            "forward_pass_instruction_count": 8,
+            "backward_pass_block_instruction_count": 9,
+            "forward_minus_backward": -1
+          },
+          {
+            "stage": "transfer",
+            "branch_index": 8,
+            "forward_pass_instruction_count": 8,
+            "backward_pass_block_instruction_count": 9,
+            "forward_minus_backward": -1
+          },
+          {
+            "stage": "transfer",
+            "branch_index": 10,
+            "forward_pass_instruction_count": 8,
+            "backward_pass_block_instruction_count": 9,
+            "forward_minus_backward": -1
+          },
+          {
+            "stage": "transfer",
+            "branch_index": 13,
+            "forward_pass_instruction_count": 8,
+            "backward_pass_block_instruction_count": 9,
+            "forward_minus_backward": -1
+          }
+        ]
+      }
+    },
+    "wrappers": {
+      "total": 12,
+      "per_stage": {
+        "alloc": 6,
+        "transfer": 6
+      },
+      "rvas": [
+        "0x51D680",
+        "0x51D880",
+        "0x51DAB0",
+        "0x51DC60",
+        "0x51DDE0",
+        "0x51DFF0",
+        "0xC8F650",
+        "0xC8F880",
+        "0xC8FAA0",
+        "0xC8FC00",
+        "0xC8FDE0",
+        "0xC8FF60"
+      ],
+      "allocation_rva_band": [
+        "0x51D680",
+        "0x51DFF0"
+      ],
+      "transfer_rva_band": [
+        "0xC8F650",
+        "0xC8FF60"
+      ],
+      "syscall_sites": [
+        "0x51D84C",
+        "0x51DA7B",
+        "0x51DC2A",
+        "0x51DDAE",
+        "0x51DFC5",
+        "0x51E180",
+        "0xC8F84C",
+        "0xC8FA6C",
+        "0xC8FBCD",
+        "0xC8FDAC",
+        "0xC8FF3A",
+        "0xC9011E"
+      ],
+      "return_sites": [
+        "0x51D874",
+        "0x51DAA2",
+        "0x51DC51",
+        "0x51DDD5",
+        "0x51DFED",
+        "0x51E1A5",
+        "0xC8F871",
+        "0xC8FA91",
+        "0xC8FBF2",
+        "0xC8FDD1",
+        "0xC8FF5F",
+        "0xC90143"
+      ],
+      "status_return_sites": [
+        "0x51D862",
+        "0x51DA91",
+        "0x51DC40",
+        "0x51DDC4",
+        "0x51DFDB",
+        "0x51E196",
+        "0xC8F862",
+        "0xC8FA82",
+        "0xC8FBE3",
+        "0xC8FDC2",
+        "0xC8FF50",
+        "0xC90134"
+      ],
+      "called_from_branch_indexes": {
+        "0x51D680": [
+          0,
+          10
+        ],
+        "0x51D880": [
+          1
+        ],
+        "0x51DAB0": [
+          3,
+          13
+        ],
+        "0x51DC60": [
+          5
+        ],
+        "0x51DDE0": [
+          7
+        ],
+        "0x51DFF0": [
+          8
+        ],
+        "0xC8F650": [
+          0,
+          10
+        ],
+        "0xC8F880": [
+          1
+        ],
+        "0xC8FAA0": [
+          3,
+          13
+        ],
+        "0xC8FC00": [
+          5
+        ],
+        "0xC8FDE0": [
+          7
+        ],
+        "0xC8FF60": [
+          8
+        ]
+      },
+      "prologue_frame_bytes": {
+        "0x51D680": 120,
+        "0x51D880": 104,
+        "0x51DAB0": 104,
+        "0x51DC60": 104,
+        "0x51DDE0": 120,
+        "0x51DFF0": 104,
+        "0xC8F650": 104,
+        "0xC8F880": 104,
+        "0xC8FAA0": 104,
+        "0xC8FC00": 104,
+        "0xC8FDE0": 104,
+        "0xC8FF60": 104
+      },
+      "api_call_site_count_sum": 0,
+      "returns_syscall_status_all": true,
+      "handle_argument_position_all": [
+        1
+      ],
+      "argument_forwarding_rule": "call argument position n reaches syscall argument position n-1 on every wrapper",
+      "argument_forwarding_holds": true,
+      "cluster_id_by_wrapper": {
+        "0x51D680": 38,
+        "0x51D880": 38,
+        "0x51DAB0": 38,
+        "0x51DC60": 38,
+        "0x51DDE0": 38,
+        "0x51DFF0": 38,
+        "0xC8F650": 85,
+        "0xC8F880": 85,
+        "0xC8FAA0": 85,
+        "0xC8FC00": 85,
+        "0xC8FDE0": 85,
+        "0xC8FF60": 85
+      },
+      "distinct_caller_functions": 37,
+      "callers_inside_cluster_range": [
+        "0xC856C0"
+      ],
+      "callers_outside_cluster_range": [
+        "0x100D1A0",
+        "0x1014550",
+        "0x101C990",
+        "0x1038AC0",
+        "0x104F010",
+        "0x12DD8F0",
+        "0x12ECCE0",
+        "0x12F3D50",
+        "0x1367630",
+        "0x136EBD0",
+        "0x137D1D0",
+        "0x1394210",
+        "0x167F330",
+        "0x16DB170",
+        "0x174C190",
+        "0x1850510",
+        "0x185B700",
+        "0x1AFD4A0",
+        "0x1B0B3A0",
+        "0x1B10230",
+        "0x1B12B50",
+        "0x291CAC0",
+        "0x291E560",
+        "0x4F2B50",
+        "0x4FA0C0",
+        "0xAF3D50",
+        "0xDA99A0",
+        "0xE27CD0",
+        "0xE48B60",
+        "0xE4E5B0",
+        "0xE55F50",
+        "0xE5D940",
+        "0xE783B0",
+        "0xE7FD40",
+        "0xE8E540",
+        "0xFD1260"
+      ],
+      "per_wrapper_distinct_callers": {
+        "0x51D680": 35,
+        "0x51D880": 35,
+        "0x51DAB0": 35,
+        "0x51DC60": 35,
+        "0x51DDE0": 35,
+        "0x51DFF0": 35,
+        "0xC8F650": 3,
+        "0xC8F880": 3,
+        "0xC8FAA0": 3,
+        "0xC8FC00": 3,
+        "0xC8FDE0": 3,
+        "0xC8FF60": 3
+      }
+    },
+    "syscall_sites": {
+      "inline_count": 16,
+      "inline_per_stage": {
+        "alloc": 8,
+        "transfer": 8
+      },
+      "inline_positions_per_stage": {
+        "alloc": [
+          6
+        ],
+        "transfer": [
+          5
+        ]
+      },
+      "inline_rvas": [
+        "0xC858E0",
+        "0xC85A9A",
+        "0xC85BB0",
+        "0xC85DC3",
+        "0xC85FCC",
+        "0xC86140",
+        "0xC862FA",
+        "0xC86420",
+        "0xC865ED",
+        "0xC86737",
+        "0xC8694F",
+        "0xC86ACC",
+        "0xC86CBC",
+        "0xC86E0A",
+        "0xC86F54",
+        "0xC870DB"
+      ],
+      "wrapper_count": 12,
+      "total": 28,
+      "cfg_functions_csv_syscall_sites": {
+        "anchor": 16,
+        "entry_function": 0,
+        "growth_helper": 0,
+        "wrapper:0x51D680": 1,
+        "wrapper:0x51D880": 1,
+        "wrapper:0x51DAB0": 1,
+        "wrapper:0x51DC60": 1,
+        "wrapper:0x51DDE0": 1,
+        "wrapper:0x51DFF0": 1,
+        "wrapper:0xC8F650": 1,
+        "wrapper:0xC8F880": 1,
+        "wrapper:0xC8FAA0": 1,
+        "wrapper:0xC8FC00": 1,
+        "wrapper:0xC8FDE0": 1,
+        "wrapper:0xC8FF60": 1
+      },
+      "cfg_functions_csv_total_over_reachable_pdata_functions": 28,
+      "inventory_service_class_split": {
+        "allocation_0x1000_0x40": 8,
+        "other": 20
+      },
+      "inventory_status_split": {
+        "unresolved_symbolic_service_number": 28
+      },
+      "inventory_named_rows": 0,
+      "inventory_shape_signatures": {
+        "inline_alloc": [
+          [
+            "A7_REG_INDIRECT",
+            "A3_OUT_BUF",
+            "A2_OBJ_CLASS",
+            "A3_OUT_BUF",
+            "A4_LEN",
+            "A2_OBJ_CLASS"
+          ]
+        ],
+        "inline_transfer": [
+          [
+            "A6_SELF_HANDLE",
+            "A7_REG_INDIRECT",
+            "A6_SELF_HANDLE",
+            "A6_SELF_HANDLE",
+            "A3_OUT_BUF",
+            "A5_STACK_SLOT"
+          ]
+        ],
+        "wrappers": [
+          [
+            "A6_SELF_HANDLE",
+            "A6_SELF_HANDLE",
+            "A6_SELF_HANDLE",
+            "A7_REG_INDIRECT",
+            "A5_STACK_SLOT",
+            "A5_STACK_SLOT"
+          ],
+          [
+            "A8_UNKNOWN",
+            "A6_SELF_HANDLE",
+            "A6_SELF_HANDLE",
+            "A7_REG_INDIRECT",
+            "A5_STACK_SLOT",
+            "A5_STACK_SLOT"
+          ]
+        ]
+      }
+    },
+    "handle_flow": {
+      "expression": "[descriptor+0]",
+      "load_count": 2,
+      "load_sites": [
+        {
+          "rva": "0xC856F3",
+          "raw": "0xC84AF3",
+          "register": "r14",
+          "text": "mov r14, qword ptr [rcx]",
+          "bytes": "4c 8b 31"
+        },
+        {
+          "rva": "0xC86440",
+          "raw": "0xC85840",
+          "register": "rbx",
+          "text": "mov rbx, qword ptr [rbx]",
+          "bytes": "48 8b 1b"
+        }
+      ],
+      "use_site_count": 32,
+      "use_sites_per_stage": {
+        "alloc": 16,
+        "transfer": 16
+      },
+      "argument_register_split": {
+        "r10": 16,
+        "rdx": 16
+      },
+      "sink_kind_split": {
+        "inline_syscall": 16,
+        "wrapper_call": 16
+      },
+      "consume_site_count_field": 32,
+      "value_may_change_between_loads": true,
+      "descriptor_fields_observed": [
+        0
+      ],
+      "descriptor_size_bytes_field": null
+    },
+    "producer_and_caller_boundary": {
+      "anchor": {
+        "rva": "0xC856C0",
+        "inbound_rel32_call_sites": 1,
+        "inbound_site": "0xC85681",
+        "inbound_site_bytes": "e8 3a 00 00 00"
+      },
+      "entry_function": {
+        "rva": "0xC85650",
+        "forms_enumerated": [
+          "absolute_pointer",
+          "api_target",
+          "code_pointer_slot",
+          "rel32_call",
+          "rel32_jmp",
+          "rip_relative_materialisation"
+        ],
+        "site_count_per_form": {
+          "absolute_pointer": 0,
+          "api_target": 0,
+          "code_pointer_slot": 0,
+          "rel32_call": 0,
+          "rel32_jmp": 0,
+          "rip_relative_materialisation": 0
+        },
+        "forms_with_zero_sites": [
+          "absolute_pointer",
+          "api_target",
+          "code_pointer_slot",
+          "rel32_call",
+          "rel32_jmp",
+          "rip_relative_materialisation"
+        ],
+        "frontier_after_last_level": [],
+        "exhausted": true
+      },
+      "closure_rows": {
+        "total": 444,
+        "csv_total": 444,
+        "csv_matches_json": true,
+        "per_level": {
+          "0": 14,
+          "1": 429,
+          "2": 1
+        },
+        "per_edge_kind": {
+          "direct_call": 429,
+          "forward_subject": 14,
+          "no_inbound_edge_in_enumerated_forms": 1
+        },
+        "per_scope_and_level": {
+          "anchor_chain:0": 1,
+          "anchor_chain:1": 1,
+          "anchor_chain:2": 1,
+          "forward_sinks:0": 13,
+          "forward_sinks:1": 428
+        },
+        "rows_carrying_F_U_01": 220,
+        "uncovered_call_site_count": 0,
+        "method": {
+          "rel32": "every 0xE8 and 0xE9 byte in .text decoded as a signed 32 bit displacement, no address range restriction",
+          "code_pointer_slot": "reverse/evidence/xref_edges.csv rows with relation fnptr_slot_code_target and dst_kind code",
+          "levels": "breadth first from the scope seeds, every call site attributed to the .pdata runtime function that contains it",
+          "not_covered": "a call through a register or a stack slot cannot be resolved statically, so the walk covers the enumerated static edge forms only",
+          "ordering": "sorted by scope, then level, then target rva, then call site rva"
+        }
+      },
+      "caller_functions": {
+        "level_one_rows_total": 429,
+        "distinct_over_all_13_forward_sinks": 54,
+        "distinct_over_the_12_wrappers": 37,
+        "wrappers_inside_cluster_range": [
+          "0xC856C0"
+        ],
+        "wrappers_outside_cluster_range": [
+          "0x100D1A0",
+          "0x1014550",
+          "0x101C990",
+          "0x1038AC0",
+          "0x104F010",
+          "0x12DD8F0",
+          "0x12ECCE0",
+          "0x12F3D50",
+          "0x1367630",
+          "0x136EBD0",
+          "0x137D1D0",
+          "0x1394210",
+          "0x167F330",
+          "0x16DB170",
+          "0x174C190",
+          "0x1850510",
+          "0x185B700",
+          "0x1AFD4A0",
+          "0x1B0B3A0",
+          "0x1B10230",
+          "0x1B12B50",
+          "0x291CAC0",
+          "0x291E560",
+          "0x4F2B50",
+          "0x4FA0C0",
+          "0xAF3D50",
+          "0xDA99A0",
+          "0xE27CD0",
+          "0xE48B60",
+          "0xE4E5B0",
+          "0xE55F50",
+          "0xE5D940",
+          "0xE783B0",
+          "0xE7FD40",
+          "0xE8E540",
+          "0xFD1260"
+        ],
+        "sinks_inside_cluster_range": [
+          "0xC85650",
+          "0xC856C0"
+        ],
+        "growth_helper_distinct": 17
+      },
+      "published_edge_set": {
+        "row_count": 57101,
+        "dst_rows_for_anchor": 0,
+        "dst_rows_for_entry_function": 0,
+        "dst_rows_for_growth_helper": 0,
+        "close_handle_rows": 61,
+        "duplicate_handle_rows": 0,
+        "close_handle_in_cluster_rows": 0,
+        "nearest_close_handle_sites": [
+          {
+            "src_rva": "0xC81D49",
+            "distance_from_anchor": -14711,
+            "relation": "call_indirect_iat"
+          },
+          {
+            "src_rva": "0xCA8AE7",
+            "distance_from_anchor": 144423,
+            "relation": "call_indirect_iat"
+          },
+          {
+            "src_rva": "0x87F348",
+            "distance_from_anchor": -4219768,
+            "relation": "call_indirect_iat"
+          }
+        ]
+      },
+      "handle_lifetime_published": {
+        "ownership": "OPEN",
+        "conclusion_confidence": "HIGH",
+        "reachable_set_exhausted": false,
+        "dir64_cluster_slot_count": 0,
+        "cluster_range_api_site_counts": {
+          "CloseHandle": 0,
+          "DuplicateHandle": 0
+        }
+      },
+      "producer_status": "OPEN",
+      "producer_identified": false,
+      "producer_unresolved_id": "U-01"
+    },
+    "reachable_set": {
+      "function_count_field": 37,
+      "distinct_targets": 37,
+      "per_depth": {
+        "0": 2,
+        "1": 22,
+        "2": 6,
+        "3": 5,
+        "4": 2
+      },
+      "max_depth": 4,
+      "exhausted": false,
+      "with_runtime_function_record": 23,
+      "without_runtime_function_record": 14,
+      "without_record_list": [
+        {
+          "rva": "0x5219A0",
+          "callsite": "0x51D73F",
+          "from": "0x51D680"
+        },
+        {
+          "rva": "0x5219C0",
+          "callsite": "0x51DB3C",
+          "from": "0x51DAB0"
+        },
+        {
+          "rva": "0xCAC0D0",
+          "callsite": "0xC85B1D",
+          "from": "0xC856C0"
+        },
+        {
+          "rva": "0xCAC0F0",
+          "callsite": "0xC870A4",
+          "from": "0xC856C0"
+        },
+        {
+          "rva": "0xCAC110",
+          "callsite": "0xC87015",
+          "from": "0xC856C0"
+        },
+        {
+          "rva": "0xCAC130",
+          "callsite": "0xC868DA",
+          "from": "0xC856C0"
+        },
+        {
+          "rva": "0xCAC150",
+          "callsite": "0xC8FEE4",
+          "from": "0xC8FDE0"
+        },
+        {
+          "rva": "0xCAC170",
+          "callsite": "0xC86A52",
+          "from": "0xC856C0"
+        },
+        {
+          "rva": "0x2A98530",
+          "callsite": "0x2AE0DE1",
+          "from": "0x2AE0DD8"
+        },
+        {
+          "rva": "0x2AAE840",
+          "callsite": "0x2AAEB19",
+          "from": "0x2AAEB10"
+        },
+        {
+          "rva": "0x2AB2418",
+          "callsite": "0x49789",
+          "from": "0x495D0"
+        },
+        {
+          "rva": "0x2BEDDF0",
+          "callsite": "0x8B00",
+          "from": "0x8AC0"
+        },
+        {
+          "rva": "0x2BEE110",
+          "callsite": "0x2AB23EE",
+          "from": "0x2AB23D4"
+        },
+        {
+          "rva": "0x2BEE1E0",
+          "callsite": "0x2AB23E2",
+          "from": "0x2AB23D4"
+        }
+      ]
+    },
+    "frame_slots": {
+      "0x40": {
+        "role": "transfer_status",
+        "direct_write": 1,
+        "address_taken": 16,
+        "direct_read": 0
+      },
+      "0x48": {
+        "role": "region_size",
+        "direct_write": 1,
+        "address_taken": 16,
+        "direct_read": 0
+      },
+      "0x50": {
+        "role": "remote_base",
+        "direct_write": 1,
+        "address_taken": 16,
+        "direct_read": 2
+      }
+    },
+    "exits": {
+      "anchor_count": 3,
+      "anchor_sites": [
+        "0xC85709",
+        "0xC86456",
+        "0xC87103"
+      ],
+      "entry_count": 1,
+      "single_exit_anchor": true
+    }
+  },
+  "wrapper_forwarding_predicate": {
+    "phase": "P0/S8",
+    "group": "wrapper_forwarding",
+    "rule_as_published": "all four argument register positions are a handle the site received from its own caller, so the argument schema belongs to the calling layer",
+    "anchor_token": "four_entry_parameters_forwarded",
+    "published_site_count": 21,
+    "recomputed_site_count": 21,
+    "recomputed_shape": {
+      "argument_positions_1_to_4": [
+        [
+          "A6_SELF_HANDLE",
+          "A6_SELF_HANDLE",
+          "A6_SELF_HANDLE",
+          "A6_SELF_HANDLE"
+        ]
+      ],
+      "position_5_classes": {
+        "A3_OUT_BUF": 16,
+        "A5_STACK_SLOT": 5
+      },
+      "position_6_classes": {
+        "A5_STACK_SLOT": 21
+      },
+      "rva_band": [
+        "0x291C08F",
+        "0x2951479"
+      ],
+      "distinct_owning_runtime_functions": 7,
+      "owning_runtime_functions": [
+        "0x291BE60",
+        "0x291CAC0",
+        "0x2950CD0",
+        "0x2950E50",
+        "0x2951000",
+        "0x29511B0",
+        "0x2951310"
+      ],
+      "status_split": {
+        "unresolved_symbolic_service_number": 21
+      }
+    },
+    "scope_explanation": {
+      "what_the_predicate_counts": "a shape class over the whole 3627 site corpus, not a location class and not a function inventory. A site lands here when all four of its argument register positions hold a value the site received from its own entry parameters, which is the classifier's way of recording that the argument schema the reader wants belongs to the calling layer rather than to the site. It is a cross layer marker, and the phase writes no service name for such a row.",
+      "why_the_count_is_21": "21 of the 3627 corpus sites satisfy that four position conjunction, and all 21 carry the identical argument1 to argument4 signature of four self handles. They live in the 0x291C08F to 0x2951479 band under 7 runtime functions, far from the 0xC856C0 subject set.",
+      "why_the_12_c856c0_wrappers_are_not_among_the_21": "the predicate is a conjunction over argument positions 1 to 4 only. The 12 wrappers of the 0xC856C0 subject set have 6 syscall argument positions whose signature is position 1 a state global or an opaque value, positions 2 and 3 self handles, position 4 always a register indirect operand, and positions 5 and 6 stack slots. A register indirect operand is a symbolic unknown by the phase's own rule, so position 4 alone fails the conjunction for all 12 wrappers, and position 1 fails it at 2 of them. All 12 therefore carry anchor token no_anchor and land in the other group.",
+      "why_the_8_allocation_inline_sites_are_classified_differently": "their 6 position argument set carries both the 0x1000 and the 0x40 constant, so the earlier allocation_0x1000_0x40 anchor fires and they are grouped there, 8 sites. This is the only c856c0 group membership in the whole service map, and it independently corroborates the two constants of the document's section 10.1 from a phase that never saw the document.",
+      "why_the_8_transfer_inline_sites_are_not_transfer_5arg": "the transfer_5arg rule needs all five enumerated positions resolved to a class other than unknown or stack slot, and position 2, the remote base, is a register indirect operand, which is symbolic unknown by rule. All 8 land in the other group.",
+      "why_the_12_wrappers_carry_other_although_they_forward_the_same_constants": "the constants 0x1000 and 0x40 reach the service through the wrappers one layer down, while the classifier reads only the argument window around the candidate. The phase states this itself in reconciliation.forwarding_is_not_a_conflict and marks such rows alloc_write_scope=window with alloc_write=forwarded_or_cross_layer. A buffer or a constant that arrives by forwarding is a scope difference, not a contradiction.",
+      "relation_to_the_audited_counts": "the number 21 has no arithmetic role in the 0xC856C0 subject set. It is disjoint from the 12 wrappers, from the 16 inline sites and from the 0xC85000 to 0xC88000 code cluster. The structural idea it names is the idea the document's section 9.1 already states for its own wrappers, call argument n reaching syscall argument n minus 1, so the concept transfers while the number does not.",
+      "if_the_rule_were_widened": "an anchor rule of the form every enumerated register position is a value received from the caller would place the 12 wrappers in the same shape family, because all 12 satisfy the document's forwarding offset on every position. That would be a new classifier version with its own site count, not a restatement of the published 21.",
+      "status_of_every_c856c0_site": {
+        "named": 0,
+        "unresolved": 28,
+        "note": "all 28 subject sites carry status unresolved_symbolic_service_number and nt_service UNRESOLVED, consistent with the document's Q-02 and F-U-02 and with the phase result that 0 of 3627 corpus sites were named."
+      }
+    }
+  },
+  "contested": [
+    {
+      "id": "CF-01",
+      "severity": "high",
+      "location_in_adhesive_14": "section 9.4 table, the three wrapper caller cells",
+      "claim_as_written": "54 distinct caller functions, 54 of them outside the anchor, 0 inside the cluster",
+      "recomputed": {
+        "distinct_callers_of_the_12_wrappers": 37,
+        "level_one_rows_for_the_12_wrappers": 408,
+        "of_those_outside_the_cluster_range": 36,
+        "of_those_inside_the_cluster_range": 1,
+        "inside_the_cluster_range_is": [
+          "0xC856C0"
+        ],
+        "anchor_call_sites_into_the_12_wrappers": 16,
+        "where_54_comes_from": "the distinct caller count over all 13 forward sinks, the 12 wrappers plus the growth helper 0x495D0, not over the 12 wrappers alone",
+        "per_wrapper_distinct_callers": {
+          "0x51D680": 35,
+          "0x51D880": 35,
+          "0x51DAB0": 35,
+          "0x51DC60": 35,
+          "0x51DDE0": 35,
+          "0x51DFF0": 35,
+          "0xC8F650": 3,
+          "0xC8F880": 3,
+          "0xC8FAA0": 3,
+          "0xC8FC00": 3,
+          "0xC8FDE0": 3,
+          "0xC8FF60": 3
+        }
+      },
+      "verdict": "contested, all three cells are wrong",
+      "impact": "The shared helper conclusion of the section survives, 36 of the 37 distinct callers are outside the 0xC85000..0xC88000 range, but the figures 54, 54 and 0 are not reproducible from the payload. The anchor 0xC856C0 is itself a caller of all 12 wrappers from 16 call sites and it lies inside that range, so the zero cell is false as written. The 54 figure is correct for the 13 sink set, not for the wrappers.",
+      "proposed_correction": "Replace the three cells with 37, 36 and 1, name 0xC856C0 as the single in range caller, and keep 54 only for the 13 sink set with the growth helper named."
+    },
+    {
+      "id": "CF-02",
+      "severity": "high",
+      "location_in_adhesive_14": "section 15.4 table and NEG-15, source address distribution of xref_edges.csv",
+      "claim_as_written": "The published edge set contains only the 0x0 to 0x9 high nibbles and therefore no source side edge comes from the 0xC85000..0xC88000 cluster",
+      "recomputed": {
+        "src_rva_column_unit": "decimal",
+        "src_rva_max": "0x3306F60",
+        "true_hex_high_nibble_histogram": {
+          "0x0": 57101
+        },
+        "decimal_leading_digit_histogram": {
+          "1": 6496,
+          "2": 8716,
+          "3": 18317,
+          "4": 19210,
+          "5": 1194,
+          "6": 1022,
+          "7": 1119,
+          "8": 500,
+          "9": 527
+        },
+        "in_cluster_source_rows": 17,
+        "in_cluster_source_functions": [
+          "0xC81EE0",
+          "0xC871F0",
+          "0xC873C0",
+          "0xC87830",
+          "0xC87900"
+        ],
+        "in_cluster_source_by_relation": {
+          "call_indirect_iat": 6,
+          "call_rel_to_code": 11
+        },
+        "in_cluster_imports_reached": [
+          "KERNEL32.dll!VirtualAlloc",
+          "KERNEL32.dll!VirtualFree",
+          "KERNEL32.dll!VirtualQuery",
+          "api-ms-win-crt-runtime-l1-1-0.dll!_invalid_parameter_noinfo_noreturn"
+        ],
+        "close_handle_in_cluster_rows": 0
+      },
+      "verdict": "contested, the histogram was computed on a decimal column as if it were hexadecimal",
+      "impact": "NEG-15 is false as written. 17 published edges have their source inside the anchor cluster, from 5 functions, reaching 0x89FA0 and 0x89CF0 by direct call and reaching VirtualAlloc, VirtualFree, VirtualQuery and two CRT parameter failure calls by IAT. The 0xA to 0xF zero cell is true but vacuous, since the largest src_rva in the file is 0x3306F60 and every true hexadecimal high nibble in the column is 0x0.",
+      "proposed_correction": "Rewrite the histogram on the decimal leading digit or drop it, and replace NEG-15 with the measured 17 rows and their 5 source functions. The bounded negative of section 14.2 is unaffected and should be kept: no CloseHandle and no DuplicateHandle site is sourced from the cluster."
+    },
+    {
+      "id": "CF-03",
+      "severity": "medium",
+      "location_in_adhesive_14": "section 14.2, pdata coverage of the forward reachable set",
+      "claim_as_written": "21 pdata covered functions plus 16 targets without a RUNTIME_FUNCTION",
+      "recomputed": {
+        "distinct_targets_in_the_reachable_set": 37,
+        "with_a_runtime_function_record": 23,
+        "without_a_runtime_function_record": 14,
+        "without_record_list": [
+          "0x2A98530",
+          "0x2AAE840",
+          "0x2AB2418",
+          "0x2BEDDF0",
+          "0x2BEE110",
+          "0x2BEE1E0",
+          "0x5219A0",
+          "0x5219C0",
+          "0xCAC0D0",
+          "0xCAC0F0",
+          "0xCAC110",
+          "0xCAC130",
+          "0xCAC150",
+          "0xCAC170"
+        ],
+        "per_depth": {
+          "0": 2,
+          "1": 22,
+          "2": 6,
+          "3": 5,
+          "4": 2
+        }
+      },
+      "verdict": "contested, the split is 23 and 14",
+      "impact": "The 37 target count and the 2, 22, 6, 5, 2 depth split are correct. The 21 and 16 pair is not, and the list in the same sentence names 13 addresses while asserting 16.",
+      "proposed_correction": "State 23 with a RUNTIME_FUNCTION record and 14 without, and list the 14, which includes 0xCAC150 that the section 7.4 thunk table omits."
+    },
+    {
+      "id": "CF-04",
+      "severity": "medium",
+      "location_in_adhesive_14": "section 7.4, global address thunk table and the 0xC8FEE4 call site",
+      "claim_as_written": "The thunk set is 0xCAC0D0, 0xCAC0F0, 0xCAC110, 0xCAC130 and 0xCAC170, and 0xC8FEE4 is a second call site of 0xCAC0D0",
+      "recomputed": {
+        "backward_pass_thunk_list": [
+          "0xCAC0D0",
+          "0xCAC0F0",
+          "0xCAC110",
+          "0xCAC130",
+          "0xCAC170"
+        ],
+        "forward_pass_target_of_0xC8FEE4": [
+          "0xCAC150"
+        ],
+        "wrapper_helper_call_at_0xC8FEE4": [
+          "0xCAC150"
+        ]
+      },
+      "verdict": "contested, 0xC8FEE4 targets 0xCAC150",
+      "impact": "The table is missing one thunk and one call site is attributed to the wrong target. No audited count changes: the thunks still resolve into .data and none of them is pdata covered.",
+      "proposed_correction": "Add the 0xCAC150 row and correct the call site sentence to read 0xC8FEE4 as the 0xCAC150 call from the 0xC8FDE0 wrapper."
+    },
+    {
+      "id": "CF-05",
+      "severity": "medium",
+      "location_in_adhesive_14": "section 4.2 closing sentence, wrapper cluster membership",
+      "claim_as_written": "The 12 wrappers are outside the cluster, and the 6 transfer wrappers sit at cluster_id 85, therefore inside the cluster",
+      "recomputed": {
+        "anchor_range": [
+          "0xC85000",
+          "0xC88000"
+        ],
+        "anchor_range_function_count": 16,
+        "anchor_cluster_id": 85,
+        "transfer_wrapper_cluster_id": 85,
+        "transfer_wrappers_inside_the_anchor_range": [],
+        "note": "cluster_id is a cfg_functions.csv proximity group that spans far more than the sixteen function range, so the two identifiers are not interchangeable"
+      },
+      "verdict": "contested, the sentence contradicts itself and the inference does not hold",
+      "impact": "The two cluster_id values reproduce correctly from cfg_functions.csv, but cluster_id 85 is not the sixteen function 0xC85000..0xC88000 range, and no transfer wrapper lies inside that range.",
+      "proposed_correction": "Split the sentence: report the six allocation wrappers at cluster_id 38 and the six transfer wrappers at cluster_id 85 as two cfg_functions.csv groups, and state separately that all 12 lie outside the sixteen function anchor range."
+    },
+    {
+      "id": "CF-06",
+      "severity": "low",
+      "location_in_adhesive_14": "sections 7.1, 7.2 and 7.3, branch body instruction counts",
+      "claim_as_written": "Wrapper branch bodies are 8 to 9 instructions, inline branch bodies are 41 to 113",
+      "recomputed": {
+        "forward_pass_wrapper_body_range": [
+          8,
+          9
+        ],
+        "backward_pass_wrapper_body_value": [
+          9,
+          10
+        ],
+        "forward_pass_inline_body_range": [
+          41,
+          113
+        ],
+        "branches_that_differ": 16,
+        "delta_per_differing_branch": [
+          -1
+        ],
+        "affected_branches": [
+          {
+            "stage": "alloc",
+            "branch_index": 0,
+            "forward_pass_instruction_count": 9,
+            "backward_pass_block_instruction_count": 10,
+            "forward_minus_backward": -1
+          },
+          {
+            "stage": "alloc",
+            "branch_index": 1,
+            "forward_pass_instruction_count": 9,
+            "backward_pass_block_instruction_count": 10,
+            "forward_minus_backward": -1
+          },
+          {
+            "stage": "alloc",
+            "branch_index": 3,
+            "forward_pass_instruction_count": 9,
+            "backward_pass_block_instruction_count": 10,
+            "forward_minus_backward": -1
+          },
+          {
+            "stage": "alloc",
+            "branch_index": 5,
+            "forward_pass_instruction_count": 9,
+            "backward_pass_block_instruction_count": 10,
+            "forward_minus_backward": -1
+          },
+          {
+            "stage": "alloc",
+            "branch_index": 7,
+            "forward_pass_instruction_count": 9,
+            "backward_pass_block_instruction_count": 10,
+            "forward_minus_backward": -1
+          },
+          {
+            "stage": "alloc",
+            "branch_index": 8,
+            "forward_pass_instruction_count": 9,
+            "backward_pass_block_instruction_count": 10,
+            "forward_minus_backward": -1
+          },
+          {
+            "stage": "alloc",
+            "branch_index": 10,
+            "forward_pass_instruction_count": 9,
+            "backward_pass_block_instruction_count": 10,
+            "forward_minus_backward": -1
+          },
+          {
+            "stage": "alloc",
+            "branch_index": 13,
+            "forward_pass_instruction_count": 9,
+            "backward_pass_block_instruction_count": 10,
+            "forward_minus_backward": -1
+          },
+          {
+            "stage": "transfer",
+            "branch_index": 0,
+            "forward_pass_instruction_count": 8,
+            "backward_pass_block_instruction_count": 9,
+            "forward_minus_backward": -1
+          },
+          {
+            "stage": "transfer",
+            "branch_index": 1,
+            "forward_pass_instruction_count": 8,
+            "backward_pass_block_instruction_count": 9,
+            "forward_minus_backward": -1
+          },
+          {
+            "stage": "transfer",
+            "branch_index": 3,
+            "forward_pass_instruction_count": 8,
+            "backward_pass_block_instruction_count": 9,
+            "forward_minus_backward": -1
+          },
+          {
+            "stage": "transfer",
+            "branch_index": 5,
+            "forward_pass_instruction_count": 8,
+            "backward_pass_block_instruction_count": 9,
+            "forward_minus_backward": -1
+          },
+          {
+            "stage": "transfer",
+            "branch_index": 7,
+            "forward_pass_instruction_count": 8,
+            "backward_pass_block_instruction_count": 9,
+            "forward_minus_backward": -1
+          },
+          {
+            "stage": "transfer",
+            "branch_index": 8,
+            "forward_pass_instruction_count": 8,
+            "backward_pass_block_instruction_count": 9,
+            "forward_minus_backward": -1
+          },
+          {
+            "stage": "transfer",
+            "branch_index": 10,
+            "forward_pass_instruction_count": 8,
+            "backward_pass_block_instruction_count": 9,
+            "forward_minus_backward": -1
+          },
+          {
+            "stage": "transfer",
+            "branch_index": 13,
+            "forward_pass_instruction_count": 8,
+            "backward_pass_block_instruction_count": 9,
+            "forward_minus_backward": -1
+          }
+        ]
+      },
+      "verdict": "definition delta, not a contradiction",
+      "impact": "The 16 wrapper branch bodies are 10 instructions in the backward pass and 9 in the forward pass; the two passes disagree on where the branch starts. The inline counts are identical in both. The document quotes the forward pass without naming it.",
+      "proposed_correction": "Name the pass in the column header, or give the 8 to 10 range, so a reader checking the backward payload is not surprised."
+    },
+    {
+      "id": "CF-07",
+      "severity": "low",
+      "location_in_adhesive_14": "section 12.1, the growth helper caller set",
+      "claim_as_written": "The growth helper is called by the entry function and by 0x176F860",
+      "recomputed": {
+        "growth_helper_level_one_rows": 20,
+        "growth_helper_distinct_callers": 17,
+        "growth_helper_callers_inside_the_cluster_range": [
+          "0xC85650"
+        ]
+      },
+      "verdict": "incomplete rather than wrong",
+      "impact": "The section names 2 of the 17 distinct callers, and the named one is present. This is a completeness gap, not a numeric error, and it touches none of the audited counts.",
+      "proposed_correction": "Replace the sentence with the count 17 and keep the two named sites as examples."
+    }
+  ],
+  "corrections": [
+    {
+      "id": "CF-01",
+      "severity": "high",
+      "target": "reverse/adhesive-14-c856c0-handle-producer-dataflow.md :: section 9.4 table, the three wrapper caller cells",
+      "action": "Replace the three cells with 37, 36 and 1, name 0xC856C0 as the single in range caller, and keep 54 only for the 13 sink set with the growth helper named.",
+      "applied_by_this_audit": false,
+      "note": "proposal only, adhesive-14 is not modified by this audit"
+    },
+    {
+      "id": "CF-02",
+      "severity": "high",
+      "target": "reverse/adhesive-14-c856c0-handle-producer-dataflow.md :: section 15.4 table and NEG-15, source address distribution of xref_edges.csv",
+      "action": "Rewrite the histogram on the decimal leading digit or drop it, and replace NEG-15 with the measured 17 rows and their 5 source functions. The bounded negative of section 14.2 is unaffected and should be kept: no CloseHandle and no DuplicateHandle site is sourced from the cluster.",
+      "applied_by_this_audit": false,
+      "note": "proposal only, adhesive-14 is not modified by this audit"
+    },
+    {
+      "id": "CF-03",
+      "severity": "medium",
+      "target": "reverse/adhesive-14-c856c0-handle-producer-dataflow.md :: section 14.2, pdata coverage of the forward reachable set",
+      "action": "State 23 with a RUNTIME_FUNCTION record and 14 without, and list the 14, which includes 0xCAC150 that the section 7.4 thunk table omits.",
+      "applied_by_this_audit": false,
+      "note": "proposal only, adhesive-14 is not modified by this audit"
+    },
+    {
+      "id": "CF-04",
+      "severity": "medium",
+      "target": "reverse/adhesive-14-c856c0-handle-producer-dataflow.md :: section 7.4, global address thunk table and the 0xC8FEE4 call site",
+      "action": "Add the 0xCAC150 row and correct the call site sentence to read 0xC8FEE4 as the 0xCAC150 call from the 0xC8FDE0 wrapper.",
+      "applied_by_this_audit": false,
+      "note": "proposal only, adhesive-14 is not modified by this audit"
+    },
+    {
+      "id": "CF-05",
+      "severity": "medium",
+      "target": "reverse/adhesive-14-c856c0-handle-producer-dataflow.md :: section 4.2 closing sentence, wrapper cluster membership",
+      "action": "Split the sentence: report the six allocation wrappers at cluster_id 38 and the six transfer wrappers at cluster_id 85 as two cfg_functions.csv groups, and state separately that all 12 lie outside the sixteen function anchor range.",
+      "applied_by_this_audit": false,
+      "note": "proposal only, adhesive-14 is not modified by this audit"
+    },
+    {
+      "id": "CF-06",
+      "severity": "low",
+      "target": "reverse/adhesive-14-c856c0-handle-producer-dataflow.md :: sections 7.1, 7.2 and 7.3, branch body instruction counts",
+      "action": "Name the pass in the column header, or give the 8 to 10 range, so a reader checking the backward payload is not surprised.",
+      "applied_by_this_audit": false,
+      "note": "proposal only, adhesive-14 is not modified by this audit"
+    },
+    {
+      "id": "CF-07",
+      "severity": "low",
+      "target": "reverse/adhesive-14-c856c0-handle-producer-dataflow.md :: section 12.1, the growth helper caller set",
+      "action": "Replace the sentence with the count 17 and keep the two named sites as examples.",
+      "applied_by_this_audit": false,
+      "note": "proposal only, adhesive-14 is not modified by this audit"
+    }
+  ],
+  "confirmed_without_dispute": [
+    {
+      "topic": "dispatch geometry",
+      "detail": "two tables, 16 slots each, 32 slots, 4 byte slot step, the second table exactly 0x40 after the first, an own RDTSC and AND EAX, 0xF selector per table, an own merge point per table",
+      "source": "c856c0_dataflow.json#dispatch"
+    },
+    {
+      "topic": "branch split",
+      "detail": "8 inline syscall and 8 wrapper call branches per stage, 16 and 16 in total, 16 distinct block targets per table",
+      "source": "c856c0_dataflow.json#dispatch.tables[].branches"
+    },
+    {
+      "topic": "wrapper inventory",
+      "detail": "12 distinct wrappers, 6 allocation and 6 transfer, one syscall each, call argument n reaching syscall argument n minus 1 on every wrapper, 0 api call sites, no close and no duplicate, handle at call argument position 1 everywhere",
+      "source": "c856c0_forward.json#wrappers, cfg_functions.csv#syscall_sites"
+    },
+    {
+      "topic": "syscall site total",
+      "detail": "28 syscall sites, 16 in the anchor and 12 in the wrappers, and no other function in the 23 pdata covered members of the forward reachable set carries a syscall site",
+      "source": "cfg_functions.csv#syscall_sites over the reachable set"
+    },
+    {
+      "topic": "handle loads and consumers",
+      "detail": "2 separate reads of the same descriptor field, at 0xC856F3 into r14 and at 0xC86440 into rbx, 32 use sites, 16 per stage, argument register split 16 r10 and 16 rdx, only field offset 0 ever touched",
+      "source": "c856c0_dataflow.json#handle"
+    },
+    {
+      "topic": "argument schema agreement",
+      "detail": "16 of 16 branches match the stage schema and 0 diverge for both stages, at 6 and 5 syscall positions and 7 and 6 call positions",
+      "source": "c856c0_forward.json#argument_schema.per_stage"
+    },
+    {
+      "topic": "frame slot lifecycle",
+      "detail": "rsp+0x40 and rsp+0x48 have 1 direct write, 16 address takes and 0 direct reads, rsp+0x50 has 1 direct write, 16 address takes and 2 direct reads, so the transfer status slot has no reader",
+      "source": "c856c0_forward.json#result_slot.lifecycle.slots"
+    },
+    {
+      "topic": "exits and status testing",
+      "detail": "3 anchor exits at 0xC85709, 0xC86456 and 0xC87103, 1 entry function exit, status_tested_after_sink false on all 32 branches, 0 indirect call sites in all 32 branch bodies",
+      "source": "c856c0_forward.json#exits, #stages[].branches"
+    },
+    {
+      "topic": "merge reachability split",
+      "detail": "the 16 wrapper branches join by unconditional jump with merge_reachability OBSERVED, the 16 inline branches join by fall through after the syscall with merge_reachability NOT_ASSERTED",
+      "source": "c856c0_forward.json#stages[].branches[].join"
+    },
+    {
+      "topic": "cfg cross check of the anchor and the entry function",
+      "detail": "the anchor has 6724 bytes, 108 basic blocks with 1 reached, reached_ratio 0.009259, 1486 instructions, 0 undecoded bytes, 69 call and 31 direct jmp and 2 indirect jmp and 1 jcc and 1 ret terminators, 16 syscall sites, 2 switch sites of 0 validated, cluster 85; the entry function has 112 bytes, 8 of 8 blocks reached, 30 instructions, cluster 85",
+      "source": "cfg_functions.csv rows 0xC856C0 and 0xC85650"
+    },
+    {
+      "topic": "reference scan and pdata",
+      "detail": "0 rel32, rip relative, absolute pointer or code pointer slot edges reach 0xC85650, exactly 1 rel32 call reaches 0xC856C0 at 0xC85681 with encoding e8 3a 00 00 00, the 3 32 bit occurrences are the pdata begin_address, end_address and begin_address fields at record 38549 twice and 38550 once, and 0 of 19041 DIR64 slots hold a VA into the cluster",
+      "source": "c856c0_dataflow.json#reference_scan"
+    },
+    {
+      "topic": "close and duplicate negative inside the cluster",
+      "detail": "the published edge set has 61 CloseHandle rows and 0 DuplicateHandle rows with the 59, 1, 1 relation split, and 0 of those 61 CloseHandle rows is sourced from the 0xC85000 to 0xC88000 range, so the section 14.2 cluster negative stands even though CF-02 invalidates NEG-15",
+      "source": "xref_edges.csv#dst_symbol, c856c0_forward.json#handle_lifetime.cluster_range_sites"
+    },
+    {
+      "topic": "constant pools and thunk encodings",
+      "detail": "the four measured windows reproduce at 0x31261B0 160 bytes entropy 5.692855837 with 40 zero bytes and 2 of 6 groups, 0x3189A90 256 bytes entropy 5.426974043 with 88 zero bytes and 5 of 10 groups, 0x30E35F0 64 bytes all zero, and the anchor body 6724 bytes entropy 5.997035892 with 266 zero bytes and 0 such groups; all 5 backward pass thunks resolve into .data and none is pdata covered",
+      "source": "c856c0_dataflow.json#constant_pools, #global_address_thunks"
+    },
+    {
+      "topic": "caller closure csv against payload",
+      "detail": "444 rows in both, per level 14, 429 and 1, per edge kind 14 forward_subject, 429 direct_call and 1 no_inbound_edge_in_enumerated_forms, 220 rows carry F-U-01, 0 uncovered call sites, and the row tuples are equal as multisets in both files",
+      "source": "c856c0_callers.csv, c856c0_forward.json#caller_closure.rows"
+    },
+    {
+      "topic": "service naming stays open",
+      "detail": "the service map names 0 of 3627 corpus sites and 0 of the 28 subject sites, every one is UNRESOLVED with a symbolic service number, which supports the document's Q-02 and F-U-02 without adding any naming information",
+      "source": "syscall_service_map.json#service_number.naming_gate, syscall_inventory.csv"
+    }
+  ],
+  "limitations": [
+    "The specimen is not read. Every specimen identity in this payload is quoted from the inputs, so the audit cannot detect a specimen change the payloads do not record.",
+    "No disassembly is performed, so a payload field the underlying bytes do not support would pass this audit unchanged. The audit tests the report against the evidence, not the evidence against the file.",
+    "A contested entry means the statement is not reproducible from the 7 attested inputs. It does not by itself mean the statement is false of the specimen.",
+    "The absence of a service name is preserved, not resolved. All 28 subject sites and all 3627 corpus sites are UNRESOLVED in the service map, and this audit adds no naming information.",
+    "The producer and the ownership of the handle stay open. The boundary at 0xC85650 is closed for the six enumerated edge forms only, and a register indirect or stack slot caller cannot be excluded statically.",
+    "The forward reachable set stopped at depth 4 with exhausted false, so the wrapper caller census is bounded by the same rel32 sweep and does not cover indirect callers.",
+    "The xref_edges.csv coverage limit is not uniform: it holds 0 edges for 0x495D0 although the dedicated rel32 pass finds 20, so a zero in that file is not by itself a structural negative."
+  ],
+  "validation": {
+    "check_count": 163,
+    "failed_count": 0,
+    "checks": [
+      {
+        "check": "dispatch.table_count",
+        "expected": "2",
+        "actual": "2",
+        "ok": "true"
+      },
+      {
+        "check": "dispatch.slots_per_table",
+        "expected": "[16, 16]",
+        "actual": "[16, 16]",
+        "ok": "true"
+      },
+      {
+        "check": "dispatch.slots_total",
+        "expected": "32",
+        "actual": "32",
+        "ok": "true"
+      },
+      {
+        "check": "dispatch.slot_step_bytes",
+        "expected": "[4, 4]",
+        "actual": "[4, 4]",
+        "ok": "true"
+      },
+      {
+        "check": "dispatch.tables_are_adjacent",
+        "expected": "true",
+        "actual": "true",
+        "ok": "true"
+      },
+      {
+        "check": "dispatch.distinct_block_targets_per_table",
+        "expected": "[16, 16]",
+        "actual": "[16, 16]",
+        "ok": "true"
+      },
+      {
+        "check": "dispatch.table_entries_field",
+        "expected": "16",
+        "actual": "16",
+        "ok": "true"
+      },
+      {
+        "check": "dispatch.selector_count",
+        "expected": "2",
+        "actual": "2",
+        "ok": "true"
+      },
+      {
+        "check": "dispatch.tables_are_adjacent_field",
+        "expected": "true",
+        "actual": "true",
+        "ok": "true"
+      },
+      {
+        "check": "branch.total",
+        "expected": "32",
+        "actual": "32",
+        "ok": "true"
+      },
+      {
+        "check": "branch.inline_total",
+        "expected": "16",
+        "actual": "16",
+        "ok": "true"
+      },
+      {
+        "check": "branch.wrapper_total",
+        "expected": "16",
+        "actual": "16",
+        "ok": "true"
+      },
+      {
+        "check": "branch.inline_plus_wrapper",
+        "expected": "32",
+        "actual": "32",
+        "ok": "true"
+      },
+      {
+        "check": "branch.alloc.declared_count",
+        "expected": "16",
+        "actual": "16",
+        "ok": "true"
+      },
+      {
+        "check": "branch.alloc.declared_inline",
+        "expected": "8",
+        "actual": "8",
+        "ok": "true"
+      },
+      {
+        "check": "branch.alloc.declared_wrapper",
+        "expected": "8",
+        "actual": "8",
+        "ok": "true"
+      },
+      {
+        "check": "branch.alloc.distinct_wrapper_targets",
+        "expected": "6",
+        "actual": "6",
+        "ok": "true"
+      },
+      {
+        "check": "branch.transfer.declared_count",
+        "expected": "16",
+        "actual": "16",
+        "ok": "true"
+      },
+      {
+        "check": "branch.transfer.declared_inline",
+        "expected": "8",
+        "actual": "8",
+        "ok": "true"
+      },
+      {
+        "check": "branch.transfer.declared_wrapper",
+        "expected": "8",
+        "actual": "8",
+        "ok": "true"
+      },
+      {
+        "check": "branch.transfer.distinct_wrapper_targets",
+        "expected": "6",
+        "actual": "6",
+        "ok": "true"
+      },
+      {
+        "check": "branch.argument_register_split",
+        "expected": "{'rdx': 16, 'r10': 16}",
+        "actual": "{'r10': 16, 'rdx': 16}",
+        "ok": "true"
+      },
+      {
+        "check": "wrapper.count",
+        "expected": "12",
+        "actual": "12",
+        "ok": "true"
+      },
+      {
+        "check": "wrapper.distinct",
+        "expected": "12",
+        "actual": "12",
+        "ok": "true"
+      },
+      {
+        "check": "wrapper.allocation",
+        "expected": "6",
+        "actual": "6",
+        "ok": "true"
+      },
+      {
+        "check": "wrapper.transfer",
+        "expected": "6",
+        "actual": "6",
+        "ok": "true"
+      },
+      {
+        "check": "wrapper.one_syscall_each",
+        "expected": "true",
+        "actual": "true",
+        "ok": "true"
+      },
+      {
+        "check": "wrapper.all_return_status",
+        "expected": "true",
+        "actual": "true",
+        "ok": "true"
+      },
+      {
+        "check": "wrapper.no_api_calls",
+        "expected": "true",
+        "actual": "true",
+        "ok": "true"
+      },
+      {
+        "check": "wrapper.no_handle_close_or_duplicate",
+        "expected": "true",
+        "actual": "true",
+        "ok": "true"
+      },
+      {
+        "check": "wrapper.allocation_rvas",
+        "expected": "('0x51D680', '0x51D880', '0x51DAB0', '0x51DC60', '0x51DDE0', '0x51DFF0')",
+        "actual": "('0x51D680', '0x51D880', '0x51DAB0', '0x51DC60', '0x51DDE0', '0x51DFF0')",
+        "ok": "true"
+      },
+      {
+        "check": "wrapper.transfer_rvas",
+        "expected": "('0xC8F650', '0xC8F880', '0xC8FAA0', '0xC8FC00', '0xC8FDE0', '0xC8FF60')",
+        "actual": "('0xC8F650', '0xC8F880', '0xC8FAA0', '0xC8FC00', '0xC8FDE0', '0xC8FF60')",
+        "ok": "true"
+      },
+      {
+        "check": "wrapper.handle_argument_position_is_one",
+        "expected": "{1}",
+        "actual": "{1}",
+        "ok": "true"
+      },
+      {
+        "check": "wrapper.argument_shift_n_to_n_minus_1",
+        "expected": "true",
+        "actual": "true",
+        "ok": "true"
+      },
+      {
+        "check": "syscall.inline_sites",
+        "expected": "16",
+        "actual": "16",
+        "ok": "true"
+      },
+      {
+        "check": "syscall.anchor_cfg_sites",
+        "expected": "16",
+        "actual": "16",
+        "ok": "true"
+      },
+      {
+        "check": "syscall.wrapper_cfg_sum",
+        "expected": "12",
+        "actual": "12",
+        "ok": "true"
+      },
+      {
+        "check": "syscall.subject_total",
+        "expected": "28",
+        "actual": "28",
+        "ok": "true"
+      },
+      {
+        "check": "syscall.inline_equals_anchor_cfg",
+        "expected": "16",
+        "actual": "16",
+        "ok": "true"
+      },
+      {
+        "check": "syscall.no_syscall_in_entry_or_helper",
+        "expected": "0",
+        "actual": "0",
+        "ok": "true"
+      },
+      {
+        "check": "handle.load_count",
+        "expected": "2",
+        "actual": "2",
+        "ok": "true"
+      },
+      {
+        "check": "handle.use_site_count",
+        "expected": "32",
+        "actual": "32",
+        "ok": "true"
+      },
+      {
+        "check": "handle.use_count_field",
+        "expected": "32",
+        "actual": "32",
+        "ok": "true"
+      },
+      {
+        "check": "handle.separate_reads",
+        "expected": "true",
+        "actual": "true",
+        "ok": "true"
+      },
+      {
+        "check": "handle.r10_sites",
+        "expected": "16",
+        "actual": "16",
+        "ok": "true"
+      },
+      {
+        "check": "handle.rdx_sites",
+        "expected": "16",
+        "actual": "16",
+        "ok": "true"
+      },
+      {
+        "check": "handle.allocation_stage_sites",
+        "expected": "16",
+        "actual": "16",
+        "ok": "true"
+      },
+      {
+        "check": "handle.transfer_stage_sites",
+        "expected": "16",
+        "actual": "16",
+        "ok": "true"
+      },
+      {
+        "check": "handle.use_sites_equal_branch_total",
+        "expected": "32",
+        "actual": "32",
+        "ok": "true"
+      },
+      {
+        "check": "handle.consume_site_count_field",
+        "expected": "32",
+        "actual": "32",
+        "ok": "true"
+      },
+      {
+        "check": "handle.carriers",
+        "expected": "['r14', 'rbx']",
+        "actual": "['r14', 'rbx']",
+        "ok": "true"
+      },
+      {
+        "check": "handle.sink_kind_split",
+        "expected": "{'inline_syscall': 16, 'wrapper_call': 16}",
+        "actual": "{'inline_syscall': 16, 'wrapper_call': 16}",
+        "ok": "true"
+      },
+      {
+        "check": "closure.forms_enumerated",
+        "expected": "6",
+        "actual": "6",
+        "ok": "true"
+      },
+      {
+        "check": "closure.entry_all_forms_zero",
+        "expected": "6",
+        "actual": "6",
+        "ok": "true"
+      },
+      {
+        "check": "closure.anchor_single_inbound_edge",
+        "expected": "1",
+        "actual": "1",
+        "ok": "true"
+      },
+      {
+        "check": "closure.json_rows",
+        "expected": "444",
+        "actual": "444",
+        "ok": "true"
+      },
+      {
+        "check": "closure.csv_rows",
+        "expected": "444",
+        "actual": "444",
+        "ok": "true"
+      },
+      {
+        "check": "closure.row_count_field",
+        "expected": "444",
+        "actual": "444",
+        "ok": "true"
+      },
+      {
+        "check": "closure.csv_level_split",
+        "expected": "{'0': 14, '1': 429, '2': 1}",
+        "actual": "{'0': 14, '1': 429, '2': 1}",
+        "ok": "true"
+      },
+      {
+        "check": "closure.csv_kind_split",
+        "expected": "{'direct_call': 429, 'forward_subject': 14, 'no_inbound_edge_in_enumerated_forms': 1}",
+        "actual": "{'direct_call': 429, 'forward_subject': 14, 'no_inbound_edge_in_enumerated_forms': 1}",
+        "ok": "true"
+      },
+      {
+        "check": "closure.csv_matches_json",
+        "expected": "true",
+        "actual": "true",
+        "ok": "true"
+      },
+      {
+        "check": "closure.uncovered_call_sites",
+        "expected": "0",
+        "actual": "0",
+        "ok": "true"
+      },
+      {
+        "check": "closure.rows_carrying_F_U_01",
+        "expected": "220",
+        "actual": "220",
+        "ok": "true"
+      },
+      {
+        "check": "closure.frontier_empty_and_exhausted",
+        "expected": "true",
+        "actual": "true",
+        "ok": "true"
+      },
+      {
+        "check": "producer.status_open",
+        "expected": "OPEN",
+        "actual": "OPEN",
+        "ok": "true"
+      },
+      {
+        "check": "producer.identified_false",
+        "expected": "false",
+        "actual": "false",
+        "ok": "true"
+      },
+      {
+        "check": "ownership.open",
+        "expected": "OPEN",
+        "actual": "OPEN",
+        "ok": "true"
+      },
+      {
+        "check": "wrapper.level_one_rows",
+        "expected": "408",
+        "actual": "408",
+        "ok": "true"
+      },
+      {
+        "check": "wrapper.distinct_callers",
+        "expected": "37",
+        "actual": "37",
+        "ok": "true"
+      },
+      {
+        "check": "wrapper.callers_outside_cluster",
+        "expected": "36",
+        "actual": "36",
+        "ok": "true"
+      },
+      {
+        "check": "wrapper.callers_inside_cluster",
+        "expected": "1",
+        "actual": "1",
+        "ok": "true"
+      },
+      {
+        "check": "wrapper.in_cluster_caller_is_the_anchor",
+        "expected": "('0xC856C0',)",
+        "actual": "('0xC856C0',)",
+        "ok": "true"
+      },
+      {
+        "check": "wrapper.anchor_call_sites",
+        "expected": "16",
+        "actual": "16",
+        "ok": "true"
+      },
+      {
+        "check": "sink.distinct_callers",
+        "expected": "54",
+        "actual": "54",
+        "ok": "true"
+      },
+      {
+        "check": "sink.callers_inside_cluster",
+        "expected": "2",
+        "actual": "2",
+        "ok": "true"
+      },
+      {
+        "check": "growth.distinct_callers",
+        "expected": "17",
+        "actual": "17",
+        "ok": "true"
+      },
+      {
+        "check": "per_wrapper.distinct_callers",
+        "expected": "{'0x51D680': 35, '0x51D880': 35, '0x51DAB0': 35, '0x51DC60': 35, '0x51DDE0': 35, '0x51DFF0': 35, '0xC8F650': 3, '0xC8F880': 3, '0xC8FAA0': 3, '0xC8FC00': 3, '0xC8FDE0': 3, '0xC8FF60': 3}",
+        "actual": "{'0x51D680': 35, '0x51D880': 35, '0x51DAB0': 35, '0x51DC60': 35, '0x51DDE0': 35, '0x51DFF0': 35, '0xC8F650': 3, '0xC8F880': 3, '0xC8FAA0': 3, '0xC8FC00': 3, '0xC8FDE0': 3, '0xC8FF60': 3}",
+        "ok": "true"
+      },
+      {
+        "check": "reachable.function_count",
+        "expected": "37",
+        "actual": "37",
+        "ok": "true"
+      },
+      {
+        "check": "reachable.function_count_field",
+        "expected": "37",
+        "actual": "37",
+        "ok": "true"
+      },
+      {
+        "check": "reachable.targets_outside_pdata",
+        "expected": "14",
+        "actual": "14",
+        "ok": "true"
+      },
+      {
+        "check": "reachable.outside_pdata_is_subset",
+        "expected": "true",
+        "actual": "true",
+        "ok": "true"
+      },
+      {
+        "check": "reachable.null_function_equals_outside",
+        "expected": "{5380512, 5380544, 44755008, 46064096, 13287664, 13287632, 13287696, 13287728, 13287760, 13287792, 44664112, 46063088, 44770328, 46063888}",
+        "actual": "{5380512, 5380544, 44755008, 46064096, 13287664, 13287632, 13287696, 13287728, 13287760, 13287792, 44664112, 46063088, 44770328, 46063888}",
+        "ok": "true"
+      },
+      {
+        "check": "reachable.pdata_covered",
+        "expected": "23",
+        "actual": "23",
+        "ok": "true"
+      },
+      {
+        "check": "reachable.depth_sum",
+        "expected": "37",
+        "actual": "37",
+        "ok": "true"
+      },
+      {
+        "check": "reachable.depth_split",
+        "expected": "{0: 2, 1: 22, 2: 6, 3: 5, 4: 2}",
+        "actual": "{0: 2, 1: 22, 2: 6, 3: 5, 4: 2}",
+        "ok": "true"
+      },
+      {
+        "check": "reachable.exhausted",
+        "expected": "false",
+        "actual": "false",
+        "ok": "true"
+      },
+      {
+        "check": "reachable.max_depth",
+        "expected": "4",
+        "actual": "4",
+        "ok": "true"
+      },
+      {
+        "check": "xref.row_count",
+        "expected": "57101",
+        "actual": "57101",
+        "ok": "true"
+      },
+      {
+        "check": "xref.column_count",
+        "expected": "22",
+        "actual": "22",
+        "ok": "true"
+      },
+      {
+        "check": "xref.src_unit_is_decimal",
+        "expected": "decimal",
+        "actual": "decimal",
+        "ok": "true"
+      },
+      {
+        "check": "xref.single_true_hex_high_nibble",
+        "expected": "1",
+        "actual": "1",
+        "ok": "true"
+      },
+      {
+        "check": "xref.max_src_below_0x10000000",
+        "expected": "true",
+        "actual": "true",
+        "ok": "true"
+      },
+      {
+        "check": "xref.in_cluster_src_rows",
+        "expected": "17",
+        "actual": "17",
+        "ok": "true"
+      },
+      {
+        "check": "xref.in_cluster_src_functions",
+        "expected": "5",
+        "actual": "5",
+        "ok": "true"
+      },
+      {
+        "check": "xref.dst_anchor_rows",
+        "expected": "0",
+        "actual": "0",
+        "ok": "true"
+      },
+      {
+        "check": "xref.dst_entry_rows",
+        "expected": "0",
+        "actual": "0",
+        "ok": "true"
+      },
+      {
+        "check": "xref.dst_growth_helper_rows",
+        "expected": "0",
+        "actual": "0",
+        "ok": "true"
+      },
+      {
+        "check": "xref.close_handle_rows",
+        "expected": "61",
+        "actual": "61",
+        "ok": "true"
+      },
+      {
+        "check": "xref.duplicate_handle_rows",
+        "expected": "0",
+        "actual": "0",
+        "ok": "true"
+      },
+      {
+        "check": "xref.close_handle_in_cluster",
+        "expected": "0",
+        "actual": "0",
+        "ok": "true"
+      },
+      {
+        "check": "xref.zero_valued_src_rows",
+        "expected": "0",
+        "actual": "0",
+        "ok": "true"
+      },
+      {
+        "check": "xref.close_handle_relations",
+        "expected": "{'call_indirect_iat': 59, 'iat_jmp_thunk_stub': 1, 'iat_slot_symbol_binding': 1}",
+        "actual": "{'call_indirect_iat': 59, 'iat_jmp_thunk_stub': 1, 'iat_slot_symbol_binding': 1}",
+        "ok": "true"
+      },
+      {
+        "check": "xref.nearest_close_handle_sites",
+        "expected": "[('0xC81D49', -14711), ('0xCA8AE7', 144423), ('0x87F348', -4219768)]",
+        "actual": "[('0xC81D49', -14711), ('0xCA8AE7', 144423), ('0x87F348', -4219768)]",
+        "ok": "true"
+      },
+      {
+        "check": "inventory.corpus_rows",
+        "expected": "3627",
+        "actual": "3627",
+        "ok": "true"
+      },
+      {
+        "check": "inventory.subject_rows_found",
+        "expected": "28",
+        "actual": "28",
+        "ok": "true"
+      },
+      {
+        "check": "inventory.forwarding_rows",
+        "expected": "21",
+        "actual": "21",
+        "ok": "true"
+      },
+      {
+        "check": "inventory.service_map_class_totals_agree",
+        "expected": "true",
+        "actual": "true",
+        "ok": "true"
+      },
+      {
+        "check": "inventory.subject_class_split",
+        "expected": "{'allocation_0x1000_0x40': 8, 'other': 20}",
+        "actual": "{'allocation_0x1000_0x40': 8, 'other': 20}",
+        "ok": "true"
+      },
+      {
+        "check": "inventory.subject_status_split",
+        "expected": "{'unresolved_symbolic_service_number': 28}",
+        "actual": "{'unresolved_symbolic_service_number': 28}",
+        "ok": "true"
+      },
+      {
+        "check": "inventory.no_subject_site_is_wrapper_forwarding",
+        "expected": "0",
+        "actual": "0",
+        "ok": "true"
+      },
+      {
+        "check": "inventory.no_subject_site_is_transfer_5arg",
+        "expected": "0",
+        "actual": "0",
+        "ok": "true"
+      },
+      {
+        "check": "inventory.no_subject_site_is_named",
+        "expected": "0",
+        "actual": "0",
+        "ok": "true"
+      },
+      {
+        "check": "inventory.forwarding_shape_count",
+        "expected": "1",
+        "actual": "1",
+        "ok": "true"
+      },
+      {
+        "check": "inventory.forwarding_shape_is_four_self_handles",
+        "expected": "{('A6_SELF_HANDLE', 'A6_SELF_HANDLE', 'A6_SELF_HANDLE', 'A6_SELF_HANDLE')}",
+        "actual": "{('A6_SELF_HANDLE', 'A6_SELF_HANDLE', 'A6_SELF_HANDLE', 'A6_SELF_HANDLE')}",
+        "ok": "true"
+      },
+      {
+        "check": "inventory.forwarding_outside_cluster_band",
+        "expected": "true",
+        "actual": "true",
+        "ok": "true"
+      },
+      {
+        "check": "inventory.forwarding_disjoint_from_wrappers",
+        "expected": "true",
+        "actual": "true",
+        "ok": "true"
+      },
+      {
+        "check": "inventory.forwarding_disjoint_from_inline_sites",
+        "expected": "true",
+        "actual": "true",
+        "ok": "true"
+      },
+      {
+        "check": "inventory.forwarding_owner_count",
+        "expected": "7",
+        "actual": "7",
+        "ok": "true"
+      },
+      {
+        "check": "inventory.wrapper_shape_count",
+        "expected": "2",
+        "actual": "2",
+        "ok": "true"
+      },
+      {
+        "check": "inventory.alloc_inline_shape_is_single",
+        "expected": "1",
+        "actual": "1",
+        "ok": "true"
+      },
+      {
+        "check": "inventory.transfer_inline_shape_is_single",
+        "expected": "1",
+        "actual": "1",
+        "ok": "true"
+      },
+      {
+        "check": "inventory.wrapper_position4_is_always_register_indirect",
+        "expected": "true",
+        "actual": "true",
+        "ok": "true"
+      },
+      {
+        "check": "inventory.transfer_inline_position2_is_always_register_indirect",
+        "expected": "true",
+        "actual": "true",
+        "ok": "true"
+      },
+      {
+        "check": "inventory.wrapper_shape_signature",
+        "expected": "{('A6_SELF_HANDLE', 'A6_SELF_HANDLE', 'A6_SELF_HANDLE', 'A7_REG_INDIRECT', 'A5_STACK_SLOT', 'A5_STACK_SLOT'): 10, ('A8_UNKNOWN', 'A6_SELF_HANDLE', 'A6_SELF_HANDLE', 'A7_REG_INDIRECT', 'A5_STACK_SLOT', 'A5_STACK_SLOT'): 2}",
+        "actual": "{('A8_UNKNOWN', 'A6_SELF_HANDLE', 'A6_SELF_HANDLE', 'A7_REG_INDIRECT', 'A5_STACK_SLOT', 'A5_STACK_SLOT'): 2, ('A6_SELF_HANDLE', 'A6_SELF_HANDLE', 'A6_SELF_HANDLE', 'A7_REG_INDIRECT', 'A5_STACK_SLOT', 'A5_STACK_SLOT'): 10}",
+        "ok": "true"
+      },
+      {
+        "check": "branch.block_count_delta_count",
+        "expected": "16",
+        "actual": "16",
+        "ok": "true"
+      },
+      {
+        "check": "branch.block_count_delta_uniform",
+        "expected": "{-1}",
+        "actual": "{-1}",
+        "ok": "true"
+      },
+      {
+        "check": "branch.block_count_delta_only_on_wrapper_branches",
+        "expected": "true",
+        "actual": "true",
+        "ok": "true"
+      },
+      {
+        "check": "branch.inline_body_range",
+        "expected": "[41, 113]",
+        "actual": "[41, 113]",
+        "ok": "true"
+      },
+      {
+        "check": "cluster.allocation_wrappers_cluster_id",
+        "expected": "{38}",
+        "actual": "{38}",
+        "ok": "true"
+      },
+      {
+        "check": "cluster.transfer_wrappers_cluster_id",
+        "expected": "{85}",
+        "actual": "{85}",
+        "ok": "true"
+      },
+      {
+        "check": "cluster.anchor_cluster_id",
+        "expected": "85",
+        "actual": "85",
+        "ok": "true"
+      },
+      {
+        "check": "cluster.entry_cluster_id",
+        "expected": "85",
+        "actual": "85",
+        "ok": "true"
+      },
+      {
+        "check": "cluster.transfer_wrappers_inside_sixteen_function_range",
+        "expected": "[]",
+        "actual": "[]",
+        "ok": "true"
+      },
+      {
+        "check": "cluster.function_count_field",
+        "expected": "16",
+        "actual": "16",
+        "ok": "true"
+      },
+      {
+        "check": "cluster.functions_listed",
+        "expected": "16",
+        "actual": "16",
+        "ok": "true"
+      },
+      {
+        "check": "cluster.anchor_syscall_sites",
+        "expected": "16",
+        "actual": "16",
+        "ok": "true"
+      },
+      {
+        "check": "cluster.anchor_basic_blocks",
+        "expected": "108",
+        "actual": "108",
+        "ok": "true"
+      },
+      {
+        "check": "cluster.anchor_blocks_reached",
+        "expected": "1",
+        "actual": "1",
+        "ok": "true"
+      },
+      {
+        "check": "cluster.anchor_instructions",
+        "expected": "1486",
+        "actual": "1486",
+        "ok": "true"
+      },
+      {
+        "check": "cluster.anchor_undecoded_bytes",
+        "expected": "0",
+        "actual": "0",
+        "ok": "true"
+      },
+      {
+        "check": "cluster.anchor_switch_sites",
+        "expected": "2",
+        "actual": "2",
+        "ok": "true"
+      },
+      {
+        "check": "cluster.anchor_switch_sites_validated",
+        "expected": "0",
+        "actual": "0",
+        "ok": "true"
+      },
+      {
+        "check": "cluster.entry_basic_blocks",
+        "expected": "8",
+        "actual": "8",
+        "ok": "true"
+      },
+      {
+        "check": "cluster.entry_blocks_reached",
+        "expected": "8",
+        "actual": "8",
+        "ok": "true"
+      },
+      {
+        "check": "cluster.entry_instructions",
+        "expected": "30",
+        "actual": "30",
+        "ok": "true"
+      },
+      {
+        "check": "schema.alloc_matching",
+        "expected": "16",
+        "actual": "16",
+        "ok": "true"
+      },
+      {
+        "check": "schema.alloc_diverging",
+        "expected": "0",
+        "actual": "0",
+        "ok": "true"
+      },
+      {
+        "check": "schema.transfer_matching",
+        "expected": "16",
+        "actual": "16",
+        "ok": "true"
+      },
+      {
+        "check": "schema.transfer_diverging",
+        "expected": "0",
+        "actual": "0",
+        "ok": "true"
+      },
+      {
+        "check": "schema.alloc_syscall_positions",
+        "expected": "6",
+        "actual": "6",
+        "ok": "true"
+      },
+      {
+        "check": "schema.transfer_syscall_positions",
+        "expected": "5",
+        "actual": "5",
+        "ok": "true"
+      },
+      {
+        "check": "slot.transfer_status_no_reader",
+        "expected": "0",
+        "actual": "0",
+        "ok": "true"
+      },
+      {
+        "check": "slot.transfer_status_address_taken",
+        "expected": "16",
+        "actual": "16",
+        "ok": "true"
+      },
+      {
+        "check": "slot.region_size_no_reader",
+        "expected": "0",
+        "actual": "0",
+        "ok": "true"
+      },
+      {
+        "check": "slot.region_size_address_taken",
+        "expected": "16",
+        "actual": "16",
+        "ok": "true"
+      },
+      {
+        "check": "slot.remote_base_readers",
+        "expected": "2",
+        "actual": "2",
+        "ok": "true"
+      },
+      {
+        "check": "slot.remote_base_address_taken",
+        "expected": "16",
+        "actual": "16",
+        "ok": "true"
+      },
+      {
+        "check": "exit.anchor_count",
+        "expected": "3",
+        "actual": "3",
+        "ok": "true"
+      },
+      {
+        "check": "exit.anchor_sites",
+        "expected": "['0xC85709', '0xC86456', '0xC87103']",
+        "actual": "['0xC85709', '0xC86456', '0xC87103']",
+        "ok": "true"
+      },
+      {
+        "check": "exit.entry_count",
+        "expected": "1",
+        "actual": "1",
+        "ok": "true"
+      },
+      {
+        "check": "exit.single_exit_anchor",
+        "expected": "true",
+        "actual": "true",
+        "ok": "true"
+      },
+      {
+        "check": "exit.no_status_test_on_any_branch",
+        "expected": "true",
+        "actual": "true",
+        "ok": "true"
+      },
+      {
+        "check": "exit.no_indirect_call_in_branches",
+        "expected": "true",
+        "actual": "true",
+        "ok": "true"
+      }
+    ]
+  }
+}
