@@ -13,7 +13,8 @@ public:
     explicit Decryptor(std::string serverDir);
 
     // Decrypt all resources found under Servers/<dir>/Unpacked.
-    void runAll();
+    // Returns false if at least one file failed.
+    bool runAll();
 
     std::string outputDir;
     std::string tempDir;

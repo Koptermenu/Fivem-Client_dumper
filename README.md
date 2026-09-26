@@ -72,6 +72,7 @@ idoben keletkezik, ezert egy mar meglevo build faban is ujra kell futnia.
 | `DUMPER_SERVER_NAME` | fix mappa/szerver nev |
 | `DUMPER_RESOURCE` | csak ez az egy resource |
 | `DUMPER_WORKERS` | parhuzamos letoltesok szama (1-64, alapertelmezett 24) |
+| `DUMPER_KEEP_TEMP` | a `Temp`, `TempCompiled` es `Unpacked` konyvtarakat megtartja hibakereseshez; csak a levaltas letege szamit (barmely ertek, ures sztring is), alapertelmezetten torolva |
 | `DUMPER_TEST_MODE=1` | nem interaktív mod |
 
 ## Konyvtarszerkezet

@@ -243,17 +243,32 @@ int main(int argc, char** argv) {
 
     std::cout << "\n" << CLR(term::BOLD) << CLR(term::CYAN) << "--- PHASE 2: Decrypt ---" << CLR(term::RESET) << "\n";
     Decryptor decryptor(dumper->serverDir);
-    decryptor.runAll();
+    bool decryptOk = decryptor.runAll();
 
-    std::cout << "\n" << CLR(term::GREEN)
+    std::cout << "\n" << CLR(decryptOk ? term::GREEN : term::YELLOW)
               << "==============================================\n";
-    std::cout << " Done! Output: Servers/" << dumper->serverDir << "/Output\n";
+    std::cout << (decryptOk ? " Done! Output: " : " Done, but some files failed to decrypt! Output: ")
+              << "Servers/" << dumper->serverDir << "/Output\n";
     std::cout << "==============================================" << CLR(term::RESET) << "\n";
 
-    std::error_code ec;
-    fs::remove_all("Servers/" + dumper->serverDir + "/Temp", ec);
-    fs::remove_all("Servers/" + dumper->serverDir + "/TempCompiled", ec);
-    fs::remove_all("Servers/" + dumper->serverDir + "/Unpacked", ec);
+    const std::string serverRoot = "Servers/" + dumper->serverDir;
+    const bool keepTemp = getenv("DUMPER_KEEP_TEMP") != nullptr;
+
+    if (keepTemp) {
+        std::cout << CLR(term::YELLOW) << "[!]" << CLR(term::RESET)
+                  << " DUMPER_KEEP_TEMP is set, keeping " << serverRoot << "/Temp, "
+                  << serverRoot << "/TempCompiled and " << serverRoot << "/Unpacked for inspection.\n";
+    } else if (!decryptOk) {
+        std::cerr << CLR(term::RED) << "Error: Some files failed to decrypt. Kept " << serverRoot
+                  << "/Temp and " << serverRoot << "/Unpacked (encrypted inputs) plus "
+                  << serverRoot << "/TempCompiled (compiled scratch files) for diagnosis."
+                  << CLR(term::RESET) << "\n";
+    } else {
+        std::error_code ec;
+        fs::remove_all(serverRoot + "/Temp", ec);
+        fs::remove_all(serverRoot + "/TempCompiled", ec);
+        fs::remove_all(serverRoot + "/Unpacked", ec);
+    }
 
     return 0;
 }

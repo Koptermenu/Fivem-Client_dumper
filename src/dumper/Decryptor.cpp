@@ -398,6 +398,16 @@ void Decryptor::decryptResourceFile(const std::string& resourcePath, const std::
             LOG("No valid Lua header for " + relFile + " - key mismatch, file skipped",
                 LogLevel::WARNING);
             ++failed_;
+            // Evidence: the encrypted input is the only copy of this data, so it is
+            // kept next to where the output would have been instead of being lost.
+            std::string rawPath = outputPath + ".raw";
+            std::error_code ec;
+            fs::create_directories(fs::path(rawPath).parent_path(), ec);
+            auto raw = readFileBytes(fullPath);
+            if (raw && writeFileBytes(rawPath, *raw))
+                LOG("Nyers titkositott masolat kiirva: " + rawPath, LogLevel::WARNING);
+            else
+                LOG("Nyers titkositott masolat nem irhato: " + rawPath, LogLevel::WARNING);
         } else {
             auto dec = decryptBuffer(stage1, decryptKey);
             if (dec.empty()) { LOG("Buffer decryption failed: " + relFile, LogLevel::WARNING); ++failed_; return; }
@@ -489,12 +499,34 @@ void Decryptor::decryptResource(const std::string& resourcePath, const std::stri
         } else {
             std::vector<uint8_t> iv(clk.begin(), clk.begin() + 16);
             std::vector<uint8_t> enc(clk.begin() + 16, clk.end());
-            bool ok = enc.size() % 16 == 0 &&
-                      aesCbc256DecryptPkcs7(AES_KEY, iv, enc, altKey) && altKey.size() == 32;
+            // The server ships grants_clk unpadded: the iv plus exactly two ciphertext
+            // blocks. PKCS#7 stripping on such a value silently eats the tail of the key
+            // whenever the last bytes happen to look padded, so the raw result is taken
+            // first and the padded variant is only a fallback for a server that would pad.
+            bool ok = aesCbc256DecryptRaw(AES_KEY, iv, enc, altKey) && altKey.size() == 32;
+            size_t rawLen = altKey.size();
+            size_t paddedLen = 0;
             if (!ok) {
                 altKey.clear();
-                LOG("grants_clk unusable for " + resourceName +
-                    " (bad length or undecryptable) - alt key disabled", LogLevel::WARNING);
+                std::vector<uint8_t> padded;
+                if (aesCbc256DecryptPkcs7(AES_KEY, iv, enc, padded) && padded.size() == 32) {
+                    altKey = std::move(padded);
+                    ok = true;
+                } else {
+                    paddedLen = padded.size();
+                }
+            }
+            if (!ok) {
+                std::string obtained;
+                if (rawLen || paddedLen)
+                    obtained = "a visszakulcsolt kulcs (nyers/PKCS#7) " + std::to_string(rawLen) +
+                               "/" + std::to_string(paddedLen) + " bajt";
+                else
+                    obtained = "a kulcs visszakulcsolasa nem sikerult";
+                LOG("grants_clk nem hasznalhato a " + resourceName + " eroforrashoz: " +
+                    std::to_string(clk.size()) + " bajt, " + obtained +
+                    " - alternativ kulcs tiltva", LogLevel::WARNING);
+                altKey.clear();
             }
         }
     }
@@ -543,10 +575,13 @@ void Decryptor::decryptResource(const std::string& resourcePath, const std::stri
     bar.finish();
 }
 
-void Decryptor::runAll() {
+bool Decryptor::runAll() {
+    decryptedOk_ = failed_ = copied_ = 0;
+
     if (!fs::exists(unpackedDir)) {
         LOG("No Unpacked/ directory found - run the dumper first.", LogLevel::ERROR);
-        return;
+        ++failed_;
+        return false;
     }
 
     std::vector<std::string> dirs;
@@ -563,7 +598,7 @@ void Decryptor::runAll() {
 
     if (dirs.empty()) {
         LOG("Nothing to process.", LogLevel::INFO);
-        return;
+        return failed_ == 0;
     }
 
     // ---- Fast detection: does ANY resource carry a .fxap marker? ----
@@ -605,6 +640,7 @@ void Decryptor::runAll() {
                 if (walkErr) {
                     LOG("figyelmeztetes - " + name + ": a fajlszamlalas megszakadt: " +
                         walkErr.message() + " - a bejelentett fajlszam csak reszleges", LogLevel::WARNING);
+                    ++failed_;
                 }
             } else {
                 LOG("Move failed for " + name + ": " + ec.message(), LogLevel::ERROR);
@@ -614,14 +650,13 @@ void Decryptor::runAll() {
         copied_ = (int)fileCount;
         LOG("Moved " + std::to_string(moved) + " resource(s) (" + std::to_string(fileCount) +
             " files) directly to Output - no decryption needed", LogLevel::SUCCESS);
-        return;
+        return failed_ == 0;
     }
 
     // ---- Encrypted resources present: full grants + FXAP decryption path ----
-    if (!loadGrants()) return;
+    if (!loadGrants()) { ++failed_; return false; }
 
     LOG("Found " + std::to_string(dirs.size()) + " resource(s) to process", LogLevel::INFO);
-    decryptedOk_ = failed_ = copied_ = 0;
 
     for (auto& d : dirs) {
         decryptResource(d, fs::path(d).filename().string(), "");
@@ -630,6 +665,7 @@ void Decryptor::runAll() {
     LOG("Decryption stats - ok:" + std::to_string(decryptedOk_.load()) +
         " copied:" + std::to_string(copied_.load()) + " failed:" + std::to_string(failed_.load()),
         LogLevel::SUCCESS);
+    return failed_ == 0;
 }
 
 } // namespace fivem
