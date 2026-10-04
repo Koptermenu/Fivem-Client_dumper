@@ -33,6 +33,52 @@ const char* kDefaultModelSha =
     "1741e5b2d062b07acf048bf0d2c514dadf2a48f94e2b4aa0cfe069af3838ee2f";
 const uint64_t kDefaultModelSize = 1117320800;
 
+// Pinned llama.cpp builds, all from the same fixed nightly tag b11146, with the digests
+// GitHub published for those assets. Pinned, so this is reproducible rather than "whatever
+// is newest tonight".
+//
+// A backend may need more than one archive. The CUDA build is published as two packages:
+// the binaries, and a separate "cudart" archive that holds only cublas/cudart. Extracting
+// only the first yields no llama-cli.exe, so both are pulled and unpacked side by side.
+struct EngineAsset {
+    const char* asset;
+    const char* sha256;
+    uint64_t size;
+};
+
+constexpr size_t kMaxEngineAssets = 2;
+
+struct EngineBuild {
+    const char* backend;
+    EngineAsset assets[kMaxEngineAssets];  // terminated by a null name
+    size_t assetCount;
+    bool needsNvidiaGpu;
+    bool needsCudaRuntime;
+};
+
+const EngineAsset kCudaBin{
+    "llama-b11146-bin-win-cuda-13.4-x64.zip",
+    "b1866c0ce76bc7bfb0c24b33e9a37e9669f1be18539b12c74ce361f81c41f047", 149758833};
+const EngineAsset kCudaRuntime{
+    "cudart-llama-bin-win-cuda-13.4-x64.zip",
+    "738f8c251ac22b70c3ae6f83a10cf222725df0395246a2cf58f32bdb85fbe668", 423535356};
+const EngineAsset kVulkanBin{
+    "llama-b11146-bin-win-vulkan-x64.zip",
+    "55a378aa095b466979d85075234f66d7655c7a7483222af0c006c0e55b4d7bd6", 32127004};
+const EngineAsset kCpuBin{
+    "llama-b11146-bin-win-cpu-x64.zip",
+    "14cf1303ca9ac3abd94816850532f9f9a69ac66fbaca3776fc6f9061c2fac1d1", 18560055};
+
+const EngineBuild kCudaSlimBuild{"cuda", {kCudaBin}, 1, true, false};
+const EngineBuild kCudaFullBuild{"cuda", {kCudaBin, kCudaRuntime}, 2, true, true};
+const EngineBuild kVulkanBuild{"vulkan", {kVulkanBin}, 1, false, false};
+const EngineBuild kCpuBuild{"cpu", {kCpuBin}, 1, false, false};
+
+std::string engineUrl(const EngineAsset& a) {
+    return "https://github.com/ggml-org/llama.cpp/releases/download/b11146/" +
+           std::string(a.asset);
+}
+
 std::wstring widen(const std::string& s) {
     if (s.empty()) return L"";
     const int n = MultiByteToWideChar(CP_UTF8, 0, s.c_str(), static_cast<int>(s.size()), nullptr, 0);
@@ -67,6 +113,72 @@ std::string modelFileName() {
 
 std::string enginePath() {
     return resolveTool("Tools/llama/llama-cli.exe");
+}
+
+std::string managedEngineDir() {
+    wchar_t buf[4096];
+    DWORD n = GetEnvironmentVariableW(L"LOCALAPPDATA", buf, 4096);
+    std::wstring root = (n > 0 && n < 4096) ? std::wstring(buf) : std::wstring(L".");
+    return narrow(root + L"\\FiveMDumper\\engine");
+}
+
+// True when an NVIDIA GPU is present, so the CUDA builds are worth preferring.
+bool hasNvidiaGpu() {
+    HMODULE nv = LoadLibraryW(L"nvcuda.dll");
+    if (!nv) return false;
+    FreeLibrary(nv);
+    return true;
+}
+
+// True when the CUDA runtime libraries are already installed, which is what the small
+// cuda build needs at load time.
+bool cudaRuntimeInstalled() {
+    static const char* dirs[] = {
+        "C:\\Windows\\System32",
+        "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v13.0\\bin",
+        "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v12.4\\bin",
+    };
+    for (const char* dir : dirs) {
+        std::error_code ec;
+        for (const char* ver : {"13", "12", "11", "10"}) {
+            if (fs::exists(std::string(dir) + "\\cudart64_" + ver + ".dll", ec)) return true;
+        }
+    }
+    return false;
+}
+
+// Picks the build for this machine, or the one DUMPER_LLM_BACKEND names.
+const EngineBuild& pickEngineBuild() {
+    const char* want = getenv("DUMPER_LLM_BACKEND");
+    const std::string backend = want ? toLower(trim(want)) : "auto";
+    const bool runtime = cudaRuntimeInstalled();
+
+    if (backend == "cpu") return kCpuBuild;
+    if (backend == "vulkan") return kVulkanBuild;
+    if (backend == "cuda") return runtime ? kCudaSlimBuild : kCudaFullBuild;
+    if (backend != "auto") return kCpuBuild;
+
+    if (hasNvidiaGpu()) return runtime ? kCudaSlimBuild : kCudaFullBuild;
+    std::error_code ec;
+    if (fs::exists("C:\\Windows\\System32\\vulkan-1.dll", ec)) return kVulkanBuild;
+    return kCpuBuild;
+}
+
+// First llama-cli.exe anywhere under the managed install. The executable needs the ggml
+// and CUDA DLLs that sit beside it, so the whole unpacked folder is kept in place.
+std::string findInManaged(const std::string& dir, int depth) {
+    if (depth > 4) return "";
+    std::error_code ec;
+    for (auto& e : fs::directory_iterator(dir, ec)) {
+        if (ec) break;
+        if (e.is_directory()) {
+            const std::string hit = findInManaged(e.path().string(), depth + 1);
+            if (!hit.empty()) return hit;
+        } else if (toLower(e.path().filename().string()) == "llama-cli.exe") {
+            return e.path().string();
+        }
+    }
+    return "";
 }
 
 // SHA-256 of a file, streamed so a 1 GiB model never lands in memory.
@@ -289,19 +401,132 @@ bool balancedLua(const std::string& src) {
 } // namespace
 
 bool llmAvailable(std::string& detail) {
-    const std::string engine = enginePath();
+    const std::string engine = findEngine(detail);
     std::error_code ec;
-    if (!fs::is_regular_file(engine, ec)) {
-        detail = "a futtatot nem talalhato: " + engine +
-                 " (helyezd el a llama-cli.exe-t a Tools/llama/ mappaba)";
+    if (engine.empty()) {
+        detail = "a futtatot nem talalhato";
         return false;
     }
     const std::string model = modelDir() + "\\" + modelFileName();
     if (!fs::is_regular_file(model, ec)) {
-        detail = "a modell meg nincs letoltve";
+        detail = "engine=" + engine + " (a modell meg nincs letoltve)";
         return false;
     }
     detail = "engine=" + engine + " model=" + model;
+    return true;
+}
+
+std::string findEngine(std::string& detail) {
+    std::error_code ec;
+    // A copy the user placed themselves wins over the managed install.
+    const std::string manual = enginePath();
+    if (fs::is_regular_file(manual, ec)) {
+        detail = manual;
+        return manual;
+    }
+    // Look in the backend folders first, then anywhere else under the install root.
+    const EngineBuild& build = pickEngineBuild();
+    const std::string preferred = findInManaged(managedEngineDir() + "\\" + build.backend, 0);
+    if (!preferred.empty()) {
+        detail = preferred;
+        return preferred;
+    }
+    const std::string managed = findInManaged(managedEngineDir(), 0);
+    if (!managed.empty()) {
+        detail = managed;
+        return managed;
+    }
+    detail = "nem talalhato (Tools/llama/llama-cli.exe vagy %LOCALAPPDATA%\\FiveMDumper\\engine)";
+    return "";
+}
+
+bool ensureEngine(bool interactive, const ProgressFn& onProgress, std::string& enginePathOut,
+                  std::string& errOut) {
+    errOut.clear();
+    const EngineBuild& build = pickEngineBuild();
+
+    // Only the selected backend counts. Accepting any engine here would silently hand a
+    // stale CPU install to a machine whose GPU build was requested.
+    std::error_code ec;
+    const std::string manual = enginePath();
+    if (fs::is_regular_file(manual, ec)) {
+        enginePathOut = manual;
+        return true;
+    }
+    const std::string scoped = findInManaged(managedEngineDir() + "\\" + build.backend, 0);
+    if (!scoped.empty()) {
+        enginePathOut = scoped;
+        return true;
+    }
+
+    uint64_t totalBytes = 0;
+    for (size_t i = 0; i < build.assetCount; ++i) totalBytes += build.assets[i].size;
+
+    const uint64_t mb = totalBytes / (1024 * 1024);
+
+    if (build.needsNvidiaGpu && !hasNvidiaGpu()) {
+        errOut = std::string("a ") + build.backend +
+                 " build NVIDIA GPU-t igényel, és ezen a gépen nincs";
+        return false;
+    }
+
+    if (interactive) {
+        std::cout << CLR(term::CYAN) << "[*]" << CLR(term::RESET)
+                  << " A llama.cpp futtato nincs telepitve: " << build.backend << " build, " << mb
+                  << " MB, " << build.assetCount << " csomag (b11146"
+                  << (build.needsCudaRuntime ? ", a CUDA runtime is kulcs" : "") << ").\n"
+                  << "    Letoltes es telepites? [y/N]: ";
+        std::string answer;
+        if (!std::getline(std::cin, answer)) { errOut = "nincs interaktiv bemenet"; return false; }
+        answer = toLower(trim(answer));
+        if (answer != "y" && answer != "yes" && answer != "i") {
+            errOut = "felhasznalo megszakította";
+            return false;
+        }
+    }
+
+    const std::string dir = managedEngineDir() + "\\" + build.backend;
+    fs::create_directories(dir, ec);
+
+    // The CUDA backend needs two archives unpacked into the same folder: the binaries and
+    // the separate cublas/cudart runtime.
+    const std::string tarExe = "C:\\Windows\\System32\\tar.exe";
+    if (!fs::exists(tarExe)) {
+        errOut = "a beagyazott Windows unpacker (tar.exe) nem talalhato";
+        return false;
+    }
+
+    for (size_t i = 0; i < build.assetCount; ++i) {
+        const EngineAsset& asset = build.assets[i];
+        const std::string zip = dir + "\\" + asset.asset;
+
+        std::string dlErr;
+        if (!downloadToFile(engineUrl(asset), zip, asset.size, onProgress, dlErr)) {
+            errOut = dlErr;
+            return false;
+        }
+        std::string have;
+        if (!hashFile(zip, have) || have != asset.sha256) {
+            fs::remove(zip, ec);
+            errOut = "a letoltott csomag SHA-256 ellenorzese sikertelen: " +
+                     std::string(asset.asset);
+            return false;
+        }
+        const ProcResult r = runTool(tarExe, {"-xf", zip, "-C", dir});
+        fs::remove(zip, ec);
+        if (!r.started || r.exitCode != 0) {
+            errOut = "a csomag kicsomagolasa sikertelen: " + std::string(asset.asset);
+            return false;
+        }
+    }
+
+    const std::string found = findInManaged(dir, 0);
+    if (found.empty()) {
+        errOut = "a kicsomagolt csomagban nincs llama-cli.exe";
+        return false;
+    }
+    enginePathOut = found;
+    LOG("llama.cpp telepitve: " + found, LogLevel::INFO);
     return true;
 }
 

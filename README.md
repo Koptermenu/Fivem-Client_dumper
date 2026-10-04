@@ -76,6 +76,7 @@ idoben keletkezik, ezert egy mar meglevo build faban is ujra kell futnia.
 | `DUMPER_TEST_MODE=1` | nem interaktív mod |
 | `DUMPER_CLEANUP=1` | strukturális Lua-tisztítás nem interaktív módban is |
 | `DUMPER_LLM=1` | a nyelvi modelles átírás nem interaktív módban is |
+| `DUMPER_LLM_BACKEND` | `auto` (alapértelmezett), `cuda`, `vulkan` vagy `cpu` — az inference futtató buildje |
 | `CK_CLIENT_KEY_API_URL` | a klienskulcs-szolgaltatas cime (alapertelmezett `https://grantsclk.ckcloud.de5.net`); a `CK_GRANTS_CLK_API_URL` nevet is elfogadja |
 
 ## Resource dekódolás
@@ -145,18 +146,40 @@ Kulon kerdesre letolti a **DeepSeek-R1-Distill-Qwen-1.5B** Q4_K_M kvantot
 (~1,04 GB) a Hugging Face-rol, SHA-256 ellenorzessel, majd atirja a tisztitott
 fajlokat.
 
-- A **futtatot nem toltjuk le**: a llama.cpp nem ad stabil Windows binarist, csak
-  rolling nightly artifactokat. Helyezd el a `llama-cli.exe`-t a
-  `Tools/llama/llama-cli.exe` helyre — ugyanaz a `resolveTool` kereses, mint a
-  `Bin/Unpacker.exe`-hoz.
-- A modell fajl itt van: `%LOCALAPPDATA%\FiveMDumper\models\`
+#### A futtato automatikus telepitese
+
+Ha a `llama-cli.exe` nincs a `Tools/llama/` alatt, a program felajanlja a
+letolteset. A build **pinelt** (`b11146` nightly), a meret es a SHA-256 be van
+egyerasztva, tehat reprodukalhato — nem "ami ma a legujabb".
+
+| build | letöltés | mikor választja |
+|-------|----------|-----------------|
+| `cuda` (2 csomag) | 143 + 404 MB | NVIDIA GPU, és nincs telepített CUDA runtime |
+| `cuda` (1 csomag) | 143 MB | NVIDIA GPU, és a CUDA runtime már telepítve |
+| `vulkan` | 31 MB | Vulkan loader van, de nincs NVIDIA |
+| `cpu` | 18 MB | nincs GPU |
+
+Az `auto` (`DUMPER_LLM_BACKEND`) ezt a táblát követi a gépen.
+
+**A CUDA build két archívumból áll.** A `llama-…-cuda-13.4-x64.zip` tartalmazza a
+binárisokat, a `cudart-llama-bin-win-cuda-13.4-x64.zip` pedig *csak* a
+cublas/cudart DLL-eket — a neve ellenére nem önálló csomag. Mindkettő ugyanabba a
+mappába csomagolódik, így **nem kell** CUDA toolkit a gépre. Csak a bináris
+archívumot kicsomagolva nincs `llama-cli.exe` a gépen.
+
+A kicsomagolt fájl: `%LOCALAPPDATA%\FiveMDumper\engine\<backend>\`
+
+#### A modell fajl
+
+`%LOCALAPPDATA%\FiveMDumper\models\`
+
 - Csak a 24 KB alatti fajlok mennek at (nagyobb fajl atirasa nem fer el a kontextusba)
 - Ha a modell outputja ures, rosszul keretezozott vagy kiegyenlenségtelen Lua,
   a **tisztitott** fajl marad a helyén
 
-> **Tudasd**: CPU-n ez lassu. Egy 40 KB-os fajl ~10-20 perc, es egy 50 fajlos
-> resource tobb orat vesz ig. A nyelvi modell 1,5B parametere hallucinálhat, ezért
-> csak külön mappaba ír és sose a dekódolt kódra.
+> **Tudasd**: a nyelvi modell 1,5B parametere hallucinálhat, ezert csak külön
+> mappaba ír és sose a dekódolt kódra. Vulkanon egy 40 KB-os fajl perceket,
+> CPU-on 10-20 percet vehet ig.
 
 ## Konyvtarszerkezet
 

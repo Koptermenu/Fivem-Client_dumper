@@ -34,6 +34,16 @@ struct LlmStats {
 
 using ProgressFn = std::function<void(uint64_t done, uint64_t total)>;
 
+// Locates llama-cli.exe: first a copy the user placed in Tools/llama/, then the managed
+// install under %LOCALAPPDATA%\FiveMDumper\engine. Empty when neither exists.
+std::string findEngine(std::string& detail);
+
+// Downloads and unpacks the pinned llama.cpp CPU build, after asking. The tag, asset name,
+// size and SHA-256 are all compiled in, so the download is reproducible rather than a
+// rolling artifact. Returns false when declined or on failure.
+bool ensureEngine(bool interactive, const ProgressFn& onProgress, std::string& enginePath,
+                  std::string& errOut);
+
 // True when both the model file and the inference engine are present and usable.
 bool llmAvailable(std::string& detail);
 

@@ -98,13 +98,23 @@ static void runReadabilityPass(const std::string& serverRoot, bool testMode) {
     }
     if (!wantLlm) return;
 
-    std::string detail;
-    if (!llmAvailable(detail) && detail.find("engine=") == std::string::npos) {
-        // The engine is the hard requirement; the model is fetched below on consent.
-        std::cout << CLR(term::YELLOW) << "[!]" << CLR(term::RESET) << " " << detail << "\n";
-        std::cout << "    A llama.cpp nem resze a csomagnak; a modell letoltes ezert kimarad.\n";
+    // The inference engine is downloaded and unpacked on demand, pinned to a fixed
+    // llama.cpp build and verified by SHA-256.
+    std::string engine;
+    std::string engErr;
+    const ProgressFn dlProgress = [](uint64_t done, uint64_t total) {
+        static uint64_t last = 0;
+        if (done - last < (16u << 20)) return;
+        last = done;
+        std::cout << "\r  " << (done >> 20) << " / " << (total >> 20) << " MB" << std::flush;
+    };
+    if (!ensureEngine(!testMode, dlProgress, engine, engErr)) {
+        std::cout << CLR(term::YELLOW) << "[!]" << CLR(term::RESET)
+                  << " Futtato: " << engErr << "\n";
         return;
     }
+    std::cout << "\n" << CLR(term::GREEN) << "[+]" << CLR(term::RESET) << " Futtato: " << engine
+              << "\n";
 
     LlmOptions opts;
     std::string modelPath;
@@ -124,9 +134,6 @@ static void runReadabilityPass(const std::string& serverRoot, bool testMode) {
     }
     std::cout << "\n";
 
-    std::string engineDetail;
-    llmAvailable(engineDetail);
-    const std::string engine = resolveTool("Tools/llama/llama-cli.exe");
     std::cout << CLR(term::CYAN) << "[*]" << CLR(term::RESET) << " Nyelvi modell futtatása...\n";
 
     const LlmStats ls = llmRewriteTree(opts, cleanDir, aiDir, engine, modelPath,
