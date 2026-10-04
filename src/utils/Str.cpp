@@ -1,7 +1,5 @@
 #include "Str.h"
-
 #include "../core/Bundler.h"
-
 #include <algorithm>
 #include <cctype>
 #include <filesystem>
@@ -10,9 +8,7 @@
 #ifdef _WIN32
 #include <windows.h>
 #endif
-
 namespace fivem {
-
 std::string exeDir() {
 #ifdef _WIN32
     char buf[4096];
@@ -25,20 +21,15 @@ std::string exeDir() {
     return "";
 #endif
 }
-
 std::string resolveTool(const std::string& relative) {
     namespace fsx = std::filesystem;
     std::error_code ec;
-
     auto norm = [](const std::string& dir) {
         std::string d = dir;
         std::replace(d.begin(), d.end(), '\\', '/');
         while (!d.empty() && d.back() == '/') d.pop_back();
         return d;
     };
-
-    // Candidate roots: cwd, exe dir and three parents above it (project root
-    // when running from build/Release: .../Dumper - AllInOne/build/Release).
     std::vector<std::string> roots = { ".", exeDir() };
     std::string up = exeDir();
     for (int i = 0; i < 3; ++i) {
@@ -47,22 +38,18 @@ std::string resolveTool(const std::string& relative) {
         up = up.substr(0, pos);
         roots.push_back(up);
     }
-
     for (auto& r : roots) {
         if (r.empty()) continue;
         std::string cand = norm(r) + "/" + relative;
         if (fsx::exists(cand, ec)) return cand;
     }
-
     std::string perr;
     if (fivem::ensurePayload(perr)) {
         std::string cand = norm(payloadRoot()) + "/" + relative;
         if (fsx::exists(cand, ec)) return cand;
     }
-
-    return relative;  // not found: caller's error message shows what was tried
+    return relative;
 }
-
 static bool isWindowsReservedName(const std::string& name) {
     std::string stem = name.substr(0, name.find('.'));
     std::string up;
@@ -77,7 +64,6 @@ static bool isWindowsReservedName(const std::string& name) {
         if (up == r) return true;
     return false;
 }
-
 std::string safeName(const std::string& name) {
     std::string out = name;
     for (char& c : out) {
@@ -87,17 +73,13 @@ std::string safeName(const std::string& name) {
             c = '_';
         }
     }
-    // A name made only of dots ('.', '..', ...) would resolve to the parent dir.
     if (!out.empty() && out.find_first_not_of('.') == std::string::npos)
         std::fill(out.begin(), out.end(), '_');
     while (!out.empty() && (out.back() == '.' || out.back() == ' ')) out.pop_back();
-    // Prefix, not suffix: 'CON.txt' and 'CON' are both the console device, and
-    // only the part before the first dot is checked.
     if (isWindowsReservedName(out)) out = "_" + out;
     if (out.empty() && !name.empty()) out = "_";
     return out;
 }
-
 std::string urlQuote(const std::string& s) {
     static const char* hex = "0123456789ABCDEF";
     std::ostringstream out;
@@ -110,30 +92,25 @@ std::string urlQuote(const std::string& s) {
     }
     return out.str();
 }
-
 std::string toLower(const std::string& s) {
     std::string out = s;
     std::transform(out.begin(), out.end(), out.begin(),
                    [](unsigned char c) { return std::tolower(c); });
     return out;
 }
-
 std::string trim(const std::string& s) {
     size_t a = s.find_first_not_of(" \t\r\n");
     if (a == std::string::npos) return "";
     size_t b = s.find_last_not_of(" \t\r\n");
     return s.substr(a, b - a + 1);
 }
-
 bool startsWith(const std::string& s, const std::string& prefix) {
     return s.size() >= prefix.size() && s.compare(0, prefix.size(), prefix) == 0;
 }
-
 bool endsWith(const std::string& s, const std::string& suffix) {
     return s.size() >= suffix.size() &&
            s.compare(s.size() - suffix.size(), suffix.size(), suffix) == 0;
 }
-
 bool iequals(const std::string& a, const std::string& b) {
     if (a.size() != b.size()) return false;
     for (size_t i = 0; i < a.size(); ++i) {
@@ -142,7 +119,6 @@ bool iequals(const std::string& a, const std::string& b) {
     }
     return true;
 }
-
 std::vector<std::string> split(const std::string& s, char delim) {
     std::vector<std::string> parts;
     std::string cur;
@@ -150,7 +126,6 @@ std::vector<std::string> split(const std::string& s, char delim) {
     while (std::getline(ss, cur, delim)) parts.push_back(cur);
     return parts;
 }
-
 std::vector<std::string> splitStr(const std::string& s, const std::string& delim) {
     std::vector<std::string> parts;
     size_t pos = 0, found;
@@ -161,7 +136,6 @@ std::vector<std::string> splitStr(const std::string& s, const std::string& delim
     parts.push_back(s.substr(pos));
     return parts;
 }
-
 std::string hexEncode(const std::vector<uint8_t>& data) {
     static const char* digits = "0123456789abcdef";
     std::string out;
@@ -172,7 +146,6 @@ std::string hexEncode(const std::vector<uint8_t>& data) {
     }
     return out;
 }
-
 std::vector<uint8_t> hexDecode(const std::string& hex) {
     std::vector<uint8_t> out;
     auto val = [](char c) -> int {
@@ -188,17 +161,14 @@ std::vector<uint8_t> hexDecode(const std::string& hex) {
     }
     return out;
 }
-
 std::vector<uint8_t> base64Decode(const std::string& in) {
-    // Accept standard and URL-safe alphabets
     int val[256];
     std::fill(std::begin(val), std::end(val), -1);
     const std::string alpha =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     for (int i = 0; i < 64; ++i) val[static_cast<unsigned char>(alpha[i])] = i;
-    val[static_cast<unsigned char>('-')] = 62;  // url-safe
-    val[static_cast<unsigned char>('_')] = 63;  // url-safe
-
+    val[static_cast<unsigned char>('-')] = 62;
+    val[static_cast<unsigned char>('_')] = 63;
     std::vector<uint8_t> out;
     uint32_t acc = 0;
     int bits = 0;
@@ -215,7 +185,6 @@ std::vector<uint8_t> base64Decode(const std::string& in) {
     }
     return out;
 }
-
 std::optional<std::vector<uint8_t>> readFileBytes(const std::string& path) {
     std::ifstream f(path, std::ios::binary);
     if (!f.is_open()) return std::nullopt;
@@ -224,7 +193,6 @@ std::optional<std::vector<uint8_t>> readFileBytes(const std::string& path) {
         std::istreambuf_iterator<char>());
     return data;
 }
-
 static void ensureParent(const std::string& path) {
     std::filesystem::path p(path);
     if (p.has_parent_path()) {
@@ -232,7 +200,6 @@ static void ensureParent(const std::string& path) {
         std::filesystem::create_directories(p.parent_path(), ec);
     }
 }
-
 bool writeFileBytes(const std::string& path, const std::vector<uint8_t>& data) {
     try {
         ensureParent(path);
@@ -245,20 +212,16 @@ bool writeFileBytes(const std::string& path, const std::vector<uint8_t>& data) {
         return false;
     }
 }
-
 bool writeTextFile(const std::string& path, const std::string& text) {
     std::vector<uint8_t> data(text.begin(), text.end());
     return writeFileBytes(path, data);
 }
-
 uint32_t be32(const uint8_t* p) {
     return (static_cast<uint32_t>(p[0]) << 24) | (static_cast<uint32_t>(p[1]) << 16) |
            (static_cast<uint32_t>(p[2]) << 8) | p[3];
 }
-
 uint32_t le32(const uint8_t* p) {
     return static_cast<uint32_t>(p[0]) | (static_cast<uint32_t>(p[1]) << 8) |
            (static_cast<uint32_t>(p[2]) << 16) | (static_cast<uint32_t>(p[3]) << 24);
 }
-
-} // namespace fivem
+}

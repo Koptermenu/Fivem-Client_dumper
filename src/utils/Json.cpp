@@ -1,23 +1,18 @@
 #include "Json.h"
-
 #include <cctype>
 #include <cstdlib>
 #include <stdexcept>
-
 namespace fivem {
-
 void Json::skipWs(const std::string& t, size_t& p) {
     while (p < t.size() && (t[p] == ' ' || t[p] == '\t' || t[p] == '\n' || t[p] == '\r'))
         ++p;
 }
-
 Json Json::parse(const std::string& text) {
     size_t p = 0;
     skipWs(text, p);
     if (p >= text.size()) throw std::runtime_error("empty json");
     return parseValue(text, p);
 }
-
 Json Json::parseValue(const std::string& t, size_t& p) {
     skipWs(t, p);
     if (p >= t.size()) throw std::runtime_error("unexpected end");
@@ -39,7 +34,6 @@ Json Json::parseValue(const std::string& t, size_t& p) {
     }
     return parseNumber(t, p);
 }
-
 std::string Json::decodeString(const std::string& raw) {
     std::string out;
     out.reserve(raw.size());
@@ -82,9 +76,8 @@ std::string Json::decodeString(const std::string& raw) {
     }
     return out;
 }
-
 Json Json::parseString(const std::string& t, size_t& p) {
-    ++p; // opening quote
+    ++p;
     std::string raw;
     while (p < t.size()) {
         char c = t[p];
@@ -102,7 +95,6 @@ Json Json::parseString(const std::string& t, size_t& p) {
     j.str_ = decodeString(raw);
     return j;
 }
-
 Json Json::parseNumber(const std::string& t, size_t& p) {
     size_t start = p;
     if (p < t.size() && (t[p] == '-' || t[p] == '+')) ++p;
@@ -115,11 +107,10 @@ Json Json::parseNumber(const std::string& t, size_t& p) {
     j.num_ = std::strtod(t.substr(start, p - start).c_str(), nullptr);
     return j;
 }
-
 Json Json::parseArray(const std::string& t, size_t& p) {
     Json j;
     j.type_ = Type::Array;
-    ++p; // [
+    ++p;
     skipWs(t, p);
     if (p < t.size() && t[p] == ']') { ++p; return j; }
     while (p < t.size()) {
@@ -131,11 +122,10 @@ Json Json::parseArray(const std::string& t, size_t& p) {
     }
     return j;
 }
-
 Json Json::parseObject(const std::string& t, size_t& p) {
     Json j;
     j.type_ = Type::Object;
-    ++p; // {
+    ++p;
     skipWs(t, p);
     if (p < t.size() && t[p] == '}') { ++p; return j; }
     while (p < t.size()) {
@@ -153,22 +143,18 @@ Json Json::parseObject(const std::string& t, size_t& p) {
     }
     return j;
 }
-
 bool Json::has(const std::string& key) const {
     for (auto& kv : obj_) if (kv.first == key) return true;
     return false;
 }
-
 const Json& Json::at(const std::string& key) const {
     static Json nullJson;
     for (auto& kv : obj_) if (kv.first == key) return kv.second;
     return nullJson;
 }
-
 std::string Json::strAt(const std::string& key, const std::string& def) const {
     const Json& v = at(key);
     if (v.isString()) return v.asString();
     return def;
 }
-
-} // namespace fivem
+}

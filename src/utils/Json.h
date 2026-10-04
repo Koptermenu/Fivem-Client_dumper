@@ -1,23 +1,15 @@
 #pragma once
-
 #include <map>
 #include <memory>
 #include <string>
 #include <vector>
 #include <cstdint>
-
 namespace fivem {
-
-// Minimal recursive-descent JSON parser (enough for FiveM /client responses
-// and the grants token payload).
 class Json {
 public:
     enum class Type { Null, Bool, Number, String, Array, Object };
-
     Json() = default;
-
     static Json parse(const std::string& text);
-
     Type type() const { return type_; }
     bool isNull() const { return type_ == Type::Null; }
     bool isObject() const { return type_ == Type::Object; }
@@ -25,26 +17,20 @@ public:
     bool isString() const { return type_ == Type::String; }
     bool isNumber() const { return type_ == Type::Number; }
     bool isBool() const { return type_ == Type::Bool; }
-
     const std::string& asString() const { return str_; }
     double asNumber() const { return num_; }
     int64_t asInt() const { return static_cast<int64_t>(num_); }
     bool asBool() const { return bool_; }
-
     const std::vector<std::pair<std::string, Json>>& items() const { return obj_; }
     const std::vector<Json>& arr() const { return array_; }
-
-    // Object access
     bool has(const std::string& key) const;
     const Json& at(const std::string& key) const;
     std::string strAt(const std::string& key, const std::string& def = "") const;
-
     size_t size() const {
         if (type_ == Type::Array) return array_.size();
         if (type_ == Type::Object) return obj_.size();
         return 0;
     }
-
 private:
     Type type_ = Type::Null;
     bool bool_ = false;
@@ -52,7 +38,6 @@ private:
     std::string str_;
     std::vector<Json> array_;
     std::vector<std::pair<std::string, Json>> obj_;
-
     static Json parseValue(const std::string& t, size_t& p);
     static Json parseString(const std::string& t, size_t& p);
     static Json parseNumber(const std::string& t, size_t& p);
@@ -61,5 +46,4 @@ private:
     static void skipWs(const std::string& t, size_t& p);
     static std::string decodeString(const std::string& raw);
 };
-
-} // namespace fivem
+}

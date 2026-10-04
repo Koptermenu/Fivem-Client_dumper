@@ -1,13 +1,10 @@
 #pragma once
-
 #ifdef _WIN32
 #include <windows.h>
 #endif
 #include <cstdlib>
-
 namespace fivem {
 namespace term {
-
 constexpr const char* RESET = "\033[0m";
 constexpr const char* BOLD = "\033[1m";
 constexpr const char* DIM = "\033[2m";
@@ -15,14 +12,10 @@ constexpr const char* RED = "\033[31m";
 constexpr const char* GREEN = "\033[32m";
 constexpr const char* YELLOW = "\033[33m";
 constexpr const char* CYAN = "\033[36m";
-
 inline bool& enabled() {
     static bool e = false;
     return e;
 }
-
-// Opt the console into ANSI/VT processing. Colors stay off when stdout is not
-// a console (pipes/grep stay clean) or when NO_COLOR is set.
 inline void enableColors() {
 #ifdef _WIN32
     if (getenv("NO_COLOR")) return;
@@ -34,8 +27,6 @@ inline void enableColors() {
         enabled() = true;
 #endif
 }
-
-} // namespace term
-} // namespace fivem
-
+}
+}
 #define CLR(code) (fivem::term::enabled() ? (code) : "")

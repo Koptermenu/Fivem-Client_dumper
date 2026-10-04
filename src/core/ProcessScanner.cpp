@@ -2,7 +2,6 @@
 #include "Logger.h"
 #include "../utils/Str.h"
 #include "../utils/Json.h"
-
 #include <windows.h>
 #include <tlhelp32.h>
 #include <atomic>
@@ -15,11 +14,8 @@
 #include <set>
 #include <map>
 #include <cctype>
-
 namespace fivem {
-
 namespace {
-
 std::string wideToUtf8(const wchar_t* w) {
     int len = WideCharToMultiByte(CP_UTF8, 0, w, -1, nullptr, 0, nullptr, nullptr);
     if (len <= 0) return "";
@@ -27,7 +23,6 @@ std::string wideToUtf8(const wchar_t* w) {
     WideCharToMultiByte(CP_UTF8, 0, w, -1, s.data(), len, nullptr, nullptr);
     return s;
 }
-
 const uint8_t* findBytes(const uint8_t* data, size_t len, const uint8_t* pat, size_t patLen) {
     if (patLen > len) return nullptr;
     for (size_t i = 0; i + patLen <= len; ++i) {
@@ -37,8 +32,6 @@ const uint8_t* findBytes(const uint8_t* data, size_t len, const uint8_t* pat, si
     }
     return nullptr;
 }
-
-// Validate a potential IP:port at position p; returns length consumed (0 if invalid)
 size_t matchIpPort(const uint8_t* p, const uint8_t* end) {
     auto readNum = [&](const uint8_t*& c, int maxLen) -> int {
         int v = 0, n = 0;
@@ -59,23 +52,18 @@ size_t matchIpPort(const uint8_t* p, const uint8_t* end) {
     if (port < 1 || port > 65535) return 0;
     return static_cast<size_t>(c - p);
 }
-
 struct ScanConfig {
     size_t minRegionSize = 1;
     size_t maxRegionSize = 64ull * 1024 * 1024;
     size_t maxRegions = std::numeric_limits<size_t>::max();
     bool reportRegionLimit = false;
 };
-
-// Scan memory of all processes; on first pattern hit invoke callback(buffer, offset, len)
-// and stop all threads. Returns true if callback invoked.
 template <typename Hit>
 bool scanForPattern(const std::vector<ProcessInfo>& procs, const uint8_t* pat, size_t patLen,
                     const ScanConfig& cfg, Hit hit) {
     std::atomic<bool> stop{false};
     std::mutex mtx;
     bool found = false;
-
     std::vector<std::thread> threads;
     for (auto& pi : procs) {
         threads.emplace_back([&, pi]() {
@@ -132,9 +120,7 @@ bool scanForPattern(const std::vector<ProcessInfo>& procs, const uint8_t* pat, s
     for (auto& t : threads) t.join();
     return found;
 }
-
-} // namespace
-
+}
 std::vector<ProcessInfo> getFiveMProcesses() {
     std::vector<ProcessInfo> out;
     HANDLE snap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
@@ -152,7 +138,6 @@ std::vector<ProcessInfo> getFiveMProcesses() {
     CloseHandle(snap);
     return out;
 }
-
 std::vector<ProcessInfo> getGtaProcesses() {
     std::vector<ProcessInfo> out;
     for (auto& p : getFiveMProcesses()) {
@@ -161,7 +146,6 @@ std::vector<ProcessInfo> getGtaProcesses() {
     }
     return out;
 }
-
 std::string findFiveMToken() {
     LOG("FiveM GTAProcess folyamatok keresese...", LogLevel::INFO);
     auto gta = getGtaProcesses();
@@ -172,16 +156,12 @@ std::string findFiveMToken() {
     for (auto& p : gta) {
         LOG("  - " + p.name + " (PID: " + std::to_string(p.pid) + ")", LogLevel::INFO);
     }
-
     static const std::string marker = "X-CitizenFX-Token: ";
     std::string token;
-
-    // Token scan: no region-count limit, max 67MB regions (mirrors Python)
     ScanConfig cfg;
     cfg.minRegionSize = 1;
     cfg.maxRegionSize = 67ull * 1024 * 1024;
     cfg.maxRegions = std::numeric_limits<size_t>::max();
-
     bool ok = scanForPattern(gta, reinterpret_cast<const uint8_t*>(marker.data()), marker.size(),
                              cfg, [&](const uint8_t* base, size_t off, size_t total) {
                                  size_t p = off + marker.size();
@@ -192,7 +172,6 @@ std::string findFiveMToken() {
                                  token.assign(reinterpret_cast<const char*>(base + p),
                                               reinterpret_cast<const char*>(base + end));
                              });
-
     if (!ok || token.empty()) {
         LOG("Token nem talalhato.", LogLevel::ERROR);
         return "";
@@ -200,22 +179,17 @@ std::string findFiveMToken() {
     LOG("Token megtalalva!", LogLevel::SUCCESS);
     return token;
 }
-
 std::vector<std::string> findIpsInMemory() {
     LOG("Scanning GTAProcess processes for all IPs...", LogLevel::INFO);
     auto gta = getGtaProcesses();
     if (gta.empty()) return {};
-
     std::set<std::string> ips;
     std::mutex mtx;
-
-    // Mirrors Python find_all_ips_in_memory: min 1KB, max 64MB, stop after 2000 regions
     ScanConfig cfg;
     cfg.minRegionSize = 1000;
     cfg.maxRegionSize = 64ull * 1024 * 1024;
     cfg.maxRegions = 2000;
     cfg.reportRegionLimit = true;
-
     std::vector<std::thread> threads;
     for (auto& pi : gta) {
         threads.emplace_back([&, pi]() {
@@ -269,11 +243,7 @@ std::vector<std::string> findIpsInMemory() {
     for (auto& t : threads) t.join();
     return std::vector<std::string>(ips.begin(), ips.end());
 }
-
-// ---- Server name cache (server_name.txt: {"ip:port": "Name", ...}) ----
-
 static const char* kNameFile = "server_name.txt";
-
 static std::map<std::string, std::string> loadNameMap() {
     std::map<std::string, std::string> out;
     auto data = readFileBytes(kNameFile);
@@ -284,7 +254,6 @@ static std::map<std::string, std::string> loadNameMap() {
     } catch (...) {}
     return out;
 }
-
 void saveServerName(const std::string& ip, const std::string& name) {
     if (ip.empty() || name.empty()) return;
     auto m = loadNameMap();
@@ -300,11 +269,9 @@ void saveServerName(const std::string& ip, const std::string& name) {
     ss << "\n}\n";
     writeTextFile(kNameFile, ss.str());
 }
-
 std::string getCachedServerName(const std::string& ip) {
     auto m = loadNameMap();
     auto it = m.find(ip);
     return it == m.end() ? "" : it->second;
 }
-
-} // namespace fivem
+}

@@ -1,5 +1,4 @@
 #include "HttpClient.h"
-
 #include <windows.h>
 #include <winhttp.h>
 #include <winsock2.h>
@@ -10,14 +9,10 @@
 #include <cstdlib>
 #include <cstring>
 #include <mutex>
-
 #pragma comment(lib, "winhttp.lib")
 #pragma comment(lib, "ws2_32.lib")
-
 namespace fivem {
-
 namespace {
-
 void ensureWinsock() {
     static std::once_flag once;
     std::call_once(once, [] {
@@ -25,16 +20,13 @@ void ensureWinsock() {
         WSAStartup(MAKEWORD(2, 2), &d);
     });
 }
-
 struct UrlParts {
     bool https = false;
     std::wstring host;
     INTERNET_PORT port = 0;
     std::wstring path;
 };
-
 constexpr size_t kMaxChunkedResponseBytes = 512u * 1024u * 1024u;
-
 bool startsWithNoCase(const std::string& s, const char* prefix) {
     size_t n = std::strlen(prefix);
     if (s.size() < n) return false;
@@ -46,7 +38,6 @@ bool startsWithNoCase(const std::string& s, const char* prefix) {
     }
     return true;
 }
-
 bool parseUrl(const std::string& url, UrlParts& parts) {
     std::string s = url;
     if (startsWithNoCase(s, "https://")) {
@@ -82,7 +73,6 @@ bool parseUrl(const std::string& url, UrlParts& parts) {
     parts.path.assign(rest.begin(), rest.end());
     return true;
 }
-
 std::wstring utf8ToWide(const std::string& s) {
     if (s.empty()) return L"";
     int len = MultiByteToWideChar(CP_UTF8, 0, s.c_str(), static_cast<int>(s.size()), nullptr, 0);
@@ -90,7 +80,6 @@ std::wstring utf8ToWide(const std::string& s) {
     MultiByteToWideChar(CP_UTF8, 0, s.c_str(), static_cast<int>(s.size()), w.data(), len);
     return w;
 }
-
 std::string wideToUtf8(const std::wstring& w) {
     if (w.empty()) return "";
     int len = WideCharToMultiByte(CP_UTF8, 0, w.c_str(), static_cast<int>(w.size()),
@@ -100,7 +89,6 @@ std::string wideToUtf8(const std::wstring& w) {
                         s.data(), len, nullptr, nullptr);
     return s;
 }
-
 HttpResponse httpRawRequest(const std::string& method, const std::string& host, INTERNET_PORT port,
                             const std::string& path, const std::map<std::string, std::string>& headers,
                             const std::vector<uint8_t>* body, int connectMs, int recvMs,
@@ -108,7 +96,6 @@ HttpResponse httpRawRequest(const std::string& method, const std::string& host, 
     HttpResponse resp;
     ensureWinsock();
     auto started = std::chrono::steady_clock::now();
-
     std::string req = method + " " + path + " HTTP/1.1\r\nHost: " + host + ":" + std::to_string(port) + "\r\n";
     for (const auto& kv : headers) {
         std::string value;
@@ -120,7 +107,6 @@ HttpResponse httpRawRequest(const std::string& method, const std::string& host, 
     }
     req += "Connection: close\r\n\r\n";
     if (body) req.append(reinterpret_cast<const char*>(body->data()), body->size());
-
     addrinfo hints{};
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
@@ -130,7 +116,6 @@ HttpResponse httpRawRequest(const std::string& method, const std::string& host, 
         resp.error = "resolve failed: " + host;
         return resp;
     }
-
     SOCKET s = INVALID_SOCKET;
     for (addrinfo* ai = res; ai; ai = ai->ai_next) {
         long long connectRemain = static_cast<long long>(connectMs) -
@@ -170,7 +155,6 @@ HttpResponse httpRawRequest(const std::string& method, const std::string& host, 
         resp.error = "connect failed: " + host;
         return resp;
     }
-
     long long elapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(
                               std::chrono::steady_clock::now() - started).count();
     long long remain = static_cast<long long>(recvMs) - elapsedMs;
@@ -181,27 +165,23 @@ HttpResponse httpRawRequest(const std::string& method, const std::string& host, 
     }
     DWORD tv = static_cast<DWORD>(remain);
     setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, reinterpret_cast<const char*>(&tv), sizeof(tv));
-
     auto fail = [&](const std::string& msg) {
         resp.error = msg;
         closesocket(s);
         return resp;
     };
-
     size_t off = 0;
     while (off < req.size()) {
         int n = ::send(s, req.data() + off, static_cast<int>(req.size() - off), 0);
         if (n == SOCKET_ERROR) return fail("send failed (" + std::to_string(WSAGetLastError()) + ")");
         off += static_cast<size_t>(n);
     }
-
     auto pull = [&](std::string& buf) -> int {
         char tmp[8192];
         int n = ::recv(s, tmp, sizeof(tmp), 0);
         if (n > 0) buf.append(tmp, static_cast<size_t>(n));
         return n;
     };
-
     std::string buf;
     size_t hdrEnd = std::string::npos;
     while (hdrEnd == std::string::npos) {
@@ -212,12 +192,10 @@ HttpResponse httpRawRequest(const std::string& method, const std::string& host, 
         if (hdrEnd == std::string::npos && buf.size() > (1u << 20)) return fail("response headers too large");
     }
     hdrEnd += 4;
-
     std::string head = buf.substr(0, hdrEnd);
     if (head.rfind("HTTP/", 0) != 0) return fail("malformed response");
     size_t sp1 = head.find(' ');
     if (sp1 != std::string::npos) resp.status = std::atoi(head.c_str() + sp1 + 1);
-
     std::string lower;
     for (char c : head) lower += static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
     bool chunked = lower.find("transfer-encoding:") != std::string::npos &&
@@ -248,7 +226,6 @@ HttpResponse httpRawRequest(const std::string& method, const std::string& host, 
         resp.contentLength = contentLen;
         if (onStart) onStart(contentLen);
     }
-
     std::string payload = buf.substr(hdrEnd);
     if (chunked) {
         std::string out;
@@ -295,28 +272,22 @@ HttpResponse httpRawRequest(const std::string& method, const std::string& host, 
             if (pull(payload) <= 0) break;
         }
     }
-
     closesocket(s);
     resp.body.assign(payload.begin(), payload.end());
     return resp;
 }
-
-} // namespace
-
+}
 HttpClient::HttpClient() {
     session_ = WinHttpOpen(L"FiveMDumper/1.0",
                            WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
                            WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
 }
-
 HttpClient::~HttpClient() {
     if (session_) WinHttpCloseHandle(static_cast<HINTERNET>(session_));
 }
-
 void HttpClient::setHeader(const std::string& key, const std::string& value) {
     defaultHeaders_[key] = value;
 }
-
 HttpResponse HttpClient::request(const std::string& method, const std::string& url,
                                  const std::vector<uint8_t>* body,
                                  const std::map<std::string, std::string>& headers,
@@ -328,21 +299,18 @@ HttpResponse HttpClient::request(const std::string& method, const std::string& u
         resp.error = "bad url: " + url;
         return resp;
     }
-
     if (body && !parts.https) {
         auto merged = defaultHeaders_;
         for (const auto& kv : headers) merged[kv.first] = kv.second;
         return httpRawRequest("POST", wideToUtf8(parts.host), parts.port, wideToUtf8(parts.path),
                               merged, body, timeouts_[1], timeouts_[3], onStart);
     }
-
     HINTERNET connect = WinHttpConnect(static_cast<HINTERNET>(session_), parts.host.c_str(),
                                        parts.port, 0);
     if (!connect) {
         resp.error = "connect failed: " + url;
         return resp;
     }
-
     DWORD flags = parts.https ? WINHTTP_FLAG_SECURE : 0;
     HINTERNET request = WinHttpOpenRequest(connect, utf8ToWide(method).c_str(),
                                            parts.path.c_str(), nullptr,
@@ -353,7 +321,6 @@ HttpResponse HttpClient::request(const std::string& method, const std::string& u
         resp.error = "open request failed: " + url;
         return resp;
     }
-
     if (parts.https) {
         DWORD sec = 0;
         if (!WinHttpSetOption(request, WINHTTP_OPTION_SECURITY_FLAGS, &sec, sizeof(sec))) {
@@ -363,19 +330,15 @@ HttpResponse HttpClient::request(const std::string& method, const std::string& u
             return resp;
         }
     }
-
     WinHttpSetTimeouts(request, timeouts_[0], timeouts_[1], timeouts_[2], timeouts_[3]);
-
     std::wstring headerStr;
     auto merged = defaultHeaders_;
     for (auto& kv : headers) merged[kv.first] = kv.second;
     for (auto& kv : merged) {
         headerStr += utf8ToWide(kv.first + ": " + kv.second + "\r\n");
     }
-
     LPCVOID bodyPtr = body ? body->data() : WINHTTP_NO_REQUEST_DATA;
     DWORD bodyLen = body ? static_cast<DWORD>(body->size()) : 0;
-
     BOOL sent = WinHttpSendRequest(request,
                                    headerStr.empty() ? WINHTTP_NO_ADDITIONAL_HEADERS : headerStr.c_str(),
                                    headerStr.empty() ? 0 : (DWORD)-1,
@@ -386,19 +349,16 @@ HttpResponse HttpClient::request(const std::string& method, const std::string& u
         resp.error = "send failed (" + std::to_string(e) + "): " + url;
         return resp;
     }
-
     if (!WinHttpReceiveResponse(request, nullptr)) {
         DWORD e = GetLastError();
         WinHttpCloseHandle(request);
         resp.error = "receive failed (" + std::to_string(e) + "): " + url;
         return resp;
     }
-
     DWORD status = 0, size = sizeof(status);
     WinHttpQueryHeaders(request, WINHTTP_QUERY_STATUS_CODE | WINHTTP_QUERY_FLAG_NUMBER,
                         WINHTTP_HEADER_NAME_BY_INDEX, &status, &size, WINHTTP_NO_HEADER_INDEX);
     resp.status = static_cast<int>(status);
-
     {
         DWORD clen = 0, csize = sizeof(clen);
         if (WinHttpQueryHeaders(request, WINHTTP_QUERY_CONTENT_LENGTH | WINHTTP_QUERY_FLAG_NUMBER,
@@ -407,7 +367,6 @@ HttpResponse HttpClient::request(const std::string& method, const std::string& u
             if (onStart) onStart(static_cast<size_t>(clen));
         }
     }
-
     std::vector<uint8_t> chunk;
     for (;;) {
         DWORD avail = 0;
@@ -431,18 +390,15 @@ HttpResponse HttpClient::request(const std::string& method, const std::string& u
         resp.body.insert(resp.body.end(), chunk.begin(), chunk.begin() + read);
         if (onProgress && read) onProgress(read);
     }
-
     if (resp.error.empty() && resp.status >= 200 && resp.status < 300 &&
         resp.status != 204 && resp.status != 304 && resp.contentLength != 0 &&
         resp.body.size() < resp.contentLength) {
         resp.error = "truncated response (" + std::to_string(resp.body.size()) + " of " +
                      std::to_string(resp.contentLength) + " bytes): " + url;
     }
-
     WinHttpCloseHandle(request);
     return resp;
 }
-
 HttpResponse HttpClient::postForm(const std::string& url, const std::string& formBody,
                                   const std::map<std::string, std::string>& headers) {
     std::map<std::string, std::string> h = headers;
@@ -450,17 +406,14 @@ HttpResponse HttpClient::postForm(const std::string& url, const std::string& for
     std::vector<uint8_t> body(formBody.begin(), formBody.end());
     return request("POST", url, &body, h, nullptr, nullptr);
 }
-
 HttpResponse HttpClient::postJson(const std::string& url, const std::string& jsonBody) {
     std::vector<uint8_t> body(jsonBody.begin(), jsonBody.end());
     return request("POST", url, &body, {{"Content-Type", "application/json"}}, nullptr, nullptr);
 }
-
 HttpResponse HttpClient::get(const std::string& url, const std::map<std::string, std::string>& headers,
                              const ByteProgress& onProgress, const SizeCallback& onStart) {
     return request("GET", url, nullptr, headers, onProgress, onStart);
 }
-
 HttpResponse HttpClient::plainGetRaw(const std::string& url,
                                      const std::map<std::string, std::string>& headers,
                                      int connectMs, int recvMs) {
@@ -477,5 +430,4 @@ HttpResponse HttpClient::plainGetRaw(const std::string& url,
     return httpRawRequest("GET", wideToUtf8(parts.host), parts.port, wideToUtf8(parts.path),
                           headers, nullptr, connectMs, recvMs, nullptr);
 }
-
-} // namespace fivem
+} 

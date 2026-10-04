@@ -6,7 +6,6 @@
 #include <future>
 #include <vector>
 #include <filesystem>
-
 #include "core/Logger.h"
 #include "core/Bundler.h"
 #include "core/Checkpoint.h"
@@ -19,18 +18,13 @@
 #include "utils/Str.h"
 #include "utils/Term.h"
 #include "utils/Json.h"
-
 namespace fs = std::filesystem;
-
 using namespace fivem;
-
 static const char* TEST_SERVER_IP = "play.popcornrp.city:30120";
-
 static bool readLine(std::string& out) {
     if (!std::getline(std::cin, out)) return false;
     return true;
 }
-
 static bool parseDigits(const std::string& s, unsigned long long& out) {
     if (s.empty() || s.size() > 18) return false;
     unsigned long long v = 0;
@@ -41,7 +35,6 @@ static bool parseDigits(const std::string& s, unsigned long long& out) {
     out = v;
     return true;
 }
-
 static bool askYesNo(const char* question, bool defaultYes) {
     std::cout << question << (defaultYes ? " [Y/n]: " : " [y/N]: ");
     std::string answer;
@@ -50,21 +43,14 @@ static bool askYesNo(const char* question, bool defaultYes) {
     if (answer.empty()) return defaultYes;
     return answer == "y" || answer == "yes" || answer == "i";
 }
-
-// Readability pass over the decrypted Lua: a deterministic structural cleanup, then an
-// optional local language-model pass. Both write to separate trees - the decrypted Output
-// is never modified.
 static void runReadabilityPass(const std::string& serverRoot, bool testMode) {
     const std::string outputDir = serverRoot + "/Output";
     const std::string cleanDir = serverRoot + "/Output_clean";
     const std::string aiDir = serverRoot + "/Output_ai";
-
     std::error_code ec;
     if (!fs::is_directory(outputDir, ec)) return;
-
     const bool forceCleanup = getenv("DUMPER_CLEANUP") != nullptr;
     const bool forceLlm = getenv("DUMPER_LLM") != nullptr;
-
     bool wantCleanup = forceCleanup;
     if (!wantCleanup) {
         if (testMode) return;
@@ -73,7 +59,6 @@ static void runReadabilityPass(const std::string& serverRoot, bool testMode) {
             true);
     }
     if (!wantCleanup) return;
-
     std::cout << CLR(term::CYAN) << "\n[*]" << CLR(term::RESET) << " Strukturális tisztítás...\n";
     const CleanupStats cs = cleanupLuaTree(outputDir, cleanDir);
     std::cout << CLR(term::GREEN) << "[+]" << CLR(term::RESET) << " Tisztított Lua: " << cleanDir
@@ -87,19 +72,30 @@ static void runReadabilityPass(const std::string& serverRoot, bool testMode) {
         LOG("atnevezes kimaradt " + std::to_string(cs.ambiguousVars) +
             " valtozonak (nincs egyertelmű kotes vagy a nevet globalis foglalja)", LogLevel::INFO);
     }
-
     bool wantLlm = forceLlm;
     if (!wantLlm) {
         if (testMode) return;
+        const char* want = getenv("DUMPER_LLM_MODEL");
+        const LlmModel& m = llmModelById(want ? want : "coder");
+        const uint64_t engineBytes = llmEngineDownloadBytes();
+        const uint64_t total = m.size + engineBytes;
+        const auto gb = [](uint64_t n) {
+            return static_cast<double>(n) / (1024.0 * 1024.0 * 1024.0);
+        };
         std::cout << "\n";
-        wantLlm = askYesNo(
-            "Nyelvi modellel is átírjam? (DeepSeek-R1-Distill-Qwen-1.5B, ~1 GB letöltés, "
-            "CPU-n lassú)", false);
+        std::cout << CLR(term::BOLD) << "AI-val atirjam a kodot?" << CLR(term::RESET) << "\n";
+        std::cout << "    modell: " << m.displayName << " ("
+                  << std::fixed << std::setprecision(2) << gb(m.size) << " GB)\n";
+        std::cout << "    futtato: llama.cpp " << llmBackendName() << " ("
+                  << std::fixed << std::setprecision(2) << gb(engineBytes) << " GB)\n";
+        std::cout << "    osszesen: " << std::fixed << std::setprecision(2) << gb(total)
+                  << " GB letoltes\n";
+        std::cout << "    normalis GPU kell hozza, lehetoleg NVIDIA. Vulkan build 31 MB, "
+                     "de lassabb.\n";
+        std::cout << "    Ha a modell rossz kodot ad, a tisztitott fajl marad a helyen.\n";
+        wantLlm = askYesNo("    Letoltes es futtatas?", false);
     }
     if (!wantLlm) return;
-
-    // The inference engine is downloaded and unpacked on demand, pinned to a fixed
-    // llama.cpp build and verified by SHA-256.
     std::string engine;
     std::string engErr;
     const ProgressFn dlProgress = [](uint64_t done, uint64_t total) {
@@ -115,8 +111,15 @@ static void runReadabilityPass(const std::string& serverRoot, bool testMode) {
     }
     std::cout << "\n" << CLR(term::GREEN) << "[+]" << CLR(term::RESET) << " Futtato: " << engine
               << "\n";
-
     LlmOptions opts;
+    opts.model = &llmModelById(getenv("DUMPER_LLM_MODEL") ? getenv("DUMPER_LLM_MODEL") : "coder");
+    if (const char* v = getenv("DUMPER_LLM_TIMEOUT")) {
+        const long s = strtol(v, nullptr, 10);
+        if (s >= 10 && s <= 86400) {
+            opts.totalTimeoutMs = static_cast<DWORD>(s) * 1000;
+            opts.fileTimeoutMs = static_cast<DWORD>(s) * 1000;
+        }
+    }
     std::string modelPath;
     std::string err;
     if (!ensureModel(opts, !testMode,
@@ -133,9 +136,7 @@ static void runReadabilityPass(const std::string& serverRoot, bool testMode) {
         return;
     }
     std::cout << "\n";
-
     std::cout << CLR(term::CYAN) << "[*]" << CLR(term::RESET) << " Nyelvi modell futtatása...\n";
-
     const LlmStats ls = llmRewriteTree(opts, cleanDir, aiDir, engine, modelPath,
                                        [](uint64_t done, uint64_t total) {
                                            std::cout << "\r  fajl " << done << " / " << total
@@ -143,18 +144,19 @@ static void runReadabilityPass(const std::string& serverRoot, bool testMode) {
                                        });
     std::cout << "\n";
     std::cout << CLR(term::GREEN) << "[+]" << CLR(term::RESET) << " LLM kiemenet: " << aiDir
-              << " (" << ls.rewritten << " atirva, " << ls.skippedTooLarge << " tul nagy, "
-              << ls.failed << " hibas)\n";
+              << " (" << ls.rewritten << " atirva, " << ls.failed << " hibas, "
+              << ls.skippedAlreadyClean << " mar tisztta, " << ls.skippedTooLarge << " tul nagy, "
+              << ls.skippedOutOfTime << " idobudgetbol kimaradt)\n";
+    std::cout << "    ido: " << (ls.elapsedMs / 1000) << " s / " << (opts.totalTimeoutMs / 1000)
+              << " s keret\n";
     if (ls.rewritten < ls.files) {
         std::cout << CLR(term::YELLOW) << "[!]" << CLR(term::RESET)
                   << " A nem atirt fajlok a " << cleanDir << " mappaban maradtak.\n";
     }
 }
-
 int main(int argc, char** argv) {
     SetConsoleOutputCP(CP_UTF8);
     fivem::term::enableColors();
-
     if (getenv("DUMPER_SELFPATH")) {
         std::string err;
         bool ok = fivem::ensurePayload(err);
@@ -163,14 +165,11 @@ int main(int argc, char** argv) {
         std::cout << "Jar:      " << resolveTool("Tools/Decompile/unluac54.jar") << "\n";
         return 0;
     }
-
     std::cout << CLR(term::CYAN) << "==============================================\n";
     std::cout << "   FiveM Dumper C++ v1.0 - AllInOne\n";
     std::cout << "==============================================" << CLR(term::RESET) << "\n";
     std::cout << CLR(term::CYAN) << "[*]" << CLR(term::RESET) << " Parsing Server Info...\n";
-
     bool testMode = getenv("DUMPER_TEST_MODE") != nullptr;
-
     std::string token;
     const char* envToken = getenv("DUMPER_TOKEN");
     if (envToken && *envToken) {
@@ -193,17 +192,14 @@ int main(int argc, char** argv) {
         if (nl != std::string::npos) token = token.substr(0, nl);
         token = trim(token);
     }
-
     std::string ip, serverName, baseUrl;
     const char* envIp = getenv("DUMPER_SERVER_IP");
     std::vector<std::string> ips;
     bool ipsScanned = false;
-
     Checkpoint checkpoint;
     checkpoint.load();
     std::unique_ptr<FiveMDumper> dumper;
     const char* envName = getenv("DUMPER_SERVER_NAME");
-
     for (;;) {
         if (testMode) {
             ip = (envIp && *envIp) ? envIp : TEST_SERVER_IP;
@@ -285,15 +281,12 @@ int main(int argc, char** argv) {
         if (startsWith(ip, "https://")) ip = ip.substr(8);
         else if (startsWith(ip, "http://")) ip = ip.substr(7);
         while (!ip.empty() && ip.back() == '/') ip.pop_back();
-
         baseUrl = "http://" + ip;
         std::cout << CLR(term::GREEN) << "[+]" << CLR(term::RESET) << " Selected server IP: " << ip << "\n";
-
         dumper = std::make_unique<FiveMDumper>(baseUrl, token, "", checkpoint);
         if (dumper->getConfiguration()) {
             serverName = dumper->hostname();
             if (serverName.empty() && envName && *envName) serverName = envName;
-
             bool gotDynamicResponse = false;
             if (serverName.empty()) {
                 std::cout << CLR(term::CYAN) << "[*]" << CLR(term::RESET)
@@ -301,10 +294,8 @@ int main(int argc, char** argv) {
                 gotDynamicResponse = dumper->fetchDynamicHostname();
                 if (gotDynamicResponse) serverName = dumper->hostname();
             }
-
             std::string cached = getCachedServerName(ip);
             if (serverName.empty() && !cached.empty() && cached != ip) serverName = cached;
-
             if (serverName.empty() && !testMode && gotDynamicResponse) {
                 std::cout << CLR(term::YELLOW) << "[?]" << CLR(term::RESET)
                           << " Adj nevet a szervernek (mappanév, Enter = IP): ";
@@ -312,61 +303,49 @@ int main(int argc, char** argv) {
                 if (readLine(in) && !trim(in).empty()) serverName = trim(in);
             }
             if (serverName.empty()) serverName = ip;
-
             if (serverName != ip && serverName != "ismeretlen") {
                 saveServerName(ip, serverName);
             }
             dumper->setServerName(serverName);
-
             if (serverName != ip) {
                 std::cout << CLR(term::GREEN) << "[+]" << CLR(term::RESET) << " Server Name: "
                           << CLR(term::BOLD) << serverName << CLR(term::RESET) << "\n";
             }
             break;
         }
-
         std::string cached = getCachedServerName(ip);
         std::cout << CLR(term::YELLOW) << "[!] Ez az IP nem valaszol a /client vegponton"
                   << (cached.empty() ? "" : (" (utoljara: " + cached + ")")) << ".\n";
         std::cout << "    Ellenorizd, hogy a jatek Csatlakoztatva van ehhez a szerverhez." << CLR(term::RESET) << "\n\n";
-
         if (testMode) {
             std::cerr << CLR(term::RED) << "Test-mode server unreachable; aborting." << CLR(term::RESET) << "\n";
             return 1;
         }
     }
-
     std::string filterRes = testMode
         ? std::string(getenv("DUMPER_RESOURCE") ? getenv("DUMPER_RESOURCE") : "pma-voice")
         : "";
-
     if (!checkpoint.completed_resources.empty()) {
         std::cout << CLR(term::CYAN) << "[*]" << CLR(term::RESET) << " Found checkpoint: "
                   << checkpoint.completed_resources.size()
                   << " resources already completed. Resuming...\n";
     }
-
     std::cout << "\n" << CLR(term::BOLD) << CLR(term::CYAN) << "--- PHASE 1: Download ---" << CLR(term::RESET) << "\n";
     if (!dumper->run(filterRes)) {
         std::cerr << CLR(term::RED) << "Download phase failed." << CLR(term::RESET) << "\n";
         return 1;
     }
-
     std::cout << "\n" << CLR(term::BOLD) << CLR(term::CYAN) << "--- PHASE 2: Decrypt ---" << CLR(term::RESET) << "\n";
     Decryptor decryptor(dumper->serverDir);
     bool decryptOk = decryptor.runAll();
-
     std::cout << "\n" << CLR(decryptOk ? term::GREEN : term::YELLOW)
               << "==============================================\n";
     std::cout << (decryptOk ? " Done! Output: " : " Done, but some files failed to decrypt! Output: ")
               << "Servers/" << dumper->serverDir << "/Output\n";
     std::cout << "==============================================" << CLR(term::RESET) << "\n";
-
     const std::string serverRoot = "Servers/" + dumper->serverDir;
     const bool keepTemp = getenv("DUMPER_KEEP_TEMP") != nullptr;
-
     if (decryptOk) runReadabilityPass(serverRoot, testMode);
-
     if (keepTemp) {
         std::cout << CLR(term::YELLOW) << "[!]" << CLR(term::RESET)
                   << " DUMPER_KEEP_TEMP is set, keeping " << serverRoot << "/Temp, "
@@ -382,6 +361,5 @@ int main(int argc, char** argv) {
         fs::remove_all(serverRoot + "/TempCompiled", ec);
         fs::remove_all(serverRoot + "/Unpacked", ec);
     }
-
     return 0;
 }

@@ -1,13 +1,9 @@
 #include "Sha256.h"
-
 #include <cstring>
 #include <fstream>
 #include <vector>
-
 namespace fivem {
-
 namespace {
-
 static const uint32_t K[64] = {
     0x428a2f98u, 0x71374491u, 0xb5c0fbcfu, 0xe9b5dba5u, 0x3956c25bu, 0x59f111f1u,
     0x923f82a4u, 0xab1c5ed5u, 0xd807aa98u, 0x12835b01u, 0x243185beu, 0x550c7dc3u,
@@ -21,11 +17,8 @@ static const uint32_t K[64] = {
     0x5b9cca4fu, 0x682e6ff3u, 0x748f82eeu, 0x78a5636fu, 0x84c87814u, 0x8cc70208u,
     0x90befffau, 0xa4506cebu, 0xbef9a3f7u, 0xc67178f2u
 };
-
 constexpr char kDigits[] = "0123456789abcdef";
-
 inline uint32_t rotr(uint32_t x, uint32_t n) { return (x >> n) | (x << (32 - n)); }
-
 void transform(uint32_t h[8], const uint8_t chunk[64]) {
     uint32_t w[64];
     for (int i = 0; i < 16; ++i) {
@@ -50,7 +43,6 @@ void transform(uint32_t h[8], const uint8_t chunk[64]) {
     }
     h[0]+=a; h[1]+=b; h[2]+=c; h[3]+=d; h[4]+=e; h[5]+=f; h[6]+=g; h[7]+=hh;
 }
-
 std::vector<uint8_t> sha256Impl(const uint8_t* msg, size_t len) {
     uint32_t h[8] = {0x6a09e667u, 0xbb67ae85u, 0x3c6ef372u, 0xa54ff53au,
                      0x510e527fu, 0x9b05688cu, 0x1f83d9abu, 0x5be0cd19u};
@@ -60,7 +52,6 @@ std::vector<uint8_t> sha256Impl(const uint8_t* msg, size_t len) {
     while (data.size() % 64 != 56) data.push_back(0);
     for (int i = 7; i >= 0; --i) data.push_back(uint8_t((bitLen >> (i * 8)) & 0xFF));
     for (size_t off = 0; off < data.size(); off += 64) transform(h, data.data() + off);
-
     std::vector<uint8_t> out(32);
     for (int i = 0; i < 8; ++i) {
         out[i*4]   = uint8_t(h[i] >> 24);
@@ -70,12 +61,9 @@ std::vector<uint8_t> sha256Impl(const uint8_t* msg, size_t len) {
     }
     return out;
 }
-
-} // namespace
-
+}
 std::vector<uint8_t> sha256(const uint8_t* data, size_t len) { return sha256Impl(data, len); }
 std::vector<uint8_t> sha256(const std::vector<uint8_t>& data) { return sha256Impl(data.data(), data.size()); }
-
 std::string sha256Hex(const std::vector<uint8_t>& data) {
     auto h = sha256(data);
     std::string out;
@@ -83,7 +71,6 @@ std::string sha256Hex(const std::vector<uint8_t>& data) {
     for (uint8_t b : h) { out += kDigits[b >> 4]; out += kDigits[b & 0xF]; }
     return out;
 }
-
 std::vector<uint8_t> hmacSha256(const std::vector<uint8_t>& key, const std::vector<uint8_t>& msg) {
     const size_t B = 64;
     std::vector<uint8_t> k = key;
@@ -96,18 +83,15 @@ std::vector<uint8_t> hmacSha256(const std::vector<uint8_t>& key, const std::vect
     std::memcpy(opad.data() + B, inner.data(), 32);
     return sha256Impl(opad.data(), opad.size());
 }
-
 std::vector<uint8_t> hmacSha256(const std::vector<uint8_t>& key, const std::string& msg) {
     return hmacSha256(key, std::vector<uint8_t>(msg.begin(), msg.end()));
 }
-
 Sha256Stream::Sha256Stream() : totalBits_(0), blockLen_(0) {
     state_[0] = 0x6a09e667u; state_[1] = 0xbb67ae85u; state_[2] = 0x3c6ef372u;
     state_[3] = 0xa54ff53au; state_[4] = 0x510e527fu; state_[5] = 0x9b05688cu;
     state_[6] = 0x1f83d9abu; state_[7] = 0x5be0cd19u;
     std::memset(block_, 0, sizeof(block_));
 }
-
 void Sha256Stream::update(const uint8_t* data, size_t len) {
     totalBits_ += static_cast<uint64_t>(len) * 8;
     while (len > 0) {
@@ -123,12 +107,8 @@ void Sha256Stream::update(const uint8_t* data, size_t len) {
         }
     }
 }
-
 std::string Sha256Stream::finishHex() {
     const uint64_t bits = totalBits_;
-
-    // Pad directly into the block buffer: routing the padding through update() would
-    // keep extending totalBits_, and the length has to stay the original one.
     block_[blockLen_++] = 0x80;
     if (blockLen_ > 56) {
         while (blockLen_ < 64) block_[blockLen_++] = 0;
@@ -140,7 +120,6 @@ std::string Sha256Stream::finishHex() {
         block_[56 + i] = static_cast<uint8_t>((bits >> (56 - i * 8)) & 0xFF);
     transform(state_, block_);
     blockLen_ = 0;
-
     std::string out;
     out.reserve(64);
     for (int i = 0; i < 8; ++i) {
@@ -152,7 +131,6 @@ std::string Sha256Stream::finishHex() {
     }
     return out;
 }
-
 bool sha256HexFile(const std::string& path, std::string& hexOut) {
     std::ifstream in(path, std::ios::binary);
     if (!in.is_open()) return false;
@@ -167,5 +145,4 @@ bool sha256HexFile(const std::string& path, std::string& hexOut) {
     hexOut = sha.finishHex();
     return true;
 }
-
-} // namespace fivem
+}

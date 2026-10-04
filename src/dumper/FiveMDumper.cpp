@@ -1,5 +1,4 @@
 #include "FiveMDumper.h"
-
 #include "../core/Logger.h"
 #include "../crypto/Sha256.h"
 #include "../crypto/ChaCha20.h"
@@ -7,7 +6,6 @@
 #include "../utils/Term.h"
 #include "../utils/Json.h"
 #include "../utils/ProgressBar.h"
-
 #include <windows.h>
 #include <algorithm>
 #include <atomic>
@@ -22,11 +20,8 @@
 #include <stdexcept>
 #include <thread>
 #include <vector>
-
 namespace fs = std::filesystem;
-
 namespace fivem {
-
 static bool isSafeRelPath(const std::string& rel) {
     if (rel.empty()) return false;
     if (rel.front() == '/' || rel.front() == '\\') return false;
@@ -43,15 +38,11 @@ static bool isSafeRelPath(const std::string& rel) {
         if (end == std::string::npos) break;
         start = end + 1;
     }
-    // Win32 silently strips trailing dots/spaces, so 'fxmanifest.lua.' would
-    // alias onto 'fxmanifest.lua' and two downloads would race on one path. A
-    // name made only of dots ('...') strips to nothing and aliases onto nothing.
     if ((rel.back() == '.' || rel.back() == ' ') &&
         rel.find_first_not_of('.') != std::string::npos)
         return false;
     return true;
 }
-
 static bool parseDigits(const std::string& s, unsigned long long& out) {
     if (s.empty() || s.size() > 18) return false;
     unsigned long long v = 0;
@@ -62,7 +53,6 @@ static bool parseDigits(const std::string& s, unsigned long long& out) {
     out = v;
     return true;
 }
-
 static std::string truncateForPath(const std::string& s, size_t maxBytes) {
     std::string out = s;
     if (s.size() > maxBytes) {
@@ -85,7 +75,6 @@ static std::string truncateForPath(const std::string& s, size_t maxBytes) {
         out.pop_back();
     return out;
 }
-
 FiveMDumper::FiveMDumper(std::string baseUrl, std::string token,
                          std::string serverName, Checkpoint& checkpoint)
     : baseUrl_(std::move(baseUrl)), token_(std::move(token)),
@@ -98,7 +87,6 @@ FiveMDumper::FiveMDumper(std::string baseUrl, std::string token,
     }
     setServerName(serverName_);
 }
-
 void FiveMDumper::setServerName(const std::string& name) {
     serverName_ = name;
     std::string safe = safeName(name.empty() ? baseUrl_ : name);
@@ -111,7 +99,6 @@ void FiveMDumper::setServerName(const std::string& name) {
         writeTextFile(resourcesDir + "/Grants.txt", grants_);
     }
 }
-
 bool FiveMDumper::getConfiguration() {
     if (configFetched_) return true;
     auto resp = http_.postForm(baseUrl_ + "/client", "method=getConfiguration");
@@ -127,26 +114,21 @@ bool FiveMDumper::getConfiguration() {
         LOG(std::string("JSON parse error: ") + e.what(), LogLevel::ERROR);
         return false;
     }
-
     if (js.has("error") && js.at("error").isString() && !js.has("resources")) {
         LOG("Server rejected the token: " + js.at("error").asString() +
             " - connect in FiveM to this exact server first.", LogLevel::ERROR);
         return false;
     }
-
     std::string grants = js.strAt("grants_token", "");
     grants_ = grants;
-
     for (const char* key : {"hostname", "serverName", "name"}) {
         std::string v = js.strAt(key, "");
         if (!v.empty()) { hostname_ = v; break; }
     }
-
     checkpoint_.server_ip = baseUrl_.size() > 7 ? baseUrl_.substr(
         (startsWith(baseUrl_, "https://") ? 8 : 7)) : baseUrl_;
     checkpoint_.save();
     configFetched_ = true;
-
     resources_.clear();
     const Json& res = js.at("resources");
     if (res.isArray()) {
@@ -175,7 +157,6 @@ bool FiveMDumper::getConfiguration() {
     LOG("Configuration fetched: " + std::to_string(resources_.size()) + " resources", LogLevel::INFO);
     return true;
 }
-
 static std::string stripFxColors(const std::string& s) {
     std::string out;
     out.reserve(s.size());
@@ -190,7 +171,6 @@ static std::string stripFxColors(const std::string& s) {
     }
     return out;
 }
-
 static std::string cleanDynamicHostname(const std::string& raw) {
     std::string name = trim(stripFxColors(raw));
     if (name.empty() || iequals(name, "default FXServer") ||
@@ -198,7 +178,6 @@ static std::string cleanDynamicHostname(const std::string& raw) {
         return "";
     return name;
 }
-
 std::string FiveMDumper::probeDynamicHostname(const std::string& baseUrl, int timeoutMs) {
     auto resp = HttpClient::plainGetRaw(baseUrl + "/dynamic.json", {{"User-Agent", "CitizenFX/1"}},
                                         timeoutMs, timeoutMs);
@@ -210,7 +189,6 @@ std::string FiveMDumper::probeDynamicHostname(const std::string& baseUrl, int ti
         return "";
     }
 }
-
 bool FiveMDumper::fetchDynamicHostname() {
     auto resp = http_.get(baseUrl_ + "/dynamic.json");
     if (!resp.ok()) {
@@ -233,7 +211,6 @@ bool FiveMDumper::fetchDynamicHostname() {
     hostname_ = name;
     return true;
 }
-
 void FiveMDumper::downloadAndDecrypt(const std::string& url, const std::vector<uint8_t>& key,
                                      const std::vector<uint8_t>& iv, const std::string& outPath,
                                      const std::string& expectedChecksum,
@@ -257,7 +234,6 @@ void FiveMDumper::downloadAndDecrypt(const std::string& url, const std::vector<u
     if (!resp.ok()) {
         throw std::runtime_error("Failed to download " + outPath + ": " + resp.error);
     }
-
     std::vector<uint8_t> dec;
     bool decrypted = false;
     for (int nonceLen = 12; nonceLen >= 8; nonceLen -= 4) {
@@ -270,14 +246,12 @@ void FiveMDumper::downloadAndDecrypt(const std::string& url, const std::vector<u
         } catch (...) { decrypted = false; }
     }
     if (!decrypted) throw std::runtime_error("ChaCha20 decrypt failed: " + outPath);
-
     if (endsWith(toLower(outPath), ".rpf") && dec.size() < 3) {
         throw std::runtime_error("Invalid RPF header for " + outPath);
     }
     if (endsWith(toLower(outPath), ".rpf") && !(dec[0] == 'R' && dec[1] == 'P' && dec[2] == 'F')) {
         throw std::runtime_error("Invalid RPF header for " + outPath);
     }
-
     if (!expectedChecksum.empty()) {
         std::string rawHex = sha256Hex(resp.body);
         std::string decHex = sha256Hex(dec);
@@ -288,12 +262,10 @@ void FiveMDumper::downloadAndDecrypt(const std::string& url, const std::vector<u
             LOG("Checksum verified: " + outPath, LogLevel::INFO);
         }
     }
-
     if (!writeFileBytes(outPath, dec)) {
         throw std::runtime_error("Failed to write " + outPath);
     }
 }
-
 bool FiveMDumper::downloadQuiet(const std::string& url, const std::vector<uint8_t>& key,
                                 const std::vector<uint8_t>& iv, const std::string& outPath) {
     auto resp = http_.get(url);
@@ -314,7 +286,6 @@ bool FiveMDumper::downloadQuiet(const std::string& url, const std::vector<uint8_
     }
     return false;
 }
-
 static bool hasManifest(const std::string& dir) {
     std::error_code ec;
     if (!fs::exists(dir, ec)) return false;
@@ -325,7 +296,6 @@ static bool hasManifest(const std::string& dir) {
     }
     return false;
 }
-
 static size_t countTree(const std::string& dir) {
     std::error_code ec;
     if (!fs::exists(dir, ec)) return 0;
@@ -334,7 +304,6 @@ static size_t countTree(const std::string& dir) {
         if (e.is_regular_file()) ++n;
     return n;
 }
-
 bool FiveMDumper::unpackRpf(const std::string& rpfPath, const std::string& outDir) {
     std::string unpackerRel = resolveTool("Bin/Unpacker.exe");
     if (!fs::exists(unpackerRel)) {
@@ -342,7 +311,6 @@ bool FiveMDumper::unpackRpf(const std::string& rpfPath, const std::string& outDi
             " RPF-ei kitomorigatas nelkul maradnak!", LogLevel::WARNING);
         return false;
     }
-
     auto makeAbs = [](const std::string& p) {
         char buf[4096];
         DWORD n = GetFullPathNameA(p.c_str(), sizeof(buf), buf, nullptr);
@@ -353,12 +321,9 @@ bool FiveMDumper::unpackRpf(const std::string& rpfPath, const std::string& outDi
     std::string unpacker = makeAbs(unpackerRel);
     std::string rpf = makeAbs(rpfPath);
     std::string out = makeAbs(outDir);
-
     std::error_code ec;
     fs::create_directories(out, ec);
-
     size_t before = countTree(out);
-
     std::string cmd = "\"" + unpacker + "\" \"" + rpf + "\" \"" + out + "\"";
     std::wstring wcmd;
     int len = MultiByteToWideChar(CP_UTF8, 0, cmd.c_str(), -1, nullptr, 0);
@@ -369,7 +334,6 @@ bool FiveMDumper::unpackRpf(const std::string& rpfPath, const std::string& outDi
     }
     wcmd.resize(len - 1);
     MultiByteToWideChar(CP_UTF8, 0, cmd.c_str(), -1, wcmd.data(), len);
-
     STARTUPINFOW si{}; si.cb = sizeof(si);
     PROCESS_INFORMATION pi{};
     if (!CreateProcessW(nullptr, wcmd.data(), nullptr, nullptr, FALSE,
@@ -388,20 +352,17 @@ bool FiveMDumper::unpackRpf(const std::string& rpfPath, const std::string& outDi
     GetExitCodeProcess(pi.hProcess, &exitCode);
     CloseHandle(pi.hThread);
     CloseHandle(pi.hProcess);
-
     if (wait != WAIT_OBJECT_0) {
         LOG("Unpacker wait failed (result " + std::to_string(wait) + ") for " +
             fs::path(rpfPath).filename().generic_string() +
             " - a folyamat allapotat nem sikerult megallapitani.", LogLevel::WARNING);
         return false;
     }
-
     if (timedOut) {
         LOG("Unpacker TIMEOUT (120s) for " + fs::path(rpfPath).filename().generic_string() +
             " - a folyamat leallitva.", LogLevel::WARNING);
         return false;
     }
-
     size_t after = countTree(out);
     if (after <= before) {
         LOG("Unpacker produced NO new files for " + fs::path(rpfPath).filename().generic_string() +
@@ -410,7 +371,6 @@ bool FiveMDumper::unpackRpf(const std::string& rpfPath, const std::string& outDi
     }
     return true;
 }
-
 void FiveMDumper::fetchResource(const ResourceInfo& res) {
     std::string resName = safeName(res.name);
     if (std::find(checkpoint_.completed_resources.begin(), checkpoint_.completed_resources.end(),
@@ -418,10 +378,8 @@ void FiveMDumper::fetchResource(const ResourceInfo& res) {
         LOG("Resource '" + resName + "' already completed, skipping.", LogLevel::INFO);
         return;
     }
-
     std::string tempRes = tempDir + "/" + resName;
     std::string unpackedRes = unpackedDir + "/" + resName;
-
     auto hashPos = res.uri.find('#');
     if (hashPos == std::string::npos) {
         LOG("Resource has malformed uri: " + resName, LogLevel::ERROR);
@@ -436,15 +394,11 @@ void FiveMDumper::fetchResource(const ResourceInfo& res) {
     std::vector<uint8_t> xored(uriBytes.begin() + 19, uriBytes.end());
     std::vector<uint8_t> hmacKey(32);
     for (size_t i = 0; i < 32; ++i) hmacKey[i] = xored[i] ^ 0x69;
-
     std::string fileBase = res.fileServer.empty() ? (baseUrl_ + "/files") : res.fileServer;
-
     std::atomic<size_t> rejected{0};
-
     struct Task { std::string url, outPath, hash; std::vector<uint8_t> key; bool rpf; };
     std::vector<Task> tasks;
     tasks.reserve(res.files.size() + res.streamFiles.size());
-
     for (const auto& f : res.files) {
         if (!isSafeRelPath(f.name)) {
             LOG(resName + ": figyelmeztetes - unsafe file name megtagadva: '" + f.name + "'",
@@ -475,13 +429,11 @@ void FiveMDumper::fetchResource(const ResourceInfo& res) {
         t.rpf = false;
         tasks.push_back(std::move(t));
     }
-
     std::vector<std::string> rpfFiles;
     std::mutex rpfMtx;
     std::atomic<size_t> next{0};
     std::atomic<size_t> errors{0};
     ProgressBar bar("  " + resName, tasks.size());
-
     int workers = std::min(maxWorkers_, (int)tasks.size());
     std::vector<std::thread> pool;
     for (int w = 0; w < workers; ++w) {
@@ -508,7 +460,6 @@ void FiveMDumper::fetchResource(const ResourceInfo& res) {
     }
     for (auto& th : pool) th.join();
     bar.finish();
-
     if (errors > 0) {
         LOG(resName + ": " + std::to_string(errors) + " file(s) failed", LogLevel::WARNING);
     }
@@ -517,7 +468,6 @@ void FiveMDumper::fetchResource(const ResourceInfo& res) {
             " file(s) megtagadva (biztonsagtalan fajlnev) - a resource NEM lett kesznek jelolve, "
             "a kovetkezo futas ujra letolli", LogLevel::ERROR);
     }
-
     if (!rpfFiles.empty()) {
         LOG("Unpacking " + std::to_string(rpfFiles.size()) + " RPF files for " + resName,
             LogLevel::INFO);
@@ -527,7 +477,6 @@ void FiveMDumper::fetchResource(const ResourceInfo& res) {
                 if (!unpackRpf(rpf, unpackedRes)) failedRpbs.push_back(rpf);
             } catch (...) { failedRpbs.push_back(rpf); }
         }
-
         if (!failedRpbs.empty()) {
             std::error_code ec;
             fs::create_directories(unpackedRes, ec);
@@ -541,7 +490,6 @@ void FiveMDumper::fetchResource(const ResourceInfo& res) {
                 LogLevel::WARNING);
         }
     }
-
     if (!hasManifest(unpackedRes)) {
         for (const char* cand : {"fxmanifest.lua", "__resource.lua"}) {
             if (!isSafeRelPath(cand)) {
@@ -561,25 +509,19 @@ void FiveMDumper::fetchResource(const ResourceInfo& res) {
                 " bomthat ki; probald masik kitomorigetovel)", LogLevel::WARNING);
         }
     }
-
     if (rejected > 0) return;
-
     checkpoint_.completed_resources.push_back(resName);
     checkpoint_.save();
 }
-
 bool FiveMDumper::run(const std::string& filterResource) {
     if (!getConfiguration()) return false;
     if (configFetched_ && !grants_.empty())
         writeTextFile(resourcesDir + "/Grants.txt", grants_);
-
     std::vector<ResourceInfo> sorted = resources_;
     std::sort(sorted.begin(), sorted.end(), [](const ResourceInfo& a, const ResourceInfo& b) {
         return toLower(a.name) < toLower(b.name);
     });
-
     std::vector<ResourceInfo> chosen;
-
     if (!filterResource.empty()) {
         for (auto& r : sorted)
             if (safeName(r.name) == safeName(filterResource)) chosen.push_back(r);
@@ -594,10 +536,8 @@ bool FiveMDumper::run(const std::string& filterResource) {
         std::cout << "Enter resources: indices (1,3), ranges (5-8), NAMES (pma-voice, ox_lib),\n";
         std::cout << "mixed ok; " << CLR(term::GREEN) << "'all'" << CLR(term::RESET)
                   << " or Enter = mind; " << CLR(term::YELLOW) << "'q'" << CLR(term::RESET) << " = kilép: ";
-
         std::map<std::string, const ResourceInfo*> byName;
         for (auto& r : sorted) byName[toLower(r.name)] = &r;
-
         std::string line;
         if (!std::getline(std::cin, line)) {
             std::cout << CLR(term::CYAN) << "[*]" << CLR(term::RESET) << " Non-interactive, selecting all.\n";
@@ -652,18 +592,14 @@ bool FiveMDumper::run(const std::string& filterResource) {
             }
         }
     }
-
     if (chosen.empty()) {
         LOG("No resources selected.", LogLevel::INFO);
         return false;
     }
-
     LOG("Processing " + std::to_string(chosen.size()) + " resource(s)...", LogLevel::INFO);
     for (const auto& r : chosen) fetchResource(r);
-
     checkpoint_.clear();
     LOG("All selected resources downloaded successfully.", LogLevel::SUCCESS);
     return true;
 }
-
-} // namespace fivem
+} 
