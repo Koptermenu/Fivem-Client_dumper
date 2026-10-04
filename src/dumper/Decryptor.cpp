@@ -1,37 +1,405 @@
 #include "Decryptor.h"
 
 #include "../core/Logger.h"
-#include "../crypto/Sha256.h"
 #include "../crypto/ChaCha20.h"
-#include "../crypto/AesCbc.h"
+#include "../crypto/ClientKey.h"
 #include "../utils/Str.h"
 #include "../utils/Term.h"
 #include "../utils/Json.h"
 #include "../utils/ProgressBar.h"
 
+#include <windows.h>
+
 #include <algorithm>
 #include <cctype>
+#include <cstdio>
+#include <cstring>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <mutex>
 #include <thread>
-#include <cstdio>
 
 namespace fs = std::filesystem;
 
 namespace fivem {
 
-// Hardcoded keys (same as python)
 static const std::vector<uint8_t> DEFAULT_KEY = {
     0xB3, 0xCB, 0x2E, 0x04, 0x87, 0x94, 0xD6, 0x73, 0x08, 0x23, 0xC4, 0x93, 0x7A, 0xBD, 0x18, 0xAD,
     0x6B, 0xE6, 0xDC, 0xB3, 0x91, 0x43, 0x0D, 0x28, 0xF9, 0x40, 0x9D, 0x48, 0x37, 0xB9, 0x38, 0xFB
 };
-static const std::vector<uint8_t> AES_KEY = {
-    0x7A, 0xBA, 0x8D, 0x53, 0x25, 0x5B, 0x0E, 0xFD, 0x16, 0xBD, 0x35, 0x22, 0xA0, 0xB9, 0x26, 0xA5,
-    0x61, 0x83, 0x2E, 0xEC, 0xA2, 0x4B, 0xFD, 0x56, 0x9E, 0xC0, 0x1D, 0x8F, 0x38, 0x40, 0x54, 0x6D
+
+// Lua bytecode starts with ESC "Lua"; the remaining header bytes carry the
+// compiler's sizeof values, so they are not part of the recognition test.
+static const uint8_t LUA_SIGNATURE[4] = {0x1B, 0x4C, 0x75, 0x61};
+static const char* RSC7_HEADER = "RSC7";
+static const char* RSC8_HEADER = "RSC8";
+
+static const char* STREAM_EXTENSIONS[] = {
+    ".awc", ".ybn", ".ydd", ".ydr", ".yft", ".ymap", ".ymf", ".ytd", ".ytyp"
 };
-static const std::string LUA_HEADER_HEX = "1b4c7561540019930d0a1a0a0408087856";
+
+namespace {
+
+bool isFxap(const std::vector<uint8_t>& d) {
+    return d.size() >= 4 && d[0] == 'F' && d[1] == 'X' && d[2] == 'A' && d[3] == 'P';
+}
+
+bool isLuaBytecode(const std::vector<uint8_t>& d) {
+    return d.size() >= 4 && std::memcmp(d.data(), LUA_SIGNATURE, 4) == 0;
+}
+
+bool isRsc(const std::vector<uint8_t>& d) {
+    return d.size() >= 4 &&
+           (std::memcmp(d.data(), RSC7_HEADER, 4) == 0 ||
+            std::memcmp(d.data(), RSC8_HEADER, 4) == 0);
+}
+
+bool isStreamFile(const std::string& lowerName) {
+    for (const char* ext : STREAM_EXTENSIONS)
+        if (endsWith(lowerName, ext)) return true;
+    return false;
+}
+
+// Inner layout of an already unwrapped FXAP payload:
+//
+//   [0..4)   format version
+//   [4..6)   uint16 LE length of the embedded metadata block
+//   [6..6+N) metadata: the file's SHA-256 plus its original path
+//   [6+N..)  12-byte ChaCha20 nonce
+//   [+12..)  ciphertext
+//
+// The metadata length varies per file (74..105 bytes on real dumps), so the nonce
+// cannot live at a fixed offset. The historical 80/92 pair is only correct when the
+// metadata happens to be exactly 74 bytes and stays as a fallback for older blobs.
+bool deriveInnerLayout(const std::vector<uint8_t>& d, size_t& ivOffset, size_t& payloadOffset) {
+    if (d.size() >= 18) {
+        const size_t metaLen = static_cast<size_t>(d[4]) | (static_cast<size_t>(d[5]) << 8);
+        const size_t iv = 6 + metaLen;
+        const size_t payload = iv + 12;
+        if (payload < d.size()) {
+            ivOffset = iv;
+            payloadOffset = payload;
+            return true;
+        }
+    }
+    if (d.size() > 92) {
+        ivOffset = 80;
+        payloadOffset = 92;
+        return true;
+    }
+    return false;
+}
+
+std::vector<uint8_t> decryptAt(const std::vector<uint8_t>& d, const std::vector<uint8_t>& key,
+                              size_t payloadOffset, size_t ivOffset) {
+    if (ivOffset + 12 > payloadOffset || payloadOffset >= d.size()) return {};
+    std::vector<uint8_t> nonce(d.begin() + ivOffset, d.begin() + ivOffset + 12);
+    std::vector<uint8_t> payload(d.begin() + payloadOffset, d.end());
+    return chacha20Xor(key, nonce, payload);
+}
+
+// ChaCha20 is a stream cipher with a zero start counter, so the first bytes of the
+// full plaintext only need the first keystream block. This keeps the offset search
+// cheap enough to brute-force.
+bool probeAt(const std::vector<uint8_t>& d, const std::vector<uint8_t>& key,
+             size_t payloadOffset, size_t ivOffset, bool (*valid)(const std::vector<uint8_t>&)) {
+    if (ivOffset + 12 > payloadOffset || payloadOffset >= d.size()) return false;
+    const size_t n = std::min<size_t>(32, d.size() - payloadOffset);
+    std::vector<uint8_t> nonce(d.begin() + ivOffset, d.begin() + ivOffset + 12);
+    std::vector<uint8_t> head(d.begin() + payloadOffset, d.begin() + payloadOffset + n);
+    try {
+        return valid(chacha20Xor(key, nonce, head));
+    } catch (...) {
+        return false;
+    }
+}
+
+std::vector<uint8_t> findLuaBytecode(const std::vector<uint8_t>& d,
+                                     const std::vector<std::vector<uint8_t>>& keys) {
+    for (const auto& key : keys) {
+        size_t iv = 0, payload = 0;
+        if (deriveInnerLayout(d, iv, payload) && probeAt(d, key, payload, iv, isLuaBytecode))
+            return decryptAt(d, key, payload, iv);
+    }
+    for (const auto& key : keys) {
+        if (probeAt(d, key, 90, 78, isLuaBytecode)) return decryptAt(d, key, 90, 78);
+    }
+    for (const auto& key : keys) {
+        for (size_t payload = 50; payload <= 150 && payload < d.size(); ++payload) {
+            for (size_t iv = 38; iv <= 138 && iv + 12 <= payload; ++iv) {
+                if (probeAt(d, key, payload, iv, isLuaBytecode))
+                    return decryptAt(d, key, payload, iv);
+            }
+        }
+    }
+    return {};
+}
+
+// Offset of the first byte after an embedded stream file's original path. The nonce
+// of a stream payload follows that path, which gives a second candidate layout
+// besides the one the metadata length describes.
+size_t findFilenameEnd(const std::vector<uint8_t>& d) {
+    for (size_t i = 0; i < d.size(); ++i) {
+        for (const char* ext : STREAM_EXTENSIONS) {
+            const size_t len = std::strlen(ext);
+            if (i + len <= d.size() && std::memcmp(d.data() + i, ext, len) == 0) return i + len;
+        }
+    }
+    return std::string::npos;
+}
+
+std::vector<uint8_t> decryptStreamBuffer(const std::vector<uint8_t>& d,
+                                        const std::vector<uint8_t>& key) {
+    if (d.size() < 100) return {};
+    const size_t nameEnd = findFilenameEnd(d);
+    if (nameEnd != std::string::npos) {
+        for (size_t extra : {size_t(0), size_t(1), size_t(2), size_t(4), size_t(8)}) {
+            const size_t iv = nameEnd + extra;
+            if (probeAt(d, key, iv + 12, iv, isRsc)) return decryptAt(d, key, iv + 12, iv);
+        }
+    }
+    for (size_t iv = 40; iv <= 120; ++iv) {
+        if (probeAt(d, key, iv + 12, iv, isRsc)) return decryptAt(d, key, iv + 12, iv);
+    }
+    return {};
+}
+
+std::vector<uint8_t> findStreamPayload(const std::vector<uint8_t>& d,
+                                       const std::vector<std::vector<uint8_t>>& keys) {
+    for (const auto& key : keys) {
+        size_t iv = 0, payload = 0;
+        if (deriveInnerLayout(d, iv, payload) && probeAt(d, key, payload, iv, isRsc))
+            return decryptAt(d, key, payload, iv);
+        std::vector<uint8_t> scanned = decryptStreamBuffer(d, key);
+        if (!scanned.empty()) return scanned;
+    }
+    return {};
+}
+
+std::vector<uint8_t> decryptAny(const std::vector<uint8_t>& d,
+                                const std::vector<std::vector<uint8_t>>& keys) {
+    for (const auto& key : keys) {
+        size_t iv = 0, payload = 0;
+        if (!deriveInnerLayout(d, iv, payload)) continue;
+        std::vector<uint8_t> out = decryptAt(d, key, payload, iv);
+        if (!out.empty()) return out;
+    }
+    return {};
+}
+
+// ---- Java / unluac plumbing ----
+
+std::wstring widen(const std::string& s) {
+    if (s.empty()) return L"";
+    const int n = MultiByteToWideChar(CP_UTF8, 0, s.c_str(), static_cast<int>(s.size()), nullptr, 0);
+    std::wstring w(n, 0);
+    MultiByteToWideChar(CP_UTF8, 0, s.c_str(), static_cast<int>(s.size()), w.data(), n);
+    return w;
+}
+
+std::wstring quoteArg(const std::string& a) {
+    std::wstring w = widen(a);
+    if (w.find_first_of(L" \t\"") == std::wstring::npos) return w;
+    std::wstring out = L"\"";
+    for (wchar_t c : w) {
+        if (c == L'\\') out += L"\\\\";
+        else if (c == L'"') out += L"\\\"";
+        else out += c;
+    }
+    out += L'"';
+    return out;
+}
+
+struct ProcResult {
+    bool started = false;
+    DWORD exitCode = 1;
+    std::string out;
+    std::string errOut;
+    bool overflow = false;
+};
+
+// Runs a console tool with its output captured. Unicode arguments are supported (the
+// temp paths inherit the server name, which may hold accents or emoji) and stdin is
+// detached from the console so a child process cannot swallow the dumper's own input.
+ProcResult runTool(const std::string& executable, const std::vector<std::string>& args) {
+    ProcResult r;
+    SECURITY_ATTRIBUTES sa{sizeof(sa), nullptr, TRUE};
+
+    HANDLE outRd = nullptr, outWr = nullptr, errRd = nullptr, errWr = nullptr, nul = nullptr;
+    if (!CreatePipe(&outRd, &outWr, &sa, 0) || !CreatePipe(&errRd, &errWr, &sa, 0)) {
+        if (outRd) CloseHandle(outRd);
+        if (outWr) CloseHandle(outWr);
+        return r;
+    }
+    SetHandleInformation(outRd, HANDLE_FLAG_INHERIT, 0);
+    SetHandleInformation(errRd, HANDLE_FLAG_INHERIT, 0);
+
+    nul = CreateFileW(L"NUL", GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, &sa,
+                      OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+    if (nul == INVALID_HANDLE_VALUE) {
+        CloseHandle(outRd); CloseHandle(outWr);
+        CloseHandle(errRd); CloseHandle(errWr);
+        return r;
+    }
+
+    std::wstring cmd = quoteArg(executable);
+    for (const auto& a : args) cmd += L" " + quoteArg(a);
+    std::vector<wchar_t> cmdBuf(cmd.begin(), cmd.end());
+    cmdBuf.push_back(L'\0');
+
+    STARTUPINFOW si{};
+    si.cb = sizeof(si);
+    si.dwFlags = STARTF_USESTDHANDLES;
+    si.hStdInput = nul;
+    si.hStdOutput = outWr;
+    si.hStdError = errWr;
+
+    PROCESS_INFORMATION pi{};
+    if (!CreateProcessW(nullptr, cmdBuf.data(), nullptr, nullptr, TRUE, CREATE_NO_WINDOW,
+                        nullptr, nullptr, &si, &pi)) {
+        CloseHandle(outRd); CloseHandle(outWr);
+        CloseHandle(errRd); CloseHandle(errWr);
+        CloseHandle(nul);
+        return r;
+    }
+    r.started = true;
+    CloseHandle(outWr);
+    CloseHandle(errWr);
+    CloseHandle(nul);
+
+    // Both pipes must be drained at once: a full stderr pipe would block the child
+    // while stdout is being read, and vice versa.
+    const size_t kMaxOutput = 128u * 1024u * 1024u;
+    HANDLE pipes[2] = {outRd, errRd};
+    std::string* sinks[2] = {&r.out, &r.errOut};
+    std::thread drainers[2];
+    for (int i = 0; i < 2; ++i) {
+        drainers[i] = std::thread([&, i]() {
+            char buf[8192];
+            DWORD n = 0;
+            while (ReadFile(pipes[i], buf, sizeof(buf), &n, nullptr) && n > 0) {
+                if (sinks[i]->size() >= kMaxOutput) { r.overflow = true; continue; }
+                sinks[i]->append(buf, n);
+            }
+            CloseHandle(pipes[i]);
+        });
+    }
+    for (auto& t : drainers) t.join();
+
+    WaitForSingleObject(pi.hProcess, 300000);
+    GetExitCodeProcess(pi.hProcess, &r.exitCode);
+    CloseHandle(pi.hThread);
+    CloseHandle(pi.hProcess);
+    return r;
+}
+
+std::string resolveJava() {
+    if (const char* home = getenv("JAVA_HOME")) {
+        std::string candidate = std::string(home) + "\\bin\\java.exe";
+        if (fs::exists(candidate)) return candidate;
+    }
+    return "java.exe";
+}
+
+// unluac's disassembler emits `jmp <n>` targets that do not always exist as labels,
+// which makes the assembler reject the listing. Repointing them at the nearest
+// existing label lets a round-trip (disassemble -> assemble) repair the bytecode.
+bool fixUnknownLabels(const std::string& asmPath) {
+    std::ifstream in(asmPath, std::ios::binary);
+    if (!in.is_open()) return false;
+    std::string text((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+    in.close();
+
+    struct Label { long long number; size_t line; };
+    std::vector<Label> labels;
+    std::vector<std::string> lines;
+
+    size_t pos = 0;
+    while (pos <= text.size()) {
+        size_t eol = text.find('\n', pos);
+        if (eol == std::string::npos) eol = text.size();
+        lines.push_back(text.substr(pos, eol - pos));
+        pos = eol + 1;
+    }
+
+    auto parseLabel = [](const std::string& line, long long& number) -> bool {
+        size_t i = line.find(".label");
+        if (i == std::string::npos) return false;
+        i += 7;
+        while (i < line.size() && (line[i] == ' ' || line[i] == '\t')) ++i;
+        if (i >= line.size() || line[i] != 'l') return false;
+        ++i;
+        if (i >= line.size() || !std::isdigit(static_cast<unsigned char>(line[i]))) return false;
+        number = 0;
+        while (i < line.size() && std::isdigit(static_cast<unsigned char>(line[i])))
+            number = number * 10 + (line[i++] - '0');
+        return true;
+    };
+
+    for (size_t i = 0; i < lines.size(); ++i) {
+        long long n = 0;
+        if (parseLabel(lines[i], n)) labels.push_back({n, i});
+    }
+    if (labels.empty()) return false;
+
+    auto known = [&](long long n) {
+        for (const auto& l : labels) if (l.number == n) return true;
+        return false;
+    };
+
+    bool changed = false;
+    for (size_t i = 0; i < lines.size(); ++i) {
+        std::string t = trim(lines[i]);
+        if (!startsWith(t, "jmp")) continue;
+        std::string rest = trim(t.substr(3));
+        if (rest.empty()) continue;
+        if (rest[0] == 'l') rest = rest.substr(1);
+        if (rest.find_first_not_of("0123456789") != std::string::npos) continue;
+
+        long long target = 0;
+        for (char c : rest) target = target * 10 + (c - '0');
+        if (known(target)) continue;
+
+        long long replacement = 0;
+        bool found = false;
+        for (const auto& l : labels) if (l.number == target) { replacement = l.number; found = true; break; }
+        if (!found) {
+            for (const auto& l : labels) if (l.line > i) { replacement = l.number; found = true; break; }
+        }
+        if (!found) {
+            long long best = 0;
+            long long bestDelta = -1;
+            for (const auto& l : labels) {
+                const long long delta = l.number > target ? l.number - target : target - l.number;
+                if (!found || delta < bestDelta) { bestDelta = delta; best = l.number; found = true; }
+            }
+            replacement = best;
+        }
+        if (!found) continue;
+
+        const std::string replacementLine = "jmp          " + std::to_string(replacement);
+        if (!lines[i].empty() && lines[i].back() == '\r') lines[i].pop_back();
+        const size_t indent = lines[i].find_first_not_of(" \t");
+        lines[i] = std::string(indent == std::string::npos ? 0 : indent, ' ') + replacementLine;
+        changed = true;
+    }
+
+    if (!changed) return false;
+    std::ofstream out(asmPath, std::ios::binary | std::ios::trunc);
+    if (!out.is_open()) return false;
+    for (size_t i = 0; i < lines.size(); ++i) out << lines[i] << "\n";
+    return out.good();
+}
+
+std::string replaceExtension(const std::string& path, const std::string& newExt) {
+    const size_t slash = path.find_last_of("/\\");
+    const size_t dot = path.find_last_of('.');
+    if (dot == std::string::npos || (slash != std::string::npos && dot < slash)) return path + newExt;
+    return path.substr(0, dot) + newExt;
+}
+
+} // namespace
 
 Decryptor::Decryptor(std::string serverDir)
     : serverDir_(std::move(serverDir)) {
@@ -48,7 +416,6 @@ bool Decryptor::loadGrants() {
     auto parts = splitStr(token, ".");
     if (parts.size() < 2) { LOG("Malformed grants token", LogLevel::ERROR); return false; }
     std::string payload = parts[1];
-    // pad
     size_t mod = payload.size() % 4;
     if (mod) payload.append(4 - mod, '=');
     std::vector<uint8_t> raw = base64Decode(payload);
@@ -60,511 +427,308 @@ bool Decryptor::loadGrants() {
         LOG(std::string("Grants parse error: ") + e.what(), LogLevel::ERROR);
         return false;
     }
+    LOG("Grants loaded: " + std::to_string(grantsMap_.size()) + " resource key(s)", LogLevel::INFO);
     return true;
 }
 
 bool Decryptor::verifyEncrypted(const std::string& path) const {
     auto buf = readFileBytes(path);
-    if (!buf || buf->size() < 4) return false;
-    return (*buf)[0] == 'F' && (*buf)[1] == 'X' && (*buf)[2] == 'A' && (*buf)[3] == 'P';
+    return buf && isFxap(*buf);
 }
 
 std::vector<uint8_t> Decryptor::decryptFile(const std::string& path,
                                             const std::vector<uint8_t>& key) const {
     auto buf = readFileBytes(path);
-    if (!buf || buf->size() < 86) return {};
-    if (!((*buf)[0] == 'F' && (*buf)[1] == 'X' && (*buf)[2] == 'A' && (*buf)[3] == 'P')) return {};
-    std::vector<uint8_t> iv(buf->begin() + 74, buf->begin() + 86);
-    std::vector<uint8_t> enc(buf->begin() + 86, buf->end());
-    return chacha20Xor(key, iv, enc);
+    if (!buf || buf->size() < 86 || !isFxap(*buf)) return {};
+    return decryptAt(*buf, key, 86, 74);
 }
 
-std::vector<uint8_t> Decryptor::decryptBuffer(const std::vector<uint8_t>& data,
-                                              const std::vector<uint8_t>& key) const {
-    if (data.size() < 92) return {};
-    std::vector<uint8_t> iv(data.begin() + 80, data.begin() + 92);
-    std::vector<uint8_t> enc(data.begin() + 92, data.end());
-    return chacha20Xor(key, iv, enc);
-}
-
-namespace {
-
-// Canonical form used for both sides of the comparison: lowercase, '/' separators,
-// no './' prefix and no empty segments.
-std::string normalizeRelPath(const std::string& path) {
-    std::string low = toLower(path);
-    std::replace(low.begin(), low.end(), '\\', '/');
-    std::vector<std::string> parts;
-    for (const std::string& seg : split(low, '/'))
-        if (!seg.empty() && seg != ".") parts.push_back(seg);
-    std::string out;
-    for (size_t i = 0; i < parts.size(); ++i) {
-        if (i) out += '/';
-        out += parts[i];
+Decryptor::ResourceKeys Decryptor::resolveKeys(uint32_t resourceId,
+                                               const std::string& resourceName) {
+    ResourceKeys keys;
+    const std::string idStr = std::to_string(resourceId);
+    auto it = grantsMap_.find(idStr);
+    if (it == grantsMap_.end()) {
+        LOG(resourceName + ": nincs grant a resource ID-hoz (" + idStr + ")", LogLevel::WARNING);
+        return keys;
     }
-    return out;
-}
 
-bool isNameStart(char c) {
-    return c == '_' || std::isalpha(static_cast<unsigned char>(c)) != 0;
-}
-
-bool isNameChar(char c) {
-    return c == '_' || std::isalnum(static_cast<unsigned char>(c)) != 0;
-}
-
-// End offset of the Lua long bracket (string or comment) opening at pos, 0 if none.
-size_t longBracketEnd(const std::string& text, size_t pos) {
-    if (pos >= text.size() || text[pos] != '[') return 0;
-    size_t q = pos + 1;
-    while (q < text.size() && text[q] == '=') ++q;
-    if (q >= text.size() || text[q] != '[') return 0;
-    std::string close = "]" + std::string(q - pos - 1, '=') + "]";
-    size_t e = text.find(close, q + 1);
-    return e == std::string::npos ? text.size() : e + close.size();
-}
-
-// Match the 17-byte Lua 5.4 header prefix: signature, version, format, LUAC_DATA, the
-// three sizeof size bytes (04 08 08 on stock x64 Windows) and the low byte of LUAC_INT (0x5678).
-bool hasLuaHeader(const std::vector<uint8_t>& data) {
-    const size_t headerLen = (LUA_HEADER_HEX.size() + 1) / 2;
-    if (data.size() < headerLen) return false;
-    std::string hex = hexEncode(std::vector<uint8_t>(data.begin(), data.begin() + headerLen));
-    return hex.rfind(LUA_HEADER_HEX, 0) == 0;
-}
-
-// One path segment against one pattern segment: '?' is one character, '*' any run.
-bool segmentMatch(const std::string& pattern, const std::string& text) {
-    size_t p = 0, t = 0, star = std::string::npos, backtrack = 0;
-    while (t < text.size()) {
-        if (p < pattern.size() && (pattern[p] == '?' || pattern[p] == text[t])) { ++p; ++t; }
-        else if (p < pattern.size() && pattern[p] == '*') { star = p++; backtrack = t; }
-        else if (star != std::string::npos) { p = star + 1; t = ++backtrack; }
-        else return false;
-    }
-    while (p < pattern.size() && pattern[p] == '*') ++p;
-    return p == pattern.size();
-}
-
-bool globMatchSegments(const std::vector<std::string>& pattern, size_t pi,
-                       const std::vector<std::string>& text, size_t ti) {
-    if (pi == pattern.size()) return ti == text.size();
-    if (pattern[pi] == "**") {
-        for (size_t k = ti; k <= text.size(); ++k)
-            if (globMatchSegments(pattern, pi + 1, text, k)) return true;
-        return false;
-    }
-    if (ti == text.size()) return false;
-    if (!segmentMatch(pattern[pi], text[ti])) return false;
-    return globMatchSegments(pattern, pi + 1, text, ti + 1);
-}
-
-bool globMatch(const std::string& pattern, const std::string& path) {
-    return globMatchSegments(split(pattern, '/'), 0, split(path, '/'), 0);
-}
-
-// Literal membership first, then the stored globs. A pattern-free entry therefore
-// still matches only itself, which keeps this a strict superset of set lookup.
-bool matchesManifestSet(const std::set<std::string>& files, const std::string& rel) {
-    if (files.count(rel)) return true;
-    for (const std::string& entry : files) {
-        if (entry.find('*') == std::string::npos && entry.find('?') == std::string::npos) continue;
-        if (globMatch(entry, rel)) return true;
-    }
-    return false;
-}
-
-} // namespace
-
-// Parses the resource manifest once and collects the paths each side receives.
-// Recognised: client_script(s), server_script(s), shared_script(s), the files /
-// file block and the top-level server_only flag. Script directives may use globs,
-// which detectLuaType matches too. files entries default to the client, because a
-// resource ships its assets to the client; a shared entry is stored in both sets,
-// while an explicit server_script entry is also recorded in serverScriptFiles so
-// that it outranks a files membership. Anything unlisted stays unclassified.
-Decryptor::LuaManifest Decryptor::parseLuaManifest(const std::string& resourcePath) {
-    enum Side { SideNone, SideClient, SideServer, SideBoth };
-    LuaManifest manifest;
-
-    auto data = readFileBytes(resourcePath + "/fxmanifest.lua");
-    if (!data) data = readFileBytes(resourcePath + "/__resource.lua");
-    if (!data) return manifest;
-
-    const std::string text(data->begin(), data->end());
-    const size_t n = text.size();
-    size_t i = 0;
-
-    auto add = [&](const std::string& raw, Side side) {
-        std::string p = normalizeRelPath(raw);
-        if (p.empty()) return;
-        if (side == SideClient || side == SideBoth) manifest.clientFiles.insert(p);
-        if (side == SideServer || side == SideBoth) manifest.serverFiles.insert(p);
-        if (side == SideServer) manifest.serverScriptFiles.insert(p);
-    };
-    auto readQuoted = [&]() {
-        char q = text[i++];
-        std::string value;
-        while (i < n && text[i] != q) value += text[i++];
-        if (i < n) ++i;
-        return value;
-    };
-    auto skipBlanks = [&]() {
-        while (i < n && (text[i] == ' ' || text[i] == '\t' || text[i] == '\r' || text[i] == '\n')) ++i;
-    };
-
-    while (i < n) {
-        // Quoted strings and comments may hold anything, never parse them as directives.
-        if (text[i] == '\'' || text[i] == '"') { readQuoted(); continue; }
-        if (text[i] == '-' && i + 1 < n && text[i + 1] == '-') {
-            size_t e = longBracketEnd(text, i + 2);
-            if (e) { i = e; continue; }
-            while (i < n && text[i] != '\n') ++i;
-            continue;
-        }
-        size_t lb = longBracketEnd(text, i);
-        if (lb) { i = lb; continue; }
-        if (!isNameStart(text[i])) { ++i; continue; }
-
-        size_t start = i;
-        while (i < n && isNameChar(text[i])) ++i;
-        std::string name = toLower(text.substr(start, i - start));
-        if (name == "server_only") { manifest.serverOnly = true; continue; }
-        Side directive = SideNone;
-        if (name == "client_script" || name == "client_scripts") directive = SideClient;
-        else if (name == "server_script" || name == "server_scripts") directive = SideServer;
-        else if (name == "shared_script" || name == "shared_scripts") directive = SideBoth;
-        else if (name == "files" || name == "file") directive = SideClient;
-        if (directive == SideNone) continue;
-
-        size_t depth = 0;
-        Side side = directive;
-        for (;;) {
-            skipBlanks();
-            if (i >= n) break;
-            char c = text[i];
-            if (c == '\'' || c == '"') { add(readQuoted(), side); continue; }
-            if (c == '{') { ++i; ++depth; continue; }
-            if (c == '[') {
-                size_t e = longBracketEnd(text, i);
-                if (e) { i = e; continue; }
-                ++i;
-                ++depth;
-                continue;
-            }
-            if (c == '}' || c == ']') {
-                if (depth == 0) break;
-                ++i;
-                if (--depth == 0) break;
-                continue;
-            }
-            if (c == ',') { ++i; continue; }
-            // A comment inside the list must not hide the entries that follow it.
-            if (c == '-' && i + 1 < n && text[i + 1] == '-') {
-                size_t e = longBracketEnd(text, i + 2);
-                if (e) {
-                    i = e;
-                } else {
-                    while (i < n && text[i] != '\n') ++i;
-                }
-                continue;
-            }
-            // At the top level any other token ends the directive's value; inside a
-            // block a stray word is skipped so it cannot drop the remaining entries.
-            if (depth == 0 || !isNameStart(c)) break;
-            while (i < n && isNameChar(text[i])) ++i;
+    if (!it->second.first.empty()) {
+        std::vector<uint8_t> server = hexDecode(it->second.first);
+        if (server.size() == 32) {
+            keys.serverKeyHex = toLower(it->second.first);
+            keys.serverKeyValid = true;
+            keys.candidates.push_back(std::move(server));
+        } else {
+            LOG(resourceName + ": hibas grant (" + std::to_string(server.size()) +
+                " bajt, 32 kell)", LogLevel::WARNING);
         }
     }
-    return manifest;
-}
 
-std::string Decryptor::detectLuaType(const std::string& relFile,
-                                     const LuaManifest& manifest) const {
-    // server_only keeps the client from downloading anything, so the whole resource
-    // is single-layer and every file takes the server key.
-    if (manifest.serverOnly) return "server";
-    std::string rel = normalizeRelPath(relFile);
-    // An explicit server_script outranks a files membership; a shared script sits in
-    // both sets, and the client side is the one that also gets the assets, so a
-    // shared script is treated as client side.
-    if (matchesManifestSet(manifest.serverScriptFiles, rel)) return "server";
-    if (matchesManifestSet(manifest.clientFiles, rel)) return "client";
-    if (matchesManifestSet(manifest.serverFiles, rel)) return "server";
-    return "unknown";
+    if (!it->second.second.empty()) {
+        std::vector<uint8_t> clk = hexDecode(it->second.second);
+        std::string err;
+        std::vector<uint8_t> client = deriveClientKey(resourceId, clk, err);
+        if (client.size() == 32) {
+            keys.clientKeyHex = hexEncode(client);
+            keys.clientKeyValid = true;
+            keys.candidates.push_back(std::move(client));
+        } else {
+            keys.clientKeyError = err;
+        }
+    }
+
+    // The two derivations can coincide; trying a key twice only wastes work.
+    std::vector<std::vector<uint8_t>> unique;
+    for (auto& c : keys.candidates) {
+        bool seen = false;
+        for (auto& u : unique) if (u == c) { seen = true; break; }
+        if (!seen) unique.push_back(std::move(c));
+    }
+    keys.candidates = std::move(unique);
+    return keys;
 }
 
 void Decryptor::processLuaFile(const std::vector<uint8_t>& buf, const std::string& outPath,
                                const std::string& resourceName, const std::string& relFile) {
-    std::string tmpPath = tempDir + "/" + resourceName + "/" + relFile + "c";
-    writeFileBytes(tmpPath, buf);
+    const std::string jar = resolveTool("Tools/Decompile/unluac54.jar");
+    const std::string java = resolveJava();
+    const std::string tempRoot = tempDir + "/" + resourceName + "/";
+    const std::string luacPath = tempRoot + relFile + "c";
+    const std::string asmPath = tempRoot + relFile + ".asm";
+    const std::string fixedPath = tempRoot + relFile + ".fixed.luac";
 
-    // Resolve the jar relative to cwd or the exe's project dir (running from
-    // build/Release must still find Tools/Decompile/unluac54.jar).
-    std::string jar = resolveTool("Tools/Decompile/unluac54.jar");
-    std::string tmpWin = tmpPath;
-    std::replace(tmpWin.begin(), tmpWin.end(), '/', '\\');
-    std::string jarWin = jar;
-    std::replace(jarWin.begin(), jarWin.end(), '/', '\\');
-    std::string cmd = "java -jar \"" + jarWin + "\" \"" + tmpWin + "\"";
-    std::string stdoutContent;
-    const size_t maxOutput = 64u * 1024u * 1024u;
-    bool overflow = false;
-    int rc = -1;
-    if (FILE* pipe = _popen(cmd.c_str(), "r")) {
-        char buffer[4096];
-        while (fgets(buffer, sizeof(buffer), pipe)) {
-            if (stdoutContent.size() < maxOutput) stdoutContent += buffer;
-            else overflow = true;
+    // Decompilation can fail; the recovered bytecode is then the only copy left, so it
+    // is kept next to where the source would have been instead of being discarded.
+    auto saveFallback = [&](const std::string& reason, bool keepAssembly) {
+        const std::string bytecodeOut = endsWith(toLower(outPath), ".lua")
+                                            ? outPath + "c"
+                                            : outPath + ".luac";
+        const std::string assemblyOut = endsWith(toLower(outPath), ".lua")
+                                            ? replaceExtension(outPath, ".asm")
+                                            : outPath + ".asm";
+        std::error_code ec;
+        fs::create_directories(fs::path(bytecodeOut).parent_path(), ec);
+        fs::remove(outPath, ec);
+        if (!writeFileBytes(bytecodeOut, buf))
+            LOG("Nem irhato a bytecode masolat: " + bytecodeOut, LogLevel::WARNING);
+        if (keepAssembly) {
+            auto listing = readFileBytes(asmPath);
+            if (listing && !writeFileBytes(assemblyOut, *listing))
+                LOG("Nem irhato az assembly masolat: " + assemblyOut, LogLevel::WARNING);
         }
-        rc = _pclose(pipe);
-    }
+        LOG("Lua decompilation FAILED for " + relFile + " (" + reason +
+            ") - a bytecode megmaradt: " + bytecodeOut, LogLevel::WARNING);
+        ++failed_;
+    };
 
-    if (overflow) {
-        LOG("Lua decompilation FAILED for " + relFile + " (unluac output exceeds 64 MB)",
-            LogLevel::WARNING);
+    fs::path outp(outPath);
+    if (outp.has_parent_path()) fs::create_directories(outp.parent_path());
+    if (!writeFileBytes(luacPath, buf)) {
+        LOG("Nem irhato a bytecode: " + luacPath, LogLevel::WARNING);
         ++failed_;
         return;
     }
 
-    fs::path p(outPath);
-    if (p.has_parent_path()) fs::create_directories(p.parent_path());
+    if (!fs::exists(jar)) {
+        saveFallback("unluac54.jar hiányzik", false);
+        return;
+    }
 
-    if (rc != 0) {
-        std::string errfile = p.parent_path().string() + "/error_" + p.stem().string() + "_unluac.txt";
-        writeTextFile(errfile, stdoutContent.empty() ? "Unknown unluac error" : stdoutContent);
-        LOG("Lua decompilation FAILED for " + relFile, LogLevel::WARNING);
-        ++failed_;
-    } else {
-        writeTextFile(outPath, stdoutContent);
+    ProcResult direct = runTool(java, {"-jar", jar, luacPath});
+    if (direct.overflow) {
+        saveFallback("az unluac kimenete meghaladta a 128 MB limitet", false);
+        return;
+    }
+    if (direct.started && direct.exitCode == 0 && direct.out.size() >= 10) {
+        writeTextFile(outPath, direct.out);
         LOG("Lua decompiled: " + relFile, LogLevel::INFO);
         ++decryptedOk_;
+        return;
     }
+
+    std::error_code ec;
+    fs::remove(asmPath, ec);
+    ProcResult dis = runTool(java, {"-jar", jar, "--disassemble", luacPath, "-o", asmPath});
+    if (!dis.started || dis.exitCode != 0 || !fs::exists(asmPath)) {
+        saveFallback("az unluac nem tudta decompile-olni vagy disassemble-olni", false);
+        return;
+    }
+
+    for (int attempt = 0; attempt < 10; ++attempt) {
+        fs::remove(fixedPath, ec);
+        ProcResult assembled = runTool(java, {"-jar", jar, "--assemble", asmPath, "-o", fixedPath});
+        if (assembled.started && assembled.exitCode == 0 && fs::exists(fixedPath)) {
+            ProcResult repaired = runTool(java, {"-jar", jar, fixedPath});
+            if (repaired.exitCode == 0 && repaired.out.size() >= 10) {
+                writeTextFile(outPath, repaired.out);
+                LOG("Lua decompiled after bytecode repair: " + relFile, LogLevel::INFO);
+                ++decryptedOk_;
+                return;
+            }
+        }
+        if (!fixUnknownLabels(asmPath)) break;
+    }
+
+    saveFallback("az unluac decompilalasa meghiusult", true);
 }
 
 void Decryptor::decryptResourceFile(const std::string& resourcePath, const std::string& relFile,
-                                    const std::vector<uint8_t>& decryptKey,
-                                    const std::string& resourceName,
-                                    const std::vector<uint8_t>& altKey,
-                                    const LuaManifest& manifest) {
-    std::string fullPath = resourcePath + "/" + relFile;
-    std::string outputPath = outputDir + "/" + resourceName + "/" + relFile;
+                                    const ResourceKeys& keys, const std::string& resourceName) {
+    const std::string fullPath = resourcePath + "/" + relFile;
+    const std::string outputPath = outputDir + "/" + resourceName + "/" + relFile;
     if (!fs::exists(fullPath)) return;
 
-    // not encrypted: copy
     if (!verifyEncrypted(fullPath)) {
         std::error_code ec;
         fs::create_directories(fs::path(outputPath).parent_path(), ec);
-        fs::copy_file(fullPath, outputPath,
-                      fs::copy_options::overwrite_existing, ec);
+        fs::copy_file(fullPath, outputPath, fs::copy_options::overwrite_existing, ec);
         if (!ec) ++copied_; else ++failed_;
         return;
     }
 
-    try {
-        auto stage1 = decryptFile(fullPath, DEFAULT_KEY);
-        if (stage1.empty()) { LOG("Initial decryption failed: " + relFile, LogLevel::WARNING); ++failed_; return; }
+    auto stage1 = decryptFile(fullPath, DEFAULT_KEY);
+    if (stage1.empty()) {
+        LOG("Initial decryption failed: " + relFile, LogLevel::WARNING);
+        ++failed_;
+        return;
+    }
 
-        if (endsWith(toLower(relFile), ".lua")) {
-            std::string luaType = detectLuaType(relFile, manifest);
-            const std::vector<uint8_t>& firstKey = (luaType == "client" && !altKey.empty())
-                                                       ? altKey : decryptKey;
-            std::vector<uint8_t> dec = decryptBuffer(stage1, firstKey);
-            if (hasLuaHeader(dec)) {
-                processLuaFile(dec, outputPath, resourceName, relFile);
+    // The encrypted input is the only copy of this data, so a file that cannot be
+    // recovered is preserved next to where its output would have been.
+    auto keepRaw = [&]() {
+        const std::string rawPath = outputPath + ".raw";
+        std::error_code ec;
+        fs::create_directories(fs::path(rawPath).parent_path(), ec);
+        auto raw = readFileBytes(fullPath);
+        if (raw && writeFileBytes(rawPath, *raw))
+            LOG("Nyers titkosított masolat kiirva: " + rawPath, LogLevel::WARNING);
+        else
+            LOG("Nyers titkosított masolat nem irhato: " + rawPath, LogLevel::WARNING);
+    };
+
+    const std::string lower = toLower(relFile);
+    try {
+        std::vector<uint8_t> plain;
+        if (endsWith(lower, ".lua")) {
+            plain = findLuaBytecode(stage1, keys.candidates);
+            if (plain.empty()) {
+                // Client-side Lua needs the derived client key; when only the server
+                // key is available this is expected rather than a corruption.
+                const std::string hint = keys.candidates.size() < 2
+                    ? " (csak a szerver kulcs volt elerheto)"
+                    : "";
+                LOG("No valid Lua header for " + relFile + " - egyik " +
+                    std::to_string(keys.candidates.size()) + " kulcs sem ad vissza Lua bytecot" +
+                    hint, LogLevel::WARNING);
+                ++failed_;
+                keepRaw();
                 return;
             }
-            // alt offsets
-            if (stage1.size() > 90) {
-                std::vector<uint8_t> iv(stage1.begin() + 78, stage1.begin() + 90);
-                std::vector<uint8_t> enc(stage1.begin() + 90, stage1.end());
-                try {
-                    auto alt = chacha20Xor(decryptKey, iv, enc);
-                    if (hasLuaHeader(alt)) {
-                        processLuaFile(alt, outputPath, resourceName, relFile);
-                        return;
-                    }
-                } catch (...) {}
-            }
-            if (!altKey.empty()) {
-                auto alt2 = decryptBuffer(stage1, altKey);
-                if (hasLuaHeader(alt2)) {
-                    processLuaFile(alt2, outputPath, resourceName, relFile);
-                    return;
-                }
-            }
-
-            // No key produced a Lua header: the classification or the grants are
-            // wrong and nothing may be written out as unverified garbage.
-            LOG("No valid Lua header for " + relFile + " - key mismatch, file skipped",
-                LogLevel::WARNING);
-            ++failed_;
-            // Evidence: the encrypted input is the only copy of this data, so it is
-            // kept next to where the output would have been instead of being lost.
-            std::string rawPath = outputPath + ".raw";
-            std::error_code ec;
-            fs::create_directories(fs::path(rawPath).parent_path(), ec);
-            auto raw = readFileBytes(fullPath);
-            if (raw && writeFileBytes(rawPath, *raw))
-                LOG("Nyers titkositott masolat kiirva: " + rawPath, LogLevel::WARNING);
-            else
-                LOG("Nyers titkositott masolat nem irhato: " + rawPath, LogLevel::WARNING);
-        } else {
-            auto dec = decryptBuffer(stage1, decryptKey);
-            if (dec.empty()) { LOG("Buffer decryption failed: " + relFile, LogLevel::WARNING); ++failed_; return; }
-            writeFileBytes(outputPath, dec);
-            ++decryptedOk_;
+            processLuaFile(plain, outputPath, resourceName, relFile);
+            return;
         }
+
+        if (isStreamFile(lower)) {
+            plain = findStreamPayload(stage1, keys.candidates);
+            if (plain.empty()) {
+                LOG("No valid RSC stream for " + relFile, LogLevel::WARNING);
+                ++failed_;
+                keepRaw();
+                return;
+            }
+        } else {
+            plain = decryptAny(stage1, keys.candidates);
+            if (plain.empty()) {
+                LOG("Buffer decryption failed: " + relFile, LogLevel::WARNING);
+                ++failed_;
+                keepRaw();
+                return;
+            }
+        }
+
+        if (!writeFileBytes(outputPath, plain)) {
+            LOG("Nem irhato: " + outputPath, LogLevel::WARNING);
+            ++failed_;
+            return;
+        }
+        ++decryptedOk_;
     } catch (const std::exception& e) {
         LOG("Decrypt error " + relFile + ": " + e.what(), LogLevel::WARNING);
         ++failed_;
     }
 }
 
-void Decryptor::decryptResource(const std::string& resourcePath, const std::string& resourceName,
-                                const std::string& grantsToken) {
+void Decryptor::decryptResource(const std::string& resourcePath, const std::string& resourceName) {
     LOG("Processing resource: " + resourceName, LogLevel::INFO);
 
-    std::string fxapPath = resourcePath + "/.fxap";
-    if (!fs::exists(fxapPath)) {
-        // copy all
-        std::error_code itErr;
-        std::vector<fs::path> files;
-        for (auto& e : fs::recursive_directory_iterator(resourcePath, itErr))
-            if (e.is_regular_file()) files.push_back(e.path());
-        if (itErr) {
-            LOG(resourceName + ": figyelmeztetes - a konyvtarbejaras hiba miatt megszakadt: " +
-                itErr.message() + " - a fajlalista reszleges", LogLevel::WARNING);
-            ++failed_;
-        }
-        ProgressBar bar("  " + resourceName, files.size());
-        for (auto& f : files) {
-            std::string rel = std::filesystem::relative(f, resourcePath).generic_string();
-            std::string out = outputDir + "/" + resourceName + "/" + rel;
-            std::error_code ec;
-            fs::create_directories(fs::path(out).parent_path(), ec);
-            fs::copy_file(f, out, fs::copy_options::overwrite_existing, ec);
-            if (!ec) ++copied_; else ++failed_;
-            bar.tick();
-        }
-        bar.finish();
-        return;
-    }
-
-    auto fxapBuf = decryptFile(fxapPath, DEFAULT_KEY);
-    if (fxapBuf.empty()) { LOG("Unable to decrypt .fxap for " + resourceName, LogLevel::WARNING); return; }
-    if (fxapBuf.size() < 78) { LOG("Truncated .fxap for " + resourceName, LogLevel::WARNING); return; }
-    uint32_t resourceId = be32(fxapBuf.data() + 74);
-
-    std::string idStr = std::to_string(resourceId);
-    if (grantsMap_.find(idStr) == grantsMap_.end()) {
-        LOG("No grant for " + resourceName + " - copying as-is", LogLevel::WARNING);
-        std::error_code itErr;
-        std::vector<fs::path> files;
-        for (auto& e : fs::recursive_directory_iterator(resourcePath, itErr))
-            if (e.is_regular_file() && e.path().filename() != ".fxap") files.push_back(e.path());
-        if (itErr) {
-            LOG(resourceName + ": figyelmeztetes - a konyvtarbejaras hiba miatt megszakadt: " +
-                itErr.message() + " - a fajlalista reszleges", LogLevel::WARNING);
-            ++failed_;
-        }
-        ProgressBar bar("  " + resourceName, files.size());
-        for (auto& f : files) {
-            std::string rel = fs::relative(f, resourcePath).generic_string();
-            std::string out = outputDir + "/" + resourceName + "/" + rel;
-            std::error_code ec;
-            fs::create_directories(fs::path(out).parent_path(), ec);
-            fs::copy_file(f, out, fs::copy_options::overwrite_existing, ec);
-            if (!ec) ++copied_; else ++failed_;
-            bar.tick();
-        }
-        bar.finish();
-        return;
-    }
-
-    auto keyHex = grantsMap_[idStr].first;
-    auto clkHex = grantsMap_[idStr].second;
-    std::vector<uint8_t> decryptKey = hexDecode(keyHex);
-    if (decryptKey.size() != 32) {
-        LOG("Invalid grant key for " + resourceName + ": expected 32 bytes, got " +
-            std::to_string(decryptKey.size()) + " - resource skipped", LogLevel::WARNING);
-        ++failed_;
-        return;
-    }
-    std::vector<uint8_t> altKey;
-    if (!clkHex.empty()) {
-        std::vector<uint8_t> clk = hexDecode(clkHex);
-        if (clk.size() < 32) {
-            LOG("Invalid grants_clk for " + resourceName + ": expected at least 32 bytes, got " +
-                std::to_string(clk.size()) + " - alt key disabled", LogLevel::WARNING);
-        } else {
-            std::vector<uint8_t> iv(clk.begin(), clk.begin() + 16);
-            std::vector<uint8_t> enc(clk.begin() + 16, clk.end());
-            // The server ships grants_clk unpadded: the iv plus exactly two ciphertext
-            // blocks. PKCS#7 stripping on such a value silently eats the tail of the key
-            // whenever the last bytes happen to look padded, so the raw result is taken
-            // first and the padded variant is only a fallback for a server that would pad.
-            bool ok = aesCbc256DecryptRaw(AES_KEY, iv, enc, altKey) && altKey.size() == 32;
-            size_t rawLen = altKey.size();
-            size_t paddedLen = 0;
-            if (!ok) {
-                altKey.clear();
-                std::vector<uint8_t> padded;
-                if (aesCbc256DecryptPkcs7(AES_KEY, iv, enc, padded) && padded.size() == 32) {
-                    altKey = std::move(padded);
-                    ok = true;
-                } else {
-                    paddedLen = padded.size();
-                }
-            }
-            if (!ok) {
-                std::string obtained;
-                if (rawLen || paddedLen)
-                    obtained = "a visszakulcsolt kulcs (nyers/PKCS#7) " + std::to_string(rawLen) +
-                               "/" + std::to_string(paddedLen) + " bajt";
-                else
-                    obtained = "a kulcs visszakulcsolasa nem sikerult";
-                LOG("grants_clk nem hasznalhato a " + resourceName + " eroforrashoz: " +
-                    std::to_string(clk.size()) + " bajt, " + obtained +
-                    " - alternativ kulcs tiltva", LogLevel::WARNING);
-                altKey.clear();
-            }
-        }
-    }
-
-    // Gather non-fxap files
+    const std::string fxapPath = resourcePath + "/.fxap";
     std::error_code itErr;
     std::vector<fs::path> files;
-    for (auto& e : fs::recursive_directory_iterator(resourcePath, itErr))
-        if (e.is_regular_file() && e.path().filename() != ".fxap") files.push_back(e.path());
+    if (fs::exists(fxapPath)) {
+        for (auto& e : fs::recursive_directory_iterator(resourcePath, itErr))
+            if (e.is_regular_file() && e.path().filename() != ".fxap") files.push_back(e.path());
+    } else {
+        for (auto& e : fs::recursive_directory_iterator(resourcePath, itErr))
+            if (e.is_regular_file()) files.push_back(e.path());
+    }
     if (itErr) {
         LOG(resourceName + ": figyelmeztetes - a konyvtarbejaras hiba miatt megszakadt: " +
             itErr.message() + " - a fajlalista reszleges", LogLevel::WARNING);
         ++failed_;
     }
 
-    // Read and classify the manifest once, before the pool starts: the workers only read it.
-    const LuaManifest luaManifest = parseLuaManifest(resourcePath);
+    ResourceKeys keys;
+    if (fs::exists(fxapPath)) {
+        auto fxapBuf = decryptFile(fxapPath, DEFAULT_KEY);
+        if (fxapBuf.size() < 78) {
+            LOG("Unable to decrypt .fxap for " + resourceName +
+                " - a resource titkositatlanul atmasolva", LogLevel::WARNING);
+            ++failed_;
+        } else {
+            const uint32_t resourceId = be32(fxapBuf.data() + 74);
+            LOG("Resource ID: " + std::to_string(resourceId), LogLevel::INFO);
+            keys = resolveKeys(resourceId, resourceName);
+            if (keys.serverKeyValid) LOG(resourceName + ": grants kulcs " + keys.serverKeyHex, LogLevel::INFO);
+            if (keys.clientKeyValid) LOG(resourceName + ": klien(s kulcs " + keys.clientKeyHex, LogLevel::INFO);
+            if (!keys.clientKeyError.empty())
+                LOG(resourceName + ": klien(s kulcs nem elerheto - " + keys.clientKeyError, LogLevel::WARNING);
+            if (keys.candidates.empty()) {
+                LOG(resourceName + ": nincs hasznalhato kulcs, a resource atmasolva", LogLevel::WARNING);
+                ++failed_;
+            }
+        }
+    }
+
+    const bool copyOnly = !fs::exists(fxapPath) || keys.candidates.empty();
 
     ProgressBar bar("  " + resourceName, files.size());
     std::atomic<size_t> next{0};
-    int workers = 6;
+    const int workers = 6;
     std::vector<std::thread> pool;
     for (int w = 0; w < workers; ++w) {
         pool.emplace_back([&]() {
             for (;;) {
-                size_t i = next.fetch_add(1);
+                const size_t i = next.fetch_add(1);
                 if (i >= files.size()) break;
                 std::string rel;
                 try {
                     rel = fs::relative(files[i], resourcePath).generic_string();
-                    decryptResourceFile(resourcePath, rel, decryptKey, resourceName, altKey,
-                                        luaManifest);
+                    if (copyOnly) {
+                        const std::string out = outputDir + "/" + resourceName + "/" + rel;
+                        std::error_code ec;
+                        fs::create_directories(fs::path(out).parent_path(), ec);
+                        fs::copy_file(files[i], out, fs::copy_options::overwrite_existing, ec);
+                        if (!ec) ++copied_; else ++failed_;
+                    } else {
+                        decryptResourceFile(resourcePath, rel, keys, resourceName);
+                    }
                 } catch (const std::exception& e) {
                     LOG("File error (" + rel + "): " + std::string(e.what()), LogLevel::WARNING);
                     ++failed_;
                 } catch (...) {
-                    LOG("File error (" + rel + "): unknown exception while processing a file of " +
-                        resourceName, LogLevel::WARNING);
+                    LOG("File error (" + rel + "): ismeretlen hiba a " + resourceName +
+                        " eroforr feldolgozasa kozben", LogLevel::WARNING);
                     ++failed_;
                 }
                 bar.tick();
@@ -659,7 +823,7 @@ bool Decryptor::runAll() {
     LOG("Found " + std::to_string(dirs.size()) + " resource(s) to process", LogLevel::INFO);
 
     for (auto& d : dirs) {
-        decryptResource(d, fs::path(d).filename().string(), "");
+        decryptResource(d, fs::path(d).filename().string());
     }
 
     LOG("Decryption stats - ok:" + std::to_string(decryptedOk_.load()) +

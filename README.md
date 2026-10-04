@@ -58,8 +58,8 @@ idoben keletkezik, ezert egy mar meglevo build faban is ujra kell futnia.
 - **Manifest-backfill**: ha az RPF-kitomorigatas nem termel fxmanifest-et, azt
   kulon lekeri a `/files` vegponrol; ha az unpack egyaltalan nem sikert, a nyers
   `.rpf` megmarad
-- Titkosított (`.fxap`) resource-ok: full FXAP -> ChaCha20 -> (AES klienskulcs)
-  -> unluac Lua-decompile
+- Titkosított (`.fxap`) resource-ok: ket reteges FXAP -> ChaCha20 -> Lua-decompile
+  (reszletek lent, a "Resource dekódolás" szakaszban)
 - Connection reset / timeout: automatikus 3x retry, exponential backoff
 - A warning-ok csak a `dumper.log`-ba mennek, a konzol tiszta
 
@@ -74,6 +74,42 @@ idoben keletkezik, ezert egy mar meglevo build faban is ujra kell futnia.
 | `DUMPER_WORKERS` | parhuzamos letoltesok szama (1-64, alapertelmezett 24) |
 | `DUMPER_KEEP_TEMP` | a `Temp`, `TempCompiled` es `Unpacked` konyvtarakat megtartja hibakereseshez; csak a levaltas letege szamit (barmely ertek, ures sztring is), alapertelmezetten torolva |
 | `DUMPER_TEST_MODE=1` | nem interaktív mod |
+| `CK_CLIENT_KEY_API_URL` | a klienskulcs-szolgaltatas cime (alapertelmezett `https://grantsclk.ckcloud.de5.net`); a `CK_GRANTS_CLK_API_URL` nevet is elfogadja |
+
+## Resource dekódolás
+
+Egy titkosított eroforrassal a dumper ket reteget bont fel:
+
+1. **Kulso FXAP reteg** — a fajl `FXAP` fejleccel indul; a nonce a 74. bajttol
+   olvasott 12 bajt, a titkositott tartalom a 86. bajtol indul. A kulcs fix.
+2. **Belső reteg** — a felbontott blokk egy változó hosszuságú meta-blokkot tartalmaz
+   (a fajl SHA-256-ja es az eredeti utvonala), **majd utana** a 12 bajtos nonce, majd
+   a titkositott tartalom. A meta-blokk hossza fajlonkent valtozik (valós adatokon
+   74–105 bajt), ezért a nonce helye nem szamithato ki fix offsetbol — az
+   `uint16` hosszmezőből olvasandó ki. A regi, fix 80/92 offset csak 74 bajtos
+   meta-blokknal lenne helyes.
+
+A `.fxap` fejlece az eroforr azonositojat tartalmazza, ez alapjan ket kulcs juthat
+szobaja:
+
+| kulcs | forras | mire jo |
+|-------|-------|---------|
+| grants | a grants token `grants` mezjeje | szerveroldali fajlok |
+| kliens | a `grants_clk`-bol a kulcsszolgaltatas adja vissza | kliensoldali `.lua` |
+
+**Mindig a fajlhoz reallo kulcs nyitja ki**, nem eroforr-szinten dontunk: egyes
+fajlok a grants, masok a kliens kulccsal jonnek ki, ezert minden fajlon mindketto
+kulcsot megprobaljuk, es az elso validalt eredmeny nyer.
+
+Stream fajlok (`.awc .ybn .ydd .ydr .yft .ymap .ymf .ytd .ytyp`) az `RSC7`/`RSC8`
+fejlec alapjan ellenorzotten kerulnek kiirasra, hogy ne keruljon oda ellenorizetlen
+szemely.
+
+A kliens kulcs szolgaltatasaval a 78%-ban 64 bajtos `grants_clk` nem keresheti meg:
+a szolgaltatas csak a kanonikus 48 bajtos alakot fogadja el, es a token 64 bajtos
+erteke sem prefixként, sem suffixként nem tartalmazza azt. Az ilyen eroforraknál a
+szerveroldali fajlok dekodolodnak, a kliensoldali `.lua` pedig `<fajl>.raw`nevrel a
+titkosított eredeti peldanykent megmarad.
 
 ## Konyvtarszerkezet
 
@@ -87,8 +123,11 @@ Servers/<szervernev>/
 
 ## Megjegyzések
 
-- Az `unluac` jar az exe-ben van, de a Lua-dekompilacioshoz a gepen futtathato
-  **Java** kell (a jar onmaga nem hivatalos vegrehajthato).
+- Az `unluac` jar az exe-ben van (`v1.2.3.511`), de a Lua-dekompilacioshoz a gepen
+  futtathato **Java** kell (a jar onmaga nem hivatalos vegrehajthato). Ha a
+  deforditas meghiusul, a program megprobalja a `--disassemble` / `--assemble`
+  korulforditast a hibas cimkek javitasaval; ha ez sem sikerul, a bytecode
+  `<fajl>.luac` es a lista `<fajl>.asm` neven megmarad.
 - A beagyazott payload merete megközelitoleg ~215 MB, igy a kesz exe megközelitoleg
   ~217 MB. A pontos meret az aktualis `Bin/` tartalmatol fugg (a `Bin/` nem resze a
   git reponek).

@@ -33,6 +33,8 @@ public:
     HttpResponse postForm(const std::string& url, const std::string& formBody,
                           const std::map<std::string, std::string>& headers = {});
 
+    HttpResponse postJson(const std::string& url, const std::string& jsonBody);
+
     HttpResponse get(const std::string& url,
                      const std::map<std::string, std::string>& headers = {},
                      const ByteProgress& onProgress = nullptr,

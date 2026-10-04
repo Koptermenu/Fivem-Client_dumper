@@ -451,6 +451,11 @@ HttpResponse HttpClient::postForm(const std::string& url, const std::string& for
     return request("POST", url, &body, h, nullptr, nullptr);
 }
 
+HttpResponse HttpClient::postJson(const std::string& url, const std::string& jsonBody) {
+    std::vector<uint8_t> body(jsonBody.begin(), jsonBody.end());
+    return request("POST", url, &body, {{"Content-Type", "application/json"}}, nullptr, nullptr);
+}
+
 HttpResponse HttpClient::get(const std::string& url, const std::map<std::string, std::string>& headers,
                              const ByteProgress& onProgress, const SizeCallback& onStart) {
     return request("GET", url, nullptr, headers, onProgress, onStart);
