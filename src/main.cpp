@@ -14,6 +14,8 @@
 #include "core/HttpClient.h"
 #include "dumper/FiveMDumper.h"
 #include "dumper/Decryptor.h"
+#include "ai/Cleanup.h"
+#include "ai/LlmCleanup.h"
 #include "utils/Str.h"
 #include "utils/Term.h"
 #include "utils/Json.h"
@@ -38,6 +40,108 @@ static bool parseDigits(const std::string& s, unsigned long long& out) {
     }
     out = v;
     return true;
+}
+
+static bool askYesNo(const char* question, bool defaultYes) {
+    std::cout << question << (defaultYes ? " [Y/n]: " : " [y/N]: ");
+    std::string answer;
+    if (!std::getline(std::cin, answer)) return defaultYes;
+    answer = toLower(trim(answer));
+    if (answer.empty()) return defaultYes;
+    return answer == "y" || answer == "yes" || answer == "i";
+}
+
+// Readability pass over the decrypted Lua: a deterministic structural cleanup, then an
+// optional local language-model pass. Both write to separate trees - the decrypted Output
+// is never modified.
+static void runReadabilityPass(const std::string& serverRoot, bool testMode) {
+    const std::string outputDir = serverRoot + "/Output";
+    const std::string cleanDir = serverRoot + "/Output_clean";
+    const std::string aiDir = serverRoot + "/Output_ai";
+
+    std::error_code ec;
+    if (!fs::is_directory(outputDir, ec)) return;
+
+    const bool forceCleanup = getenv("DUMPER_CLEANUP") != nullptr;
+    const bool forceLlm = getenv("DUMPER_LLM") != nullptr;
+
+    bool wantCleanup = forceCleanup;
+    if (!wantCleanup) {
+        if (testMode) return;
+        wantCleanup = askYesNo(
+            "\nOlvashatosag javitas a dekodedolt .lua fajlokon? (determinisztikus, azonnal)",
+            true);
+    }
+    if (!wantCleanup) return;
+
+    std::cout << CLR(term::CYAN) << "\n[*]" << CLR(term::RESET) << " Strukturális tisztítás...\n";
+    const CleanupStats cs = cleanupLuaTree(outputDir, cleanDir);
+    std::cout << CLR(term::GREEN) << "[+]" << CLR(term::RESET) << " Tisztított Lua: " << cleanDir
+              << " (" << cs.files << " fajl, " << cs.renamedVars << " atnevezés, "
+              << cs.bannerRemoved << " banner, " << cs.reindentedLines << " sor indentálva)\n";
+    if (cs.gotoLabels > 0) {
+        std::cout << CLR(term::YELLOW) << "[!]" << CLR(term::RESET) << " " << cs.gotoLabels
+                  << " goto/label blokk maradt: ezeket automata atalakitas nelkul nem bantjuk.\n";
+    }
+    if (cs.ambiguousVars > 0) {
+        LOG("atnevezes kimaradt " + std::to_string(cs.ambiguousVars) +
+            " valtozonak (nincs egyertelmű kotes vagy a nevet globalis foglalja)", LogLevel::INFO);
+    }
+
+    bool wantLlm = forceLlm;
+    if (!wantLlm) {
+        if (testMode) return;
+        std::cout << "\n";
+        wantLlm = askYesNo(
+            "Nyelvi modellel is átírjam? (DeepSeek-R1-Distill-Qwen-1.5B, ~1 GB letöltés, "
+            "CPU-n lassú)", false);
+    }
+    if (!wantLlm) return;
+
+    std::string detail;
+    if (!llmAvailable(detail) && detail.find("engine=") == std::string::npos) {
+        // The engine is the hard requirement; the model is fetched below on consent.
+        std::cout << CLR(term::YELLOW) << "[!]" << CLR(term::RESET) << " " << detail << "\n";
+        std::cout << "    A llama.cpp nem resze a csomagnak; a modell letoltes ezert kimarad.\n";
+        return;
+    }
+
+    LlmOptions opts;
+    std::string modelPath;
+    std::string err;
+    if (!ensureModel(opts, !testMode,
+                     [](uint64_t done, uint64_t total) {
+                         (void)total;
+                         static uint64_t last = 0;
+                         if (done - last < (16u << 20)) return;
+                         last = done;
+                         std::cout << "\r  " << (done >> 20) << " / " << (total >> 20) << " MB"
+                                   << std::flush;
+                     },
+                     modelPath, err)) {
+        std::cout << CLR(term::YELLOW) << "[!]" << CLR(term::RESET) << " Modell: " << err << "\n";
+        return;
+    }
+    std::cout << "\n";
+
+    std::string engineDetail;
+    llmAvailable(engineDetail);
+    const std::string engine = resolveTool("Tools/llama/llama-cli.exe");
+    std::cout << CLR(term::CYAN) << "[*]" << CLR(term::RESET) << " Nyelvi modell futtatása...\n";
+
+    const LlmStats ls = llmRewriteTree(opts, cleanDir, aiDir, engine, modelPath,
+                                       [](uint64_t done, uint64_t total) {
+                                           std::cout << "\r  fajl " << done << " / " << total
+                                                     << std::flush;
+                                       });
+    std::cout << "\n";
+    std::cout << CLR(term::GREEN) << "[+]" << CLR(term::RESET) << " LLM kiemenet: " << aiDir
+              << " (" << ls.rewritten << " atirva, " << ls.skippedTooLarge << " tul nagy, "
+              << ls.failed << " hibas)\n";
+    if (ls.rewritten < ls.files) {
+        std::cout << CLR(term::YELLOW) << "[!]" << CLR(term::RESET)
+                  << " A nem atirt fajlok a " << cleanDir << " mappaban maradtak.\n";
+    }
 }
 
 int main(int argc, char** argv) {
@@ -253,6 +357,8 @@ int main(int argc, char** argv) {
 
     const std::string serverRoot = "Servers/" + dumper->serverDir;
     const bool keepTemp = getenv("DUMPER_KEEP_TEMP") != nullptr;
+
+    if (decryptOk) runReadabilityPass(serverRoot, testMode);
 
     if (keepTemp) {
         std::cout << CLR(term::YELLOW) << "[!]" << CLR(term::RESET)

@@ -74,6 +74,8 @@ idoben keletkezik, ezert egy mar meglevo build faban is ujra kell futnia.
 | `DUMPER_WORKERS` | parhuzamos letoltesok szama (1-64, alapertelmezett 24) |
 | `DUMPER_KEEP_TEMP` | a `Temp`, `TempCompiled` es `Unpacked` konyvtarakat megtartja hibakereseshez; csak a levaltas letege szamit (barmely ertek, ures sztring is), alapertelmezetten torolva |
 | `DUMPER_TEST_MODE=1` | nem interaktív mod |
+| `DUMPER_CLEANUP=1` | strukturális Lua-tisztítás nem interaktív módban is |
+| `DUMPER_LLM=1` | a nyelvi modelles átírás nem interaktív módban is |
 | `CK_CLIENT_KEY_API_URL` | a klienskulcs-szolgaltatas cime (alapertelmezett `https://grantsclk.ckcloud.de5.net`); a `CK_GRANTS_CLK_API_URL` nevet is elfogadja |
 
 ## Resource dekódolás
@@ -111,14 +113,62 @@ erteke sem prefixként, sem suffixként nem tartalmazza azt. Az ilyen eroforrakn
 szerveroldali fajlok dekodolodnak, a kliensoldali `.lua` pedig `<fajl>.raw`nevrel a
 titkosított eredeti peldanykent megmarad.
 
+## Lua olvashatosag
+
+A 2. fazis utan a program felajanlja a dekodedolt `.lua` fajlok javitasat. **A
+dekódolt `Output` soha nem modszul** — minden javitas kulon mappaba kerul.
+
+### Strukturális tisztitas (`Output_clean`)
+
+Determinisztikus, hatokor-tudatos, offline, egeszre percek alatt:
+
+1. **Banner torles** — a decompiler fejlece (a fajl elején alló komment-blokk) elnyilik.
+   A fajl belsejeben levo kommentek megmaradnak.
+2. **Valtozonevek** — az unluac szintetikus nevei (`SHX0_1`, `L3_2`) a bevezető kötés
+   alapján nevet kapnak (`SHX0_1 = {}` -> `table1`, `SHX3_1 = false` -> `flag1`).
+   Ket okbol szokas megmaradni:
+   - ha a kotes nem egyertelmu (`f()` hivas, oszetett kifejezes)
+   - ha anev globalist vagy builtint fogyna (pl. `SHX7_1 = RegisterNetEvent`), mert
+     atnevezeskor a kotes jobb oldala mar a lokalisra mutatna, es a globalis elkapas
+     elcsuszna. Ilyenkor az eredeti `SHX`/`L` nev marad.
+3. **Ujra indentalas** — 4 spaces per blokk, a forras sorzarasaval megtartva.
+
+A `goto` / `::label::` blokkokat **nem** alakitjuk at: parser nelkul a ciklusos
+atiranyitas viselkodest valtoztatna. A talalt blokkok szam jelzesre kerul.
+
+Biztonsag: a tokenizalo nem nyul a stringekbe es a kommentekbe, es a(z) output
+kulon konyvtarba kerul, igy a romba nem kerulhet vissza.
+
+### Nyelvi modell (`Output_ai`, opcionalis)
+
+Kulon kerdesre letolti a **DeepSeek-R1-Distill-Qwen-1.5B** Q4_K_M kvantot
+(~1,04 GB) a Hugging Face-rol, SHA-256 ellenorzessel, majd atirja a tisztitott
+fajlokat.
+
+- A **futtatot nem toltjuk le**: a llama.cpp nem ad stabil Windows binarist, csak
+  rolling nightly artifactokat. Helyezd el a `llama-cli.exe`-t a
+  `Tools/llama/llama-cli.exe` helyre — ugyanaz a `resolveTool` kereses, mint a
+  `Bin/Unpacker.exe`-hoz.
+- A modell fajl itt van: `%LOCALAPPDATA%\FiveMDumper\models\`
+- Csak a 24 KB alatti fajlok mennek at (nagyobb fajl atirasa nem fer el a kontextusba)
+- Ha a modell outputja ures, rosszul keretezozott vagy kiegyenlenségtelen Lua,
+  a **tisztitott** fajl marad a helyén
+
+> **Tudasd**: CPU-n ez lassu. Egy 40 KB-os fajl ~10-20 perc, es egy 50 fajlos
+> resource tobb orat vesz ig. A nyelvi modell 1,5B parametere hallucinálhat, ezért
+> csak külön mappaba ír és sose a dekódolt kódra.
+
 ## Konyvtarszerkezet
 
 ```
 Servers/<szervernev>/
   Resources/Grants.txt
   Output/<resource>/...      <- a kesz, dekodolt fajlok
+  Output_clean/<resource>/   <- strukturálisan tisztított Lua (nem irja felul az Outputot)
+  Output_ai/<resource>/      <- nyelvi modellel atirt Lua (nem irja felul az elozket)
 %LOCALAPPDATA%/FiveMDumper/payload/   <- az exe-bol kicsomagolt Bin/ es jar
                                         (onallo exe: nem kell kulon letolteni)
+%LOCALAPPDATA%/FiveMDumper/models/    <- a letoltott nyelvi modell
 ```
 
 ## Megjegyzések
