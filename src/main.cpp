@@ -14,7 +14,6 @@
 #include "dumper/FiveMDumper.h"
 #include "dumper/Decryptor.h"
 #include "ai/Cleanup.h"
-#include "ai/LlmCleanup.h"
 #include "utils/Str.h"
 #include "utils/Term.h"
 #include "utils/Json.h"
@@ -46,11 +45,9 @@ static bool askYesNo(const char* question, bool defaultYes) {
 static void runReadabilityPass(const std::string& serverRoot, bool testMode) {
     const std::string outputDir = serverRoot + "/Output";
     const std::string cleanDir = serverRoot + "/Output_clean";
-    const std::string aiDir = serverRoot + "/Output_ai";
     std::error_code ec;
     if (!fs::is_directory(outputDir, ec)) return;
     const bool forceCleanup = getenv("DUMPER_CLEANUP") != nullptr;
-    const bool forceLlm = getenv("DUMPER_LLM") != nullptr;
     bool wantCleanup = forceCleanup;
     if (!wantCleanup) {
         if (testMode) return;
@@ -71,87 +68,6 @@ static void runReadabilityPass(const std::string& serverRoot, bool testMode) {
     if (cs.ambiguousVars > 0) {
         LOG("atnevezes kimaradt " + std::to_string(cs.ambiguousVars) +
             " valtozonak (nincs egyertelmű kotes vagy a nevet globalis foglalja)", LogLevel::INFO);
-    }
-    bool wantLlm = forceLlm;
-    if (!wantLlm) {
-        if (testMode) return;
-        const char* want = getenv("DUMPER_LLM_MODEL");
-        const LlmModel& m = llmModelById(want ? want : "coder");
-        const uint64_t engineBytes = llmEngineDownloadBytes();
-        const uint64_t total = m.size + engineBytes;
-        const auto gb = [](uint64_t n) {
-            return static_cast<double>(n) / (1024.0 * 1024.0 * 1024.0);
-        };
-        std::cout << "\n";
-        std::cout << CLR(term::BOLD) << "AI-val atirjam a kodot?" << CLR(term::RESET) << "\n";
-        std::cout << "    modell: " << m.displayName << " ("
-                  << std::fixed << std::setprecision(2) << gb(m.size) << " GB)\n";
-        std::cout << "    futtato: llama.cpp " << llmBackendName() << " ("
-                  << std::fixed << std::setprecision(2) << gb(engineBytes) << " GB)\n";
-        std::cout << "    osszesen: " << std::fixed << std::setprecision(2) << gb(total)
-                  << " GB letoltes\n";
-        std::cout << "    normalis GPU kell hozza, lehetoleg NVIDIA. Vulkan build 31 MB, "
-                     "de lassabb.\n";
-        std::cout << "    Ha a modell rossz kodot ad, a tisztitott fajl marad a helyen.\n";
-        wantLlm = askYesNo("    Letoltes es futtatas?", false);
-    }
-    if (!wantLlm) return;
-    std::string engine;
-    std::string engErr;
-    const ProgressFn dlProgress = [](uint64_t done, uint64_t total) {
-        static uint64_t last = 0;
-        if (done - last < (16u << 20)) return;
-        last = done;
-        std::cout << "\r  " << (done >> 20) << " / " << (total >> 20) << " MB" << std::flush;
-    };
-    if (!ensureEngine(!testMode, dlProgress, engine, engErr)) {
-        std::cout << CLR(term::YELLOW) << "[!]" << CLR(term::RESET)
-                  << " Futtato: " << engErr << "\n";
-        return;
-    }
-    std::cout << "\n" << CLR(term::GREEN) << "[+]" << CLR(term::RESET) << " Futtato: " << engine
-              << "\n";
-    LlmOptions opts;
-    opts.model = &llmModelById(getenv("DUMPER_LLM_MODEL") ? getenv("DUMPER_LLM_MODEL") : "coder");
-    if (const char* v = getenv("DUMPER_LLM_TIMEOUT")) {
-        const long s = strtol(v, nullptr, 10);
-        if (s >= 10 && s <= 86400) {
-            opts.totalTimeoutMs = static_cast<DWORD>(s) * 1000;
-            opts.fileTimeoutMs = static_cast<DWORD>(s) * 1000;
-        }
-    }
-    std::string modelPath;
-    std::string err;
-    if (!ensureModel(opts, !testMode,
-                     [](uint64_t done, uint64_t total) {
-                         (void)total;
-                         static uint64_t last = 0;
-                         if (done - last < (16u << 20)) return;
-                         last = done;
-                         std::cout << "\r  " << (done >> 20) << " / " << (total >> 20) << " MB"
-                                   << std::flush;
-                     },
-                     modelPath, err)) {
-        std::cout << CLR(term::YELLOW) << "[!]" << CLR(term::RESET) << " Modell: " << err << "\n";
-        return;
-    }
-    std::cout << "\n";
-    std::cout << CLR(term::CYAN) << "[*]" << CLR(term::RESET) << " Nyelvi modell futtatása...\n";
-    const LlmStats ls = llmRewriteTree(opts, cleanDir, aiDir, engine, modelPath,
-                                       [](uint64_t done, uint64_t total) {
-                                           std::cout << "\r  fajl " << done << " / " << total
-                                                     << std::flush;
-                                       });
-    std::cout << "\n";
-    std::cout << CLR(term::GREEN) << "[+]" << CLR(term::RESET) << " LLM kiemenet: " << aiDir
-              << " (" << ls.rewritten << " atirva, " << ls.failed << " hibas, "
-              << ls.skippedAlreadyClean << " mar tisztta, " << ls.skippedTooLarge << " tul nagy, "
-              << ls.skippedOutOfTime << " idobudgetbol kimaradt)\n";
-    std::cout << "    ido: " << (ls.elapsedMs / 1000) << " s / " << (opts.totalTimeoutMs / 1000)
-              << " s keret\n";
-    if (ls.rewritten < ls.files) {
-        std::cout << CLR(term::YELLOW) << "[!]" << CLR(term::RESET)
-                  << " A nem atirt fajlok a " << cleanDir << " mappaban maradtak.\n";
     }
 }
 int main(int argc, char** argv) {

@@ -75,11 +75,6 @@ idoben keletkezik, ezert egy mar meglevo build faban is ujra kell futnia.
 | `DUMPER_KEEP_TEMP` | a `Temp`, `TempCompiled` es `Unpacked` konyvtarakat megtartja hibakereseshez; csak a levaltas letege szamit (barmely ertek, ures sztring is), alapertelmezetten torolva |
 | `DUMPER_TEST_MODE=1` | nem interaktív mod |
 | `DUMPER_CLEANUP=1` | strukturális Lua-tisztítás nem interaktív módban is |
-| `DUMPER_LLM=1` | a nyelvi modelles átírás nem interaktív módban is |
-| `DUMPER_LLM_BACKEND` | `auto` (alapértelmezett), `cuda`, `vulkan` vagy `cpu` — az inference futtató buildje |
-| `DUMPER_LLM_MODEL` | `coder` (alapértelmezett) vagy `r1` — melyik modell |
-| `DUMPER_LLM_MAX_TOKENS` | fajlonkénti tokenbüdzsé (alap 4096, 512–262144) |
-| `DUMPER_LLM_TIMEOUT` | az AI resz teljes idokerete másodpercben (alap 300 = 5 perc) |
 | `CK_CLIENT_KEY_API_URL` | a klienskulcs-szolgaltatas cime (alapertelmezett `https://grantsclk.ckcloud.de5.net`); a `CK_GRANTS_CLK_API_URL` nevet is elfogadja |
 
 ## Resource dekódolás
@@ -143,94 +138,6 @@ atiranyitas viselkodest valtoztatna. A talalt blokkok szam jelzesre kerul.
 Biztonsag: a tokenizalo nem nyul a stringekbe es a kommentekbe, es a(z) output
 kulon konyvtarba kerul, igy a romba nem kerulhet vissza.
 
-### Nyelvi modell (`Output_ai`, opcionalis)
-
-A program a 2. fazis vegen kerdez, hogy atirja-e a kodot AI-val, es kiirja a
-letoltes meretet es a GPU-igennyet.
-
-**Alapertelmezett modell: `Qwen2.5-Coder-1.5B-Instruct` (Q4_K_M, 940 MB).** Ez egy
-*nem gondolkodo* kodmodell, ezert megbízhatóan visszaadja a kódot.
-
-A korábbi `DeepSeek-R1-Distill-Qwen-1.5B` (`DUMPER_LLM_MODEL=r1`) **gondolkodó**
-modell: a kimenet elott hosszu `[Start thinking]` nyom jelenik meg, ami egy
-8,7 KB-os fajlon elfogyasztja a teljes tokenbudzsét, es a kodblokk soha nem
-zarul — ilyenkor a tisztitott valtozat marad meg.
-
-#### A futtato automatikus telepitese
-
-Ha a `llama-cli.exe` nincs a `Tools/llama/` alatt, a program felajanlja a
-letolteset. A build **pinelt** (`b11146` nightly), a meret es a SHA-256 be van
-egyerasztva, tehat reprodukalhato — nem "ami ma a legujabb".
-
-| build | letöltés | mikor választja |
-|-------|----------|-----------------|
-| `cuda` (2 csomag) | 143 + 404 MB | NVIDIA GPU, és nincs telepített CUDA runtime |
-| `cuda` (1 csomag) | 143 MB | NVIDIA GPU, és a CUDA runtime már telepítve |
-| `vulkan` | 31 MB | Vulkan loader van, de nincs NVIDIA |
-| `cpu` | 18 MB | nincs GPU |
-
-Az `auto` (`DUMPER_LLM_BACKEND`) ezt a táblát követi a gépen.
-
-**A CUDA build két archívumból áll.** A `llama-…-cuda-13.4-x64.zip` tartalmazza a
-binárisokat, a `cudart-llama-bin-win-cuda-13.4-x64.zip` pedig *csak* a
-cublas/cudart DLL-eket — a neve ellenére nem önálló csomag. Mindkettő ugyanabba a
-mappába csomagolódik, így **nem kell** CUDA toolkit a gépre. Csak a bináris
-archívumot kicsomagolva nincs `llama-cli.exe` a gépen.
-
-A kicsomagolt fájl: `%LOCALAPPDATA%\FiveMDumper\engine\<backend>\`
-
-#### A modell fajl
-
-`%LOCALAPPDATA%\FiveMDumper\models\`
-
-- Csak a 16 KB alatti fajlok mennek at (nagyobb fajl atirasa nem fer el a kontextusba)
-- **Csak azokat a fajlokat futtatja, amiknek meg van dolga** — amikben maradt `SHX`
-  vagy `goto`/`::label::`. A maradék determinisztikusan tisztitva van, az nem megy
-  at a modellen.
-
-#### Amit a modell biztosan nem tehet
-
-A valaszt **csak akkor** fogadja el, ha a token-stream pontosan egyezik a bemenetevel:
-
-- ugyanannyi token, ugyanolyan sorrendben
-- a stringek, szamok es szimbulumumok **változatlanok**
-- az azonositok atnevezhetok, de **konzisztensen**: egy regi nevu mindig ugyanazt az
-  uj nevet kapja, es ketto nem kaphatja ugyanazt
-
-Kimaradhat a whitespace es a komment. Ennyi a megengedett valtozas — igy az atiras
-**nem tudja megvaltoztatni a viselkedeset**, mert az egyetlen megvaltozto elem az
-helyi nevek spellese. Ha a modell kihagy egy sort, eltorzit egy literalt, vagy
-kiesik egy kulcsszo, a token-stream elcsuszik es a **tisztitott fajl marad a helyen**.
-
-> Merve: egy 1,5B-as modell *igyekszik* megvaltoztani a kodot — egyik fajlbol
-> elhagyta a `function` kulcsszot, es a sorszam ellenere atment egy
-> "kimaradt kevesebb mint fele" ellenorzesen. A token-szintu ellenorzes ezt
-> elkapja, a hossz-alap nem.
-
-Ket probalkozas utan, ha megse sikerul, a tisztitott fajl marad.
-
-#### Idokeret: 5 perc
-
-A nyelvi resz **osszesen 5 percig** futhat, feladataronkenti idobudgettel egyutt:
-
-- a marado ido a **fajlok kozott** ellenorzozodik, ezert a befejezett fajl mindig
-  belfer
-- a futo processz csak a **fennmarado** budgetig futhat, nem a teljes 5 percig —
-  kulonben a hatar-idobeli fajl 5 percet tullepne
-- a lejart processzet a program **`TerminateProcess`-szel lekilleli**, nem varakozik
-  korlátlanul
-
-Aki turebbet akar: `DUMPER_LLM_TIMEOUT=1800` (masodpercben, 10–86400 kozott).
-
-> **Kereskedobozag**: ha a lejarni processz elakadna, a hozza tartozo olvaso
-> szalak sosem erhetenek EOF-ot. Az eredeti kod a szalak `join()`-jat **a**
-> `WaitForSingleObject` **ELOTT** hívta, igy egy beragadt processzen a 30 perces
-> timeout is halott kod volt: sosem jutott el addig.
-
-> **Tudasd**: egy 1,5B-as modell hallucinálhat, ezert a kimenet soha nem kerül a
-> dekódolt kódra, csak külön mappába. RTX 4060-on ~140 token/mp, igy egy 16 KB-os
-> fajl ket perc alatt megy. Vulkanon lassabb, CPU-n igen lassú.
-
 ## Konyvtarszerkezet
 
 ```
@@ -238,10 +145,8 @@ Servers/<szervernev>/
   Resources/Grants.txt
   Output/<resource>/...      <- a kesz, dekodolt fajlok
   Output_clean/<resource>/   <- strukturálisan tisztított Lua (nem irja felul az Outputot)
-  Output_ai/<resource>/      <- nyelvi modellel atirt Lua (nem irja felul az elozket)
 %LOCALAPPDATA%/FiveMDumper/payload/   <- az exe-bol kicsomagolt Bin/ es jar
                                         (onallo exe: nem kell kulon letolteni)
-%LOCALAPPDATA%/FiveMDumper/models/    <- a letoltott nyelvi modell
 ```
 
 ## Megjegyzések
