@@ -12,6 +12,7 @@ struct CleanupStats {
     int gotoLabels = 0;
     int reindentedLines = 0;
     int inlinedAliases = 0;
+    int deadStores = 0;
     int suspicious = 0;
 };
 struct CleanupResult {
@@ -22,6 +23,7 @@ struct CleanupResult {
     int gotoLabels = 0;
     int reindentedLines = 0;
     int inlinedAliases = 0;
+    int deadStores = 0;
     std::string text;
 };
 CleanupResult cleanupLua(const std::string& source);

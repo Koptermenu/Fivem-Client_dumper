@@ -60,7 +60,8 @@ static void runReadabilityPass(const std::string& serverRoot, bool testMode) {
     const CleanupStats cs = cleanupLuaTree(outputDir, cleanDir);
     std::cout << CLR(term::GREEN) << "[+]" << CLR(term::RESET) << " Tisztított Lua: " << cleanDir
               << " (" << cs.files << " fajl, " << cs.renamedVars << " atnevezés, "
-              << cs.inlinedAliases << " beagyazott alias, " << cs.bannerRemoved << " banner, "
+              << cs.inlinedAliases << " beagyazott alias, " << cs.deadStores
+              << " halott ertekites torolve, " << cs.bannerRemoved << " banner, "
               << cs.reindentedLines << " sor indentálva)\n";
     if (cs.ambiguousVars > 0) {
         std::cout << CLR(term::YELLOW) << "[!]" << CLR(term::RESET) << " " << cs.ambiguousVars

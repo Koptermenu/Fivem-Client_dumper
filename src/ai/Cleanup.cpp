@@ -252,9 +252,126 @@ std::string applyInline(const std::string& src, const std::vector<Token>& toks,
     return collapsed;
 }
 std::set<std::string> collectLocalNames(const std::vector<Token>& toks);
-std::string inlineAliases(const std::string& src, int& inlined) {
+bool isSideEffectFree(const std::vector<Token>& toks, size_t value, size_t end) {
+    if (value >= end) return false;
+    const Token& v = toks[value];
+    const bool literal = v.kind == Tok::String || v.kind == Tok::Number ||
+                         (v.kind == Tok::Name && !lua::isKeyword(v.text)) ||
+                         (v.kind == Tok::Name && (v.text == "nil" || v.text == "true" ||
+                                                  v.text == "false"));
+    if (!literal) return false;
+    const size_t next = significantIndex(toks, value + 1);
+    return next >= end || toks[next].kind == Tok::End || toks[next].kind == Tok::Space;
+}
+bool eliminateDeadStores(const std::string& src, std::string& out, int& removed) {
+    const std::vector<Token> toks = lua::tokenize(src);
+    const size_t n = toks.size();
+    std::vector<size_t> assignPos;
+    std::string drop;
+
+    std::set<std::string> ambiguous;
+    for (size_t i = 0; i < n; ++i) {
+        if (toks[i].kind != Tok::Name || lua::isKeyword(toks[i].text)) continue;
+        const size_t eq = significantIndex(toks, i + 1);
+        if (eq < n && toks[eq].kind == Tok::Symbol && toks[eq].text == ",") {
+            const size_t eq2 = significantIndex(toks, eq + 1);
+            if (eq2 < n && toks[eq2].kind == Tok::Name) {
+                ambiguous.insert(toks[i].text);
+                ambiguous.insert(toks[eq2].text);
+            }
+        }
+    }
+    for (size_t i = 0; i + 1 < n; ++i) {
+        if (toks[i].kind == Tok::Name && toks[i].text == "for") {
+            for (size_t k = i + 1; k < n && k < i + 5; ++k) {
+                if (toks[k].kind == Tok::Name && toks[k].text != "in" &&
+                    toks[k].text != "do") {
+                    ambiguous.insert(toks[k].text);
+                }
+                if (toks[k].kind == Tok::Name && toks[k].text == "do") break;
+            }
+        }
+    }
+    for (size_t i = 0; i < n; ++i) {
+        if (toks[i].kind != Tok::Name) continue;
+        const std::string& name = toks[i].text;
+        if (lua::isKeyword(name) || name.rfind("SHX", 0) != 0) continue;
+        if (ambiguous.count(name)) continue;
+        std::vector<size_t> writes;
+        for (size_t k = 0; k < n; ++k) {
+            if (toks[k].kind != Tok::Name || toks[k].text != name) continue;
+            const size_t eq = significantIndex(toks, k + 1);
+            if (eq < n && toks[eq].kind == Tok::Symbol && toks[eq].text == "=") {
+                writes.push_back(k);
+            }
+        }
+        if (writes.size() < 2) continue;
+        for (size_t w = 0; w + 1 < writes.size(); ++w) {
+            const size_t from = writes[w];
+            const size_t to = writes[w + 1];
+            bool read = false;
+            for (size_t k = from + 1; k < to; ++k) {
+                if (toks[k].kind == Tok::Name && toks[k].text == name) {
+                    read = true;
+                    break;
+                }
+            }
+            if (read) continue;
+            const size_t eq = significantIndex(toks, from + 1);
+            const size_t value = significantIndex(toks, eq + 1);
+            const size_t stmtEnd = statementEnd(toks, from, value);
+            if (!isSideEffectFree(toks, value, stmtEnd + 1)) continue;
+            for (size_t k = from; k <= stmtEnd; ++k) drop += std::to_string(k) + ",";
+            ++removed;
+        }
+    }
+    if (drop.empty()) return false;
+    std::set<size_t> dead;
+    {
+        size_t at = 0;
+        while (at < drop.size()) {
+            const size_t comma = drop.find(',', at);
+            const std::string piece = drop.substr(at, comma - at);
+            if (!piece.empty()) dead.insert(static_cast<size_t>(std::stoul(piece)));
+            if (comma == std::string::npos) break;
+            at = comma + 1;
+        }
+    }
+    std::string raw;
+    raw.reserve(src.size());
+    for (size_t i = 0; i < n; ++i) {
+        if (toks[i].kind == Tok::End) break;
+        if (dead.count(i)) continue;
+        raw.append(src, toks[i].begin, toks[i].end - toks[i].begin);
+    }
+    out.clear();
+    out.reserve(raw.size());
+    size_t p = 0;
+    while (p < raw.size()) {
+        if (raw[p] == '\r') { ++p; continue; }
+        if (raw[p] == '\n') {
+            int blanks = 0;
+            size_t j = p;
+            while (j < raw.size() && (raw[j] == ' ' || raw[j] == '\t' || raw[j] == '\r')) ++j;
+            if (j < raw.size() && raw[j] == '\n') {
+                ++blanks;
+                p = j + 1;
+                if (blanks >= 2) continue;
+                out += '\n';
+                continue;
+            }
+            ++p;
+            continue;
+        }
+        out += raw[p];
+        ++p;
+    }
+    return true;
+}
+std::string simplifyLocals(const std::string& src, int& inlined, int& deadStores) {
     std::string working = src;
-    for (int round = 0; round < 64; ++round) {
+    std::string next;
+    for (int round = 0; round < 128; ++round) {
         const std::vector<Token> toks = lua::tokenize(working);
         const std::set<std::string> declared = collectLocalNames(toks);
         bool progress = false;
@@ -266,7 +383,12 @@ std::string inlineAliases(const std::string& src, int& inlined) {
             progress = true;
             break;
         }
-        if (!progress) break;
+        if (!progress) {
+            int found = 0;
+            if (!eliminateDeadStores(working, next, found)) break;
+            working = std::move(next);
+            deadStores += found;
+        }
     }
     return working;
 }
@@ -471,7 +593,6 @@ std::string stripBanners(const std::string& src, int& removed) {
     const std::vector<Token> toks = lua::tokenize(src);
     std::vector<Token> keep;
     keep.reserve(toks.size());
-
     size_t i = 0;
     while (i < toks.size()) {
         if (toks[i].kind == Tok::End) break;
@@ -514,7 +635,6 @@ std::string stripBanners(const std::string& src, int& removed) {
         if (t.kind == Tok::End) break;
         out.append(src, t.begin, t.end - t.begin);
     }
-
     std::string collapsed;
     collapsed.reserve(out.size());
     size_t p = 0;
@@ -568,9 +688,12 @@ CleanupResult cleanupLua(const std::string& source) {
         toks = lua::tokenize(working);
     }
     int inlined = 0;
-    if (std::string collapsed = inlineAliases(working, inlined); collapsed != working) {
+    int deadStores = 0;
+    if (std::string collapsed = simplifyLocals(working, inlined, deadStores);
+        collapsed != working) {
         working = std::move(collapsed);
         result.inlinedAliases = inlined;
+        result.deadStores = deadStores;
         result.changed = true;
         toks = lua::tokenize(working);
         if (hasUnterminatedString(toks)) {
@@ -658,6 +781,7 @@ CleanupStats cleanupLuaTree(const std::string& rootIn, const std::string& rootOu
         stats.gotoLabels += r.gotoLabels;
         stats.reindentedLines += r.reindentedLines;
         stats.inlinedAliases += r.inlinedAliases;
+    stats.deadStores += r.deadStores;
     }
     return stats;
 }
