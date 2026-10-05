@@ -256,8 +256,16 @@ int main(int argc, char** argv) {
     bool decryptOk = decryptor.runAll();
     std::cout << "\n" << CLR(decryptOk ? term::GREEN : term::YELLOW)
               << "==============================================\n";
-    std::cout << (decryptOk ? " Done! Output: " : " Done, but some files failed to decrypt! Output: ")
-              << "Servers/" << dumper->serverDir << "/Output\n";
+    if (!decryptor.grantsLoaded()) {
+        std::cout << " Nem sikerult elkezdeni: a kulcstoken hianyzik, ezert egyetlen .fxap "
+                     "se nyult hozza.\n    Futtasd meg a letoltest a FiveM-hez csatlakozva, "
+                     "hogy a Grants.txt megszulelesre keruljon.\n";
+    } else if (decryptOk) {
+        std::cout << " Kesz! Output: Servers/" << dumper->serverDir << "/Output\n";
+    } else {
+        std::cout << " Kesz, de egyes fajlok nem oldodtak fel: Servers/" << dumper->serverDir
+                  << "/Output\n";
+    }
     std::cout << "==============================================" << CLR(term::RESET) << "\n";
     const std::string serverRoot = "Servers/" + dumper->serverDir;
     const bool keepTemp = getenv("DUMPER_KEEP_TEMP") != nullptr;

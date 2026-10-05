@@ -334,10 +334,20 @@ Decryptor::Decryptor(std::string serverDir)
 bool Decryptor::loadGrants() {
     std::string path = "Servers/" + serverDir_ + "/Resources/Grants.txt";
     auto data = readFileBytes(path);
-    if (!data) { LOG("No Grants.txt found", LogLevel::ERROR); return false; }
-    std::string token(data->begin(), data->end());
+    if (!data) {
+        LOG("Nincs kulcstoken: " + path, LogLevel::ERROR);
+        LOG("A .fxap fajlokat a szerver kulcsaival oldjuk fel, es a tokenbol jonnek. "
+            "Futtasd meg a letoltest (1. fazis) a FiveM-hez csatlakozva, vagy másold vissza "
+            "a Grants.txt-t a helyere. Addig egyetlen .fxap sem dekódolható.",
+            LogLevel::ERROR);
+        return false;
+    }
+    grantsLoaded_ = true;    std::string token(data->begin(), data->end());
     auto parts = splitStr(token, ".");
-    if (parts.size() < 2) { LOG("Malformed grants token", LogLevel::ERROR); return false; }
+    if (parts.size() < 2) {
+        LOG("Malakultszeru kulcstoken: " + path + " (nincs benne pont)", LogLevel::ERROR);
+        return false;
+    }
     std::string payload = parts[1];
     size_t mod = payload.size() % 4;
     if (mod) payload.append(4 - mod, '=');

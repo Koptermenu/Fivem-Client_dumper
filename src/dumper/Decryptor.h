@@ -9,6 +9,7 @@ class Decryptor {
 public:
     explicit Decryptor(std::string serverDir);
     bool runAll();
+    bool grantsLoaded() const { return grantsLoaded_; }
     std::string outputDir;
     std::string tempDir;
     std::string unpackedDir;
@@ -32,6 +33,7 @@ private:
     std::string serverDir_;
     std::map<std::string, std::pair<std::string, std::string>> grantsMap_;
     bool loadGrants();
+    bool grantsLoaded_ = false;
     std::atomic<int> decryptedOk_{0}, failed_{0}, copied_{0};
 };
 } 
