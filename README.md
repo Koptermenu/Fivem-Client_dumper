@@ -131,12 +131,44 @@ Determinisztikus, hatokor-tudatos, offline, egeszre percek alatt:
      atnevezeskor a kotes jobb oldala mar a lokalisra mutatna, es a globalis elkapas
      elcsuszna. Ilyenkor az eredeti `SHX`/`L` nev marad.
 3. **Ujra indentalas** — 4 spaces per blokk, a forras sorzarasaval megtartva.
+4. **Egyszer használt alias beágyazása** — a decompiler gyakran minden értéket egy
+   eldobható lokálon keresztül vezet:
+
+   ```lua
+   local SHX0_1, text1
+   SHX0_1 = print
+   text1 = "Hello, World!"
+   SHX0_1(text1)
+   ```
+
+   ebből `print("Hello, World!")` lesz. A feltételek, hogy ez biztonságos:
+
+   - a lokál **keresztelés nélkül** van deklarálva (nincs inicializáló)
+   - **pontosan egyszer** van hozzárendelve, egyetlen literállal vagy sima globális
+     nevet kap
+   - **pontosan egyszer** van olvasva, és az **a hozzárendelés után** következik —
+     ez az, ami kizárja a lezáró elemet korábban becsülő függvényt
+   - nem egy hívás argumentuma összetett kifejezés, és nem `:metódus` hívás
+     literállal
+
+   A lánc rekurzívan összeáll: a `text1` is beágyazódik, így egy menet alatt a
+   teljes `print("Hello, World!")` keletkezik.
 
 A `goto` / `::label::` blokkokat **nem** alakitjuk at: parser nelkul a ciklusos
 atiranyitas viselkodest valtoztatna. A talalt blokkok szam jelzesre kerul.
 
-Biztonsag: a tokenizalo nem nyul a stringekbe es a kommentekbe, es a(z) output
-kulon konyvtarba kerul, igy a romba nem kerulhet vissza.
+### Ellenorzes
+
+A tisztítás **állításokat töröl**, ezért a token-egyezés önmagában nem elég.
+A `luac -p`-vel ellenőrizünk: a 12 valódi resource 160 fájljából a dekódolat
+állapotban 108-ból 18 eleve érvénytelen (a decompiler kimenete nem mindig valid
+Lua), és **tisztítás után ugyanaz a 18 marad érvénytelen, új hiba nélkül**.
+
+> Az `SHX7_1 = RegisterNetEvent` név szándékosan marad. Átnevezni
+> `RegisterNetEvent`-re csak úgy lehetne, ha a globális nevet elrejtenénk — de akkor
+> a kötés jobb oldala (`RegisterNetEvent = RegisterNetEvent`) már a *lokálisra* mutatna.
+> Ezért az ilyen nevet nem szabad elrejteni: egy félrevezető nevű változó jobb, mint egy
+> eltört kód.
 
 ## Konyvtarszerkezet
 

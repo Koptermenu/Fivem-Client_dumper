@@ -60,7 +60,13 @@ static void runReadabilityPass(const std::string& serverRoot, bool testMode) {
     const CleanupStats cs = cleanupLuaTree(outputDir, cleanDir);
     std::cout << CLR(term::GREEN) << "[+]" << CLR(term::RESET) << " Tisztított Lua: " << cleanDir
               << " (" << cs.files << " fajl, " << cs.renamedVars << " atnevezés, "
-              << cs.bannerRemoved << " banner, " << cs.reindentedLines << " sor indentálva)\n";
+              << cs.inlinedAliases << " beagyazott alias, " << cs.bannerRemoved << " banner, "
+              << cs.reindentedLines << " sor indentálva)\n";
+    if (cs.ambiguousVars > 0) {
+        std::cout << CLR(term::YELLOW) << "[!]" << CLR(term::RESET) << " " << cs.ambiguousVars
+                  << " valtozonak megmaradt a decompiler neve: a kotesuk egy globalis nevet "
+                     "hasznal, amit nem lehet elrejteni.\n";
+    }
     if (cs.gotoLabels > 0) {
         std::cout << CLR(term::YELLOW) << "[!]" << CLR(term::RESET) << " " << cs.gotoLabels
                   << " goto/label blokk maradt: ezeket automata atalakitas nelkul nem bantjuk.\n";
