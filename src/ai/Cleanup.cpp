@@ -1,9 +1,11 @@
-#include "Cleanup.h"
+﻿#include "Cleanup.h"
 #include "LuaLexer.h"
 #include "../core/Logger.h"
 #include "../utils/Str.h"
 #include <algorithm>
 #include <cctype>
+#include <cstdio>
+#include <cstdlib>
 #include <filesystem>
 #include <map>
 #include <set>
@@ -252,143 +254,228 @@ std::string applyInline(const std::string& src, const std::vector<Token>& toks,
     return collapsed;
 }
 std::set<std::string> collectLocalNames(const std::vector<Token>& toks);
-bool isSideEffectFree(const std::vector<Token>& toks, size_t value, size_t end) {
-    if (value >= end) return false;
-    const Token& v = toks[value];
-    const bool literal = v.kind == Tok::String || v.kind == Tok::Number ||
-                         (v.kind == Tok::Name && !lua::isKeyword(v.text)) ||
-                         (v.kind == Tok::Name && (v.text == "nil" || v.text == "true" ||
-                                                  v.text == "false"));
-    if (!literal) return false;
-    const size_t next = significantIndex(toks, value + 1);
-    return next >= end || toks[next].kind == Tok::End || toks[next].kind == Tok::Space;
+constexpr size_t kNone = static_cast<size_t>(-1);
+bool isSideEffectFreeValue(const Token& v) {
+    if (v.kind == Tok::String || v.kind == Tok::Number) return true;
+    if (v.kind != Tok::Name) return false;
+    if (v.text == "nil" || v.text == "true" || v.text == "false") return true;
+    return !lua::isKeyword(v.text);
 }
-bool eliminateDeadStores(const std::string& src, std::string& out, int& removed) {
-    const std::vector<Token> toks = lua::tokenize(src);
+struct NameUses {
+    std::vector<size_t> writes;
+    std::vector<size_t> reads;
+    size_t declLocal = kNone;
+    size_t declName = kNone;
+    size_t declLast = kNone;
+    bool declShared = false;
+    bool ambiguous = false;
+};
+std::map<std::string, NameUses> indexNames(const std::vector<Token>& toks,
+                                          std::map<size_t, std::vector<size_t>>& declLists) {
     const size_t n = toks.size();
-    std::vector<size_t> assignPos;
-    std::string drop;
-
-    std::set<std::string> ambiguous;
+    std::map<std::string, NameUses> index;
+    std::vector<char> isDeclName(n, 0);
     for (size_t i = 0; i < n; ++i) {
-        if (toks[i].kind != Tok::Name || lua::isKeyword(toks[i].text)) continue;
-        const size_t eq = significantIndex(toks, i + 1);
-        if (eq < n && toks[eq].kind == Tok::Symbol && toks[eq].text == ",") {
-            const size_t eq2 = significantIndex(toks, eq + 1);
-            if (eq2 < n && toks[eq2].kind == Tok::Name) {
-                ambiguous.insert(toks[i].text);
-                ambiguous.insert(toks[eq2].text);
+        if (toks[i].kind != Tok::Name || toks[i].text != "local") continue;
+        size_t k = significantIndex(toks, i + 1);
+        if (k < n && toks[k].kind == Tok::Name && toks[k].text == "function") continue;
+        std::vector<size_t> names;
+        while (k < n && toks[k].kind == Tok::Name && !lua::isKeyword(toks[k].text)) {
+            names.push_back(k);
+            const size_t after = significantIndex(toks, k + 1);
+            if (after < n && toks[after].kind == Tok::Symbol && toks[after].text == ",") {
+                k = significantIndex(toks, after + 1);
+                continue;
+            }
+            break;
+        }
+        for (size_t p : names) {
+            NameUses& u = index[toks[p].text];
+            if (u.declName == kNone) {
+                u.declLocal = i;
+                u.declName = p;
             }
         }
+        if (!names.empty()) {
+            const size_t last = names.back();
+            for (size_t p : names) {
+                NameUses& u = index[toks[p].text];
+                u.declLast = last;
+                u.declShared = names.size() > 1;
+                isDeclName[p] = 1;
+            }
+            declLists[i] = names;
+        }
+    }
+    for (size_t i = 0; i < n; ++i) {
+        if (toks[i].kind != Tok::Name || isDeclName[i]) continue;
+        const std::string& name = toks[i].text;
+        NameUses& u = index[name];
+        const size_t next = significantIndex(toks, i + 1);
+        if (next >= n) {
+            u.reads.push_back(i);
+            continue;
+        }
+        if (toks[next].kind == Tok::Symbol) {
+            if (toks[next].text == "=") {
+                u.writes.push_back(i);
+                continue;
+            }
+            if (toks[next].text == ",") {
+                const size_t after = significantIndex(toks, next + 1);
+                if (after < n && toks[after].kind == Tok::Name &&
+                    !lua::isKeyword(toks[after].text) && !isDeclName[after]) {
+                    u.ambiguous = true;
+                    index[toks[after].text].ambiguous = true;
+                }
+            }
+        }
+        u.reads.push_back(i);
     }
     for (size_t i = 0; i + 1 < n; ++i) {
-        if (toks[i].kind == Tok::Name && toks[i].text == "for") {
-            for (size_t k = i + 1; k < n && k < i + 5; ++k) {
-                if (toks[k].kind == Tok::Name && toks[k].text != "in" &&
-                    toks[k].text != "do") {
-                    ambiguous.insert(toks[k].text);
-                }
-                if (toks[k].kind == Tok::Name && toks[k].text == "do") break;
+        if (toks[i].kind != Tok::Name || toks[i].text != "for") continue;
+        for (size_t k = i + 1; k < n && k < i + 6; ++k) {
+            if (toks[k].kind == Tok::Name && toks[k].text == "do") break;
+            if (toks[k].kind == Tok::Name && toks[k].text != "in" &&
+                !lua::isKeyword(toks[k].text)) {
+                index[toks[k].text].ambiguous = true;
             }
         }
     }
-    for (size_t i = 0; i < n; ++i) {
-        if (toks[i].kind != Tok::Name) continue;
-        const std::string& name = toks[i].text;
-        if (lua::isKeyword(name) || name.rfind("SHX", 0) != 0) continue;
-        if (ambiguous.count(name)) continue;
-        std::vector<size_t> writes;
-        for (size_t k = 0; k < n; ++k) {
-            if (toks[k].kind != Tok::Name || toks[k].text != name) continue;
-            const size_t eq = significantIndex(toks, k + 1);
-            if (eq < n && toks[eq].kind == Tok::Symbol && toks[eq].text == "=") {
-                writes.push_back(k);
-            }
-        }
-        if (writes.size() < 2) continue;
-        for (size_t w = 0; w + 1 < writes.size(); ++w) {
-            const size_t from = writes[w];
-            const size_t to = writes[w + 1];
-            bool read = false;
-            for (size_t k = from + 1; k < to; ++k) {
-                if (toks[k].kind == Tok::Name && toks[k].text == name) {
-                    read = true;
-                    break;
-                }
-            }
-            if (read) continue;
-            const size_t eq = significantIndex(toks, from + 1);
-            const size_t value = significantIndex(toks, eq + 1);
-            const size_t stmtEnd = statementEnd(toks, from, value);
-            if (!isSideEffectFree(toks, value, stmtEnd + 1)) continue;
-            for (size_t k = from; k <= stmtEnd; ++k) drop += std::to_string(k) + ",";
-            ++removed;
-        }
-    }
-    if (drop.empty()) return false;
-    std::set<size_t> dead;
-    {
-        size_t at = 0;
-        while (at < drop.size()) {
-            const size_t comma = drop.find(',', at);
-            const std::string piece = drop.substr(at, comma - at);
-            if (!piece.empty()) dead.insert(static_cast<size_t>(std::stoul(piece)));
-            if (comma == std::string::npos) break;
-            at = comma + 1;
-        }
-    }
+    return index;
+}
+std::string rebuildCollapsed(const std::string& src, const std::vector<Token>& toks,
+                             const std::set<size_t>& drop,
+                             const std::map<size_t, std::string>& replace) {
     std::string raw;
     raw.reserve(src.size());
-    for (size_t i = 0; i < n; ++i) {
+    for (size_t i = 0; i < toks.size(); ++i) {
         if (toks[i].kind == Tok::End) break;
-        if (dead.count(i)) continue;
+        if (drop.count(i)) continue;
+        if (auto it = replace.find(i); it != replace.end()) {
+            raw += it->second;
+            continue;
+        }
         raw.append(src, toks[i].begin, toks[i].end - toks[i].begin);
     }
-    out.clear();
+    std::string out;
     out.reserve(raw.size());
     size_t p = 0;
     while (p < raw.size()) {
-        if (raw[p] == '\r') { ++p; continue; }
-        if (raw[p] == '\n') {
-            int blanks = 0;
-            size_t j = p;
-            while (j < raw.size() && (raw[j] == ' ' || raw[j] == '\t' || raw[j] == '\r')) ++j;
-            if (j < raw.size() && raw[j] == '\n') {
-                ++blanks;
-                p = j + 1;
-                if (blanks >= 2) continue;
-                out += '\n';
-                continue;
-            }
-            ++p;
+        if (raw[p] == '\n' || raw[p] == '\r') {
+            while (p < raw.size() && (raw[p] == '\n' || raw[p] == '\r' || raw[p] == ' ' ||
+                                      raw[p] == '\t'))
+                ++p;
+            out += '\n';
             continue;
         }
         out += raw[p];
         ++p;
     }
-    return true;
+    return out;
 }
 std::string simplifyLocals(const std::string& src, int& inlined, int& deadStores) {
     std::string working = src;
-    std::string next;
-    for (int round = 0; round < 128; ++round) {
+    for (int round = 0;; ++round) {
         const std::vector<Token> toks = lua::tokenize(working);
-        const std::set<std::string> declared = collectLocalNames(toks);
-        bool progress = false;
-        for (const auto& name : declared) {
-            InlineEdit edit;
-            if (!planInlineAlias(working, toks, name, edit)) continue;
-            working = applyInline(working, toks, edit);
-            ++inlined;
-            progress = true;
-            break;
+        const size_t n = toks.size();
+
+        if (round >= (n > 1000000 ? 24 : 400)) break;
+        std::map<size_t, std::vector<size_t>> declLists;
+        const std::map<std::string, NameUses> index = indexNames(toks, declLists);
+        std::set<size_t> drop;
+        std::map<size_t, std::string> replace;
+        std::set<size_t> declClaimed;
+        int roundInlined = 0;
+        int roundDead = 0;
+        for (const auto& [name, u] : index) {
+            if (u.ambiguous || u.declName == kNone) continue;
+            if (u.writes.size() == 1 && u.reads.size() == 1 &&
+                !declClaimed.count(u.declLocal)) {
+                const size_t assign = u.writes[0];
+                const size_t assignEq = significantIndex(toks, assign + 1);
+                const size_t value = significantIndex(toks, assignEq + 1);
+                const size_t use = u.reads[0];
+                const Token& v = toks[value < n ? value : kNone];
+                const bool literal = v.kind == Tok::String || v.kind == Tok::Number ||
+                                     (v.kind == Tok::Name && (v.text == "true" ||
+                                                              v.text == "false"));
+                const bool globalName = v.kind == Tok::Name && !lua::isKeyword(v.text);
+                if (value < n && (literal || globalName) && use > assign &&
+                    statementEndsHere(working, toks, value)) {
+                    const size_t afterUse = significantIndex(toks, use + 1);
+                    if (afterUse >= n || toks[afterUse].kind != Tok::Symbol ||
+                        toks[afterUse].text != ":" || globalName) {
+                        bool earlierUse = false;
+                        for (size_t r : u.reads)
+                            if (r < assign) earlierUse = true;
+                        if (earlierUse) continue;
+                        const size_t assignEnd = statementEnd(toks, assign, value);
+                        for (size_t k = assign; k <= assignEnd && k < n; ++k) drop.insert(k);
+                        drop.insert(u.declName);
+                        replace[use] = working.substr(toks[value].begin,
+                                                      toks[value].end - toks[value].begin);
+                        declClaimed.insert(u.declLocal);
+                        ++roundInlined;
+                    }
+                }
+            }
+            if (u.writes.size() < 2) continue;
+            for (size_t w = 0; w + 1 < u.writes.size(); ++w) {
+                const size_t from = u.writes[w];
+                const size_t to = u.writes[w + 1];
+                size_t nextRead = n;
+                for (size_t r : u.reads) {
+                    if (r > from && r < to) { nextRead = r; break; }
+                    if (r >= to) break;
+                }
+                if (nextRead != n) continue;
+                const size_t writeEq = significantIndex(toks, from + 1);
+                const size_t value = significantIndex(toks, writeEq + 1);
+                if (value >= n || !isSideEffectFreeValue(toks[value])) continue;
+                const size_t stmtEnd = statementEnd(toks, from, value);
+                if (!statementEndsHere(working, toks, value)) continue;
+                for (size_t k = from; k <= stmtEnd && k < n; ++k) {
+                    if (toks[k].kind == Tok::End) break;
+                    if (replace.count(k)) continue;
+                    drop.insert(k);
+                }
+                ++roundDead;
+            }
         }
-        if (!progress) {
-            int found = 0;
-            if (!eliminateDeadStores(working, next, found)) break;
-            working = std::move(next);
-            deadStores += found;
+
+        for (const auto& [declLocal, names] : declLists) {
+            const size_t last = names.back();
+            std::vector<size_t> survivors;
+            bool removed = false;
+            for (size_t p : names) {
+                if (drop.count(p)) {
+                    removed = true;
+                    continue;
+                }
+                survivors.push_back(p);
+            }
+            if (!removed) continue;
+            if (survivors.empty()) {
+                const size_t declEnd = statementEnd(toks, declLocal, last);
+                for (size_t k = declLocal; k <= declEnd && k < n; ++k) drop.insert(k);
+            } else {
+                const size_t first = names.front();
+                std::string list;
+                for (size_t i = 0; i < survivors.size(); ++i) {
+                    if (i) list += ", ";
+                    list += working.substr(toks[survivors[i]].begin,
+                                           toks[survivors[i]].end - toks[survivors[i]].begin);
+                }
+                for (size_t k = first + 1; k <= last && k < n; ++k) drop.insert(k);
+                drop.erase(first);
+                replace[first] = list;
+            }
         }
+        if (roundInlined == 0 && roundDead == 0) break;
+        inlined += roundInlined;
+        deadStores += roundDead;
+        working = rebuildCollapsed(working, toks, drop, replace);
     }
     return working;
 }
@@ -411,17 +498,17 @@ std::set<std::string> collectLocalNames(const std::vector<Token>& toks) {
     }
     return locals;
 }
-int identifierUseCount(const std::vector<Token>& toks, const std::string& name) {
-    int count = 0;
-    for (const auto& t : toks) {
-        if (t.kind == Tok::Name && t.text == name) ++count;
-    }
-    return count;
+std::map<std::string, int> countNameTokens(const std::vector<Token>& toks) {
+    std::map<std::string, int> counts;
+    for (const auto& t : toks)
+        if (t.kind == Tok::Name) ++counts[t.text];
+    return counts;
 }
 std::map<std::string, std::string> buildRenameMap(const std::vector<Token>& toks,
                                                   const std::set<std::string>& localNames,
                                                   int& skipped) {
     const std::set<std::string> locals = collectLocalNames(toks);
+    const std::map<std::string, int> useCounts = countNameTokens(toks);
     std::map<std::string, std::vector<std::string>> bindings;
     std::map<std::string, std::string> suffixes;
     for (size_t i = 0; i < toks.size(); ++i) {
@@ -437,7 +524,8 @@ std::map<std::string, std::string> buildRenameMap(const std::vector<Token>& toks
             ++skipped;
             continue;
         }
-        if (identifierUseCount(toks, base) > 0) {
+        const auto seen = useCounts.find(base);
+        if (seen != useCounts.end() && seen->second > 0) {
             ++skipped;
             continue;
         }
