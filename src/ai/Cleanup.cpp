@@ -117,7 +117,6 @@ bool planInlineAlias(const std::string& src, const std::vector<Token>& toks,
         for (;;) {
             if (k >= n || toks[k].kind != Tok::Name) break;
             const size_t after = significantIndex(toks, k + 1);
-
             if (after < n && toks[after].kind == Tok::Symbol && toks[after].text == "=") break;
             if (toks[k].text == name) {
                 declLocal = i;
@@ -173,7 +172,6 @@ bool planInlineAlias(const std::string& src, const std::vector<Token>& toks,
         use = i;
     }
     if (use == n || use < assign) return false;
-
     for (size_t i = 0; i < assign; ++i) {
         if (i == declName || i == declLocal) continue;
         if (toks[i].kind != Tok::Name || toks[i].text != name) continue;
@@ -329,7 +327,6 @@ std::map<std::string, std::string> buildRenameMap(const std::vector<Token>& toks
             ++skipped;
             continue;
         }
-
         std::string suffixDummy;
         const std::string& base = bases.front();
         if (isSyntheticName(base, suffixDummy)) {
@@ -438,17 +435,109 @@ bool hasUnterminatedString(const std::vector<Token>& toks) {
     }
     return false;
 }
-size_t bannerEnd(const std::vector<Token>& toks) {
+bool isBannerLine(const std::string& line);
+size_t bannerEnd(const std::string& src, const std::vector<Token>& toks) {
     size_t cut = 0;
+    bool named = false;
     for (const auto& t : toks) {
         if (t.kind == Tok::Space) continue;
         if (t.kind == Tok::LineComment || t.kind == Tok::BlockComment) {
+            if (isBannerLine(src.substr(t.begin, t.end - t.begin))) named = true;
             cut = t.end;
             continue;
         }
         break;
     }
-    return cut;
+    return named ? cut : 0;
+}
+bool isBannerLine(const std::string& line) {
+    static const char* markers[] = {
+        "AI CLEANUP",
+        "Decompiled Lua",
+        "SHX_LABEL_XX",
+        "no visible label",
+        "decompiler comments",
+        "Fix indentation",
+        "Rename SHX",
+        "Replace goto/label",
+        "Move ::",
+    };
+    for (const char* m : markers) {
+        if (line.find(m) != std::string::npos) return true;
+    }
+    return false;
+}
+std::string stripBanners(const std::string& src, int& removed) {
+    const std::vector<Token> toks = lua::tokenize(src);
+    std::vector<Token> keep;
+    keep.reserve(toks.size());
+
+    size_t i = 0;
+    while (i < toks.size()) {
+        if (toks[i].kind == Tok::End) break;
+        if (toks[i].kind != Tok::LineComment) {
+            keep.push_back(toks[i]);
+            ++i;
+            continue;
+        }
+        std::vector<size_t> group;
+        size_t k = i;
+        for (;;) {
+            if (toks[k].kind != Tok::LineComment) break;
+            group.push_back(k);
+            size_t next = k + 1;
+            while (next < toks.size() && toks[next].kind == Tok::Space) ++next;
+            if (next >= toks.size() || toks[next].kind != Tok::LineComment) break;
+            k = next;
+        }
+        bool allBanner = group.size() >= 2;
+        for (size_t idx : group) {
+            if (!isBannerLine(src.substr(toks[idx].begin, toks[idx].end - toks[idx].begin))) {
+                allBanner = false;
+                break;
+            }
+        }
+        if (allBanner) {
+            ++removed;
+            for (size_t idx = i; idx <= k; ++idx) {
+                if (toks[idx].kind != Tok::LineComment) keep.push_back(toks[idx]);
+            }
+            i = k + 1;
+            continue;
+        }
+        for (size_t idx = i; idx <= k; ++idx) keep.push_back(toks[idx]);
+        i = k + 1;
+    }
+    std::string out;
+    out.reserve(src.size());
+    for (const auto& t : keep) {
+        if (t.kind == Tok::End) break;
+        out.append(src, t.begin, t.end - t.begin);
+    }
+
+    std::string collapsed;
+    collapsed.reserve(out.size());
+    size_t p = 0;
+    while (p < out.size()) {
+        if (out[p] == '\r') { ++p; continue; }
+        if (out[p] == '\n') {
+            int blanks = 0;
+            size_t j = p;
+            while (j < out.size() && (out[j] == ' ' || out[j] == '\t' || out[j] == '\r')) ++j;
+            if (j < out.size() && out[j] == '\n') {
+                ++blanks;
+                p = j + 1;
+                if (blanks >= 2) continue;
+                collapsed += '\n';
+                continue;
+            }
+            ++p;
+            continue;
+        }
+        collapsed += out[p];
+        ++p;;
+    }
+    return collapsed;
 }
 }
 CleanupResult cleanupLua(const std::string& source) {
@@ -459,12 +548,22 @@ CleanupResult cleanupLua(const std::string& source) {
     if (hasUnterminatedString(toks)) return result;
     isBalanced(toks, result.gotoLabels);
     std::string working = source;
-    if (const size_t cut = bannerEnd(toks); cut > 0 && cut < working.size()) {
+    {
+        int extra = 0;
+        const std::string stripped = stripBanners(working, extra);
+        if (stripped != working) {
+            working = stripped;
+            result.bannerRemoved += extra;
+            result.changed = true;
+            toks = lua::tokenize(working);
+        }
+    }
+    if (const size_t cut = bannerEnd(working, toks); cut > 0 && cut < working.size()) {
         working = working.substr(cut);
         const size_t first = working.find_first_not_of(" \t\r\n");
         if (first == std::string::npos) return result;
         working = working.substr(first);
-        result.bannerRemoved = 1;
+        result.bannerRemoved += 1;
         result.changed = true;
         toks = lua::tokenize(working);
     }
