@@ -1,4 +1,4 @@
-﻿#include "Cleanup.h"
+#include "Cleanup.h"
 #include "LuaLexer.h"
 #include "../core/Logger.h"
 #include "../utils/Str.h"
@@ -15,7 +15,6 @@ namespace {
 using lua::Tok;
 using lua::Token;
 bool isSyntheticName(const std::string& name, std::string& suffix) {
-
     static const char* typeStems[] = {"text", "num"};
     for (const char* stemText : typeStems) {
         const std::string stem = stemText;
@@ -65,11 +64,28 @@ size_t significantIndex(const std::vector<Token>& toks, size_t from) {
     }
     return k;
 }
+std::string tableNameField(const std::vector<Token>& toks, size_t open) {
+    const size_t n = toks.size();
+    for (size_t i = open + 1; i < n; ++i) {
+        if (toks[i].kind == Tok::Symbol && (toks[i].text == "}" || toks[i].text == "{"))
+            return "";
+        if (toks[i].kind != Tok::Name || toks[i].text != "name") continue;
+        const size_t eq = significantIndex(toks, i + 1);
+        if (eq >= n || toks[eq].kind != Tok::Symbol || toks[eq].text != "=") continue;
+        const size_t val = significantIndex(toks, eq + 1);
+        if (val >= n || toks[val].kind != Tok::String) continue;
+        std::string raw = toks[val].text;
+        if (!raw.empty() && (raw.front() == '"' || raw.front() == '\'')) raw.erase(raw.begin());
+        if (!raw.empty() && (raw.back() == '"' || raw.back() == '\'')) raw.pop_back();
+        const std::string id = sanitizeIdentifier(raw);
+        return id;
+    }
+    return "";
+}
 std::string nameFromBinding(const std::vector<Token>& toks, size_t nameIdx) {
     const size_t n = toks.size();
     const size_t assign = significantIndex(toks, nameIdx + 1);
     if (assign >= n || toks[assign].kind != Tok::Symbol || toks[assign].text != "=") return "";
-
     {
         size_t eq = nameIdx;
         while (eq > 0 && toks[eq - 1].kind == Tok::Space) --eq;
@@ -90,7 +106,11 @@ std::string nameFromBinding(const std::vector<Token>& toks, size_t nameIdx) {
     const size_t i = significantIndex(toks, assign + 1);
     if (i >= n) return "";
     if (toks[i].kind == Tok::Name && toks[i].text == "function") return "callback";
-    if (toks[i].kind == Tok::Symbol && toks[i].text == "{") return "table";
+    if (toks[i].kind == Tok::Symbol && toks[i].text == "{") {
+        const std::string named = tableNameField(toks, i);
+        if (!named.empty()) return named;
+        return "table";
+    }
     if (toks[i].kind == Tok::Name && (toks[i].text == "true" || toks[i].text == "false"))
         return "flag";
     if (toks[i].kind == Tok::Number) return "num";
@@ -404,8 +424,120 @@ std::string rebuildCollapsed(const std::string& src, const std::vector<Token>& t
     }
     return out;
 }
-std::string simplifyLocals(const std::string& src, int& inlined, int& deadStores) {
+size_t nsig(const std::vector<Token>& toks, size_t from) {
+    const size_t n = toks.size();
+    size_t k = from;
+    while (k < n && (toks[k].kind == Tok::Space || toks[k].kind == Tok::LineComment ||
+                     toks[k].kind == Tok::BlockComment))
+        ++k;
+    return k;
+}
+size_t skipValueEnd(const std::vector<Token>& toks, size_t from) {
+    const size_t n = toks.size();
+    int depth = 0;
+    for (size_t i = from; i < n; ++i) {
+        const Token& t = toks[i];
+        if (t.kind == Tok::End) return i == from ? i : i - 1;
+        if (t.kind == Tok::String || t.kind == Tok::LineComment || t.kind == Tok::BlockComment) {
+            if (depth == 0) return i;
+            continue;
+        }
+        if (t.kind == Tok::Symbol) {
+            if (t.text == "{" || t.text == "[" || t.text == "(") {
+                ++depth;
+            } else if (t.text == "}" || t.text == "]" || t.text == ")") {
+                if (depth == 0) return i;
+                --depth;
+            } else if (depth == 0 && (t.text == ";" || t.text == ",")) {
+                return i - 1;
+            }
+        }
+        if (depth == 0 && t.kind == Tok::Space && t.text.find('\n') != std::string::npos)
+            return i - 1;
+    }
+    return n - 1;
+}
+bool mentionsName(const std::string& text, const std::string& name) {
+    size_t at = text.find(name);
+    while (at != std::string::npos) {
+        const bool leftOk = at == 0 || !(std::isalnum(static_cast<unsigned char>(text[at - 1])) ||
+                                         text[at - 1] == '_');
+        const size_t after = at + name.size();
+        const bool rightOk = after >= text.size() ||
+                             !(std::isalnum(static_cast<unsigned char>(text[after])) ||
+                               text[after] == '_');
+        if (leftOk && rightOk) return true;
+        at = text.find(name, at + 1);
+    }
+    return false;
+}
+std::string collapseExplodedTables(const std::string& src, int& collapsed) {
+    const std::vector<Token> toks = lua::tokenize(src);
+    const size_t n = toks.size();
+    std::set<size_t> drop;
+    std::map<size_t, std::string> replace;
+    for (size_t i = 0; i + 3 < n; ++i) {
+        if (toks[i].kind != Tok::Name || lua::isKeyword(toks[i].text)) continue;
+        const size_t eq = significantIndex(toks, i + 1);
+        if (eq >= n || toks[eq].kind != Tok::Symbol || toks[eq].text != "=") continue;
+        const size_t open = significantIndex(toks, eq + 1);
+        if (open >= n || toks[open].kind != Tok::Symbol || toks[open].text != "{") continue;
+        const size_t close = significantIndex(toks, open + 1);
+        if (close >= n || toks[close].kind != Tok::Symbol || toks[close].text != "}") continue;
+        if (!statementEndsHere(src, toks, close)) continue;
+        const std::string name = toks[i].text;
+        std::vector<std::pair<std::string, std::string>> fields;
+        size_t k = close + 1;
+        bool usable = true;
+        while (k < n) {
+            const size_t base = nsig(toks, k);
+            if (base >= n || toks[base].kind != Tok::Name || toks[base].text != name) break;
+            const size_t dot = nsig(toks, base + 1);
+            if (dot >= n || toks[dot].kind != Tok::Symbol || toks[dot].text != ".") break;
+            const size_t fname = nsig(toks, dot + 1);
+            if (fname >= n || toks[fname].kind != Tok::Name ||
+                lua::isKeyword(toks[fname].text))
+                break;
+            const size_t feq = nsig(toks, fname + 1);
+            if (feq >= n || toks[feq].kind != Tok::Symbol || toks[feq].text != "=") break;
+            const size_t vbeg = nsig(toks, feq + 1);
+            if (vbeg >= n) break;
+            const size_t vend = skipValueEnd(toks, vbeg);
+            if (vend < vbeg) break;
+            const std::string value = src.substr(toks[vbeg].begin,
+                                                 toks[vend].end - toks[vbeg].begin);
+            if (mentionsName(value, name)) {
+                usable = false;
+                break;
+            }
+            fields.emplace_back(toks[fname].text, value);
+            k = vend + 1;
+        }
+        if (!usable || fields.size() < 2) continue;
+        std::string ctor = "{ ";
+        for (size_t f = 0; f < fields.size(); ++f) {
+            if (f) ctor += ", ";
+            ctor += fields[f].first + " = " + fields[f].second;
+        }
+        ctor += " }";
+        replace[i] = name + " = " + ctor;
+        drop.insert(eq);
+        for (size_t p = i + 1; p <= close; ++p) drop.insert(p);
+        for (size_t p = close + 1; p < k; ++p) drop.insert(p);
+        ++collapsed;
+        i = k - 1;
+    }
+    if (replace.empty()) return src;
+    return rebuildCollapsed(src, toks, drop, replace);
+}
+std::string simplifyLocals(const std::string& src, int& inlined, int& deadStores,
+                           int& tables) {
     std::string working = src;
+    for (int round = 0; round < 32; ++round) {
+        const std::string next = collapseExplodedTables(working, tables);
+        if (next == working) break;
+        working = next;
+    }
     for (int round = 0;; ++round) {
         const std::vector<Token> toks = lua::tokenize(working);
         const size_t n = toks.size();
@@ -810,11 +942,13 @@ CleanupResult cleanupLua(const std::string& source) {
     }
     int inlined = 0;
     int deadStores = 0;
-    if (std::string collapsed = simplifyLocals(working, inlined, deadStores);
+    int tables = 0;
+    if (std::string collapsed = simplifyLocals(working, inlined, deadStores, tables);
         collapsed != working) {
         working = std::move(collapsed);
         result.inlinedAliases = inlined;
         result.deadStores = deadStores;
+        result.collapsedTables = tables;
         result.changed = true;
         toks = lua::tokenize(working);
         if (hasUnterminatedString(toks)) {
@@ -903,6 +1037,7 @@ CleanupStats cleanupLuaTree(const std::string& rootIn, const std::string& rootOu
         stats.reindentedLines += r.reindentedLines;
         stats.inlinedAliases += r.inlinedAliases;
     stats.deadStores += r.deadStores;
+    stats.collapsedTables += r.collapsedTables;
     }
     return stats;
 }

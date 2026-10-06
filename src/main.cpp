@@ -61,7 +61,8 @@ static void runReadabilityPass(const std::string& serverRoot, bool testMode) {
     std::cout << CLR(term::GREEN) << "[+]" << CLR(term::RESET) << " Tisztított Lua: " << cleanDir
               << " (" << cs.files << " fajl, " << cs.renamedVars << " atnevezés, "
               << cs.inlinedAliases << " beagyazott alias, " << cs.deadStores
-              << " halott ertekites torolve, " << cs.bannerRemoved << " banner, "
+              << " halott ertekites torolve, " << cs.collapsedTables
+              << " szetbontott tabla visszaallitva, " << cs.bannerRemoved << " banner, "
               << cs.reindentedLines << " sor indentálva)\n";
     if (cs.ambiguousVars > 0) {
         std::cout << CLR(term::YELLOW) << "[!]" << CLR(term::RESET) << " " << cs.ambiguousVars
