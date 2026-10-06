@@ -460,30 +460,106 @@ size_t nsig(const std::vector<Token>& toks, size_t from) {
         ++k;
     return k;
 }
-size_t skipValueEnd(const std::vector<Token>& toks, size_t from) {
+bool matchesAny(const Token& t, const char* const* list, size_t count) {
+    for (size_t i = 0; i < count; ++i)
+        if (t.text == list[i]) return true;
+    return false;
+}
+constexpr size_t kOpCount = 18;
+bool isValueOperator(const Token& t) {
+    static const char* const ops[kOpCount] = {
+        "+", "-", "*", "/", "%", "^", "#", ".", ":", "?",
+        "=", "==", "~=", "<", "<=", ">", ">=", ","
+    };
+    return t.kind == Tok::Symbol && matchesAny(t, ops, kOpCount);
+}
+constexpr size_t kEndCount = 16;
+bool closesStatement(const Token& t) {
+    static const char* const kws[kEndCount] = {
+        "end", "until", "else", "elseif", "then", "in", "local", "if",
+        "for", "while", "do", "return", "break", "goto", "function", "repeat"
+    };
+    if (t.kind == Tok::Symbol) return t.text == ";";
+    return t.kind == Tok::Name && matchesAny(t, kws, kEndCount);
+}
+bool opensStatement(const Token& t) {
+    if (t.kind != Tok::Name) return false;
+    if (!lua::isKeyword(t.text)) return true;
+    return t.text == "nil" || t.text == "true" || t.text == "false";
+}
+constexpr size_t kJoinCount = 3;
+bool joinsValue(const Token& t) {
+    static const char* const kws[kJoinCount] = {"and", "or", "not"};
+    if (t.kind == Tok::Name) return matchesAny(t, kws, kJoinCount);
+    return t.kind == Tok::Symbol &&
+           (t.text == "." || t.text == ".." || t.text == "...");
+}
+size_t scanExpressionEnd(const std::vector<Token>& toks, size_t from) {
     const size_t n = toks.size();
-    int depth = 0;
+    int brackets = 0;
+    int blocks = 0;
+    size_t last = kNone;
+    bool pendingDo = false;
     for (size_t i = from; i < n; ++i) {
         const Token& t = toks[i];
-        if (t.kind == Tok::End) return i == from ? i : i - 1;
-        if (t.kind == Tok::String || t.kind == Tok::LineComment || t.kind == Tok::BlockComment) {
-            if (depth == 0) return i;
+        if (t.kind == Tok::End) return kNone;
+        if (t.kind == Tok::Space) {
+            if (t.text.find('\n') == std::string::npos) continue;
+            if (brackets != 0 || blocks != 0) continue;
+            if (last == kNone || isValueOperator(toks[last]) || joinsValue(toks[last]))
+                return kNone;
+            const size_t next = nsig(toks, i + 1);
+            if (next >= n || closesStatement(toks[next])) return last;
+            if (opensStatement(toks[next])) return last;
+            if (joinsValue(toks[next])) continue;
+            return kNone;
+        }
+        if (t.kind == Tok::LineComment || t.kind == Tok::BlockComment) return kNone;
+        if (t.kind == Tok::Name) {
+            const std::string& w = t.text;
+            if (w == "function") {
+
+                if (last != kNone && brackets == 0 && blocks == 0) return kNone;
+                ++blocks;
+            } else if (w == "end" || w == "until") {
+                if (blocks == 0) return last;
+                --blocks;
+            } else if (w == "do") {
+                if (blocks == 0 && brackets == 0) return kNone;
+                if (!pendingDo) ++blocks;
+                pendingDo = false;
+            } else if (w == "if" || w == "for" || w == "while" || w == "repeat") {
+                if (blocks == 0 && brackets == 0) return kNone;
+
+                if (w == "for" || w == "while") pendingDo = true;
+                ++blocks;
+            } else if (w == "then" || w == "else" || w == "elseif" || w == "in") {
+                if (blocks == 0) return last;
+            } else if (blocks == 0 && brackets == 0 && lua::isKeyword(w) &&
+                       w != "nil" && w != "true" && w != "false" && !joinsValue(t)) {
+                return kNone;
+            }
+            last = i;
             continue;
         }
         if (t.kind == Tok::Symbol) {
-            if (t.text == "{" || t.text == "[" || t.text == "(") {
-                ++depth;
-            } else if (t.text == "}" || t.text == "]" || t.text == ")") {
-                if (depth == 0) return i;
-                --depth;
-            } else if (depth == 0 && (t.text == ";" || t.text == ",")) {
-                return i - 1;
+            const std::string& s = t.text;
+            if (s == "{" || s == "[" || s == "(") {
+                ++brackets;
+            } else if (s == "}" || s == "]" || s == ")") {
+                if (brackets == 0) return last;
+                --brackets;
+            } else if (brackets == 0 && blocks == 0 && s == ";") {
+                return last;
+            } else if (brackets == 0 && blocks == 0 && s == ",") {
+                return kNone;
             }
+            last = i;
+            continue;
         }
-        if (depth == 0 && t.kind == Tok::Space && t.text.find('\n') != std::string::npos)
-            return i - 1;
+        last = i;
     }
-    return n - 1;
+    return kNone;
 }
 bool mentionsName(const std::string& text, const std::string& name) {
     size_t at = text.find(name);
@@ -499,13 +575,17 @@ bool mentionsName(const std::string& text, const std::string& name) {
     }
     return false;
 }
-size_t declarationEnd(const std::vector<Token>& toks, size_t localTok, size_t lastName) {
+constexpr size_t kUnproven = static_cast<size_t>(-1);
+size_t declarationEnd(const std::string& src, const std::vector<Token>& toks,
+                      size_t localTok, size_t lastName) {
     const size_t next = significantIndex(toks, lastName + 1);
     if (next >= toks.size() || toks[next].kind != Tok::Symbol || toks[next].text != "=")
         return statementEnd(toks, localTok, lastName);
     const size_t value = significantIndex(toks, next + 1);
     if (value >= toks.size()) return statementEnd(toks, localTok, lastName);
-    return skipValueEnd(toks, value);
+    const size_t vend = scanExpressionEnd(toks, value);
+    if (vend == kUnproven || !statementEndsHere(src, toks, vend)) return kUnproven;
+    return vend;
 }
 std::string collapseExplodedTables(const std::string& src, int& collapsed) {
     const std::vector<Token> toks = lua::tokenize(src);
@@ -538,8 +618,9 @@ std::string collapseExplodedTables(const std::string& src, int& collapsed) {
             if (feq >= n || toks[feq].kind != Tok::Symbol || toks[feq].text != "=") break;
             const size_t vbeg = nsig(toks, feq + 1);
             if (vbeg >= n) break;
-            const size_t vend = skipValueEnd(toks, vbeg);
-            if (vend < vbeg) break;
+            const size_t vend = scanExpressionEnd(toks, vbeg);
+            if (vend == kUnproven) break;
+            if (!statementEndsHere(src, toks, vend)) break;
             const std::string value = src.substr(toks[vbeg].begin,
                                                  toks[vend].end - toks[vbeg].begin);
             if (mentionsName(value, name)) {
@@ -550,7 +631,6 @@ std::string collapseExplodedTables(const std::string& src, int& collapsed) {
             k = vend + 1;
         }
         if (!usable || fields.size() < 2) continue;
-
         for (size_t p = close + 1; p < k; ++p)
             if (toks[p].kind == Tok::LineComment || toks[p].kind == Tok::BlockComment)
                 usable = false;
@@ -665,7 +745,11 @@ std::string simplifyLocals(const std::string& src, int& inlined, int& deadStores
             }
             if (!removed) continue;
             if (survivors.empty()) {
-                const size_t declEnd = declarationEnd(toks, declLocal, last);
+                const size_t declEnd = declarationEnd(working, toks, declLocal, last);
+                if (declEnd == kUnproven) {
+                    for (size_t p : names) drop.erase(p);
+                    continue;
+                }
                 for (size_t k = declLocal; k <= declEnd && k < n; ++k) drop.insert(k);
             } else {
                 const size_t first = names.front();
