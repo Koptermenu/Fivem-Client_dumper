@@ -15,6 +15,18 @@ namespace {
 using lua::Tok;
 using lua::Token;
 bool isSyntheticName(const std::string& name, std::string& suffix) {
+
+    static const char* typeStems[] = {"text", "num"};
+    for (const char* stemText : typeStems) {
+        const std::string stem = stemText;
+        if (name.rfind(stem, 0) != 0 || name.size() == stem.size()) continue;
+        bool allDigits = true;
+        for (size_t k = stem.size(); k < name.size(); ++k)
+            if (!std::isdigit(static_cast<unsigned char>(name[k]))) allDigits = false;
+        if (!allDigits) continue;
+        suffix.clear();
+        return true;
+    }
     size_t i = 0;
     if (name.rfind("SHX", 0) == 0) i = 3;
     else if (name[0] == 'L') i = 1;
@@ -57,6 +69,24 @@ std::string nameFromBinding(const std::vector<Token>& toks, size_t nameIdx) {
     const size_t n = toks.size();
     const size_t assign = significantIndex(toks, nameIdx + 1);
     if (assign >= n || toks[assign].kind != Tok::Symbol || toks[assign].text != "=") return "";
+
+    {
+        size_t eq = nameIdx;
+        while (eq > 0 && toks[eq - 1].kind == Tok::Space) --eq;
+        if (eq > 0 && toks[eq - 1].kind == Tok::Symbol && toks[eq - 1].text == "=") {
+            size_t f = eq - 1;
+            while (f > 0 && toks[f - 1].kind == Tok::Space) --f;
+            if (f > 0 && toks[f - 1].kind == Tok::Name &&
+                !lua::isKeyword(toks[f - 1].text)) {
+                size_t d = f - 1;
+                while (d > 0 && toks[d - 1].kind == Tok::Space) --d;
+                if (d > 0 && toks[d - 1].kind == Tok::Symbol && toks[d - 1].text == ".") {
+                    const std::string field = sanitizeIdentifier(toks[f - 1].text);
+                    if (!field.empty()) return field;
+                }
+            }
+        }
+    }
     const size_t i = significantIndex(toks, assign + 1);
     if (i >= n) return "";
     if (toks[i].kind == Tok::Name && toks[i].text == "function") return "callback";
@@ -379,7 +409,6 @@ std::string simplifyLocals(const std::string& src, int& inlined, int& deadStores
     for (int round = 0;; ++round) {
         const std::vector<Token> toks = lua::tokenize(working);
         const size_t n = toks.size();
-
         if (round >= (n > 1000000 ? 24 : 400)) break;
         std::map<size_t, std::vector<size_t>> declLists;
         const std::map<std::string, NameUses> index = indexNames(toks, declLists);
@@ -443,7 +472,6 @@ std::string simplifyLocals(const std::string& src, int& inlined, int& deadStores
                 ++roundDead;
             }
         }
-
         for (const auto& [declLocal, names] : declLists) {
             const size_t last = names.back();
             std::vector<size_t> survivors;
@@ -500,8 +528,13 @@ std::set<std::string> collectLocalNames(const std::vector<Token>& toks) {
 }
 std::map<std::string, int> countNameTokens(const std::vector<Token>& toks) {
     std::map<std::string, int> counts;
-    for (const auto& t : toks)
-        if (t.kind == Tok::Name) ++counts[t.text];
+    for (size_t i = 0; i < toks.size(); ++i) {
+        if (toks[i].kind != Tok::Name) continue;
+        size_t j = i;
+        while (j > 0 && toks[j - 1].kind == Tok::Space) --j;
+        if (j > 0 && toks[j - 1].kind == Tok::Symbol && toks[j - 1].text == ".") continue;
+        ++counts[toks[i].text];
+    }
     return counts;
 }
 std::map<std::string, std::string> buildRenameMap(const std::vector<Token>& toks,
