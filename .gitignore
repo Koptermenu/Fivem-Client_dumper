@@ -7,3 +7,10 @@ Servers/
 checkpoint.json
 server_name.txt
 .zcode/
+
+
+tools/verify/work/
+Tools/verify/bin/
+Tools/verify/work/
+Tools/verify/scratch/
+Tools/verify/__pycache__/
