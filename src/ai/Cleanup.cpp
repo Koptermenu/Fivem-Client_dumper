@@ -394,33 +394,62 @@ std::map<std::string, NameUses> indexNames(const std::vector<Token>& toks,
     }
     return index;
 }
+std::vector<int> functionDepths(const std::vector<Token>& toks) {
+    const size_t n = toks.size();
+    std::vector<int> depth(n, 0);
+    int d = 0;
+    int functions = 0;
+    std::string previous;
+    for (size_t i = 0; i < n; ++i) {
+        depth[i] = functions;
+        if (toks[i].kind != Tok::Name) continue;
+        const std::string& w = toks[i].text;
+        if (w == "function" || w == "if" || w == "for" || w == "while") {
+            ++d;
+            if (w == "function") ++functions;
+        } else if (w == "do") {
+            if (previous != "for" && previous != "while") ++d;
+        } else if (w == "end") {
+            if (d > 0) --d;
+            if (functions > 0) --functions;
+        } else if (w == "until") {
+            if (d > 0) --d;
+        }
+        if (w != "then" && w != "do" && w != "else" && w != "elseif" && w != "repeat" &&
+            w != "end" && w != "until")
+            previous = w;
+        else if (w == "end" || w == "until" || w == "else" || w == "elseif")
+            previous.clear();
+    }
+    return depth;
+}
 std::string rebuildCollapsed(const std::string& src, const std::vector<Token>& toks,
                              const std::set<size_t>& drop,
                              const std::map<size_t, std::string>& replace) {
-    std::string raw;
-    raw.reserve(src.size());
+    std::string out;
+    out.reserve(src.size());
     for (size_t i = 0; i < toks.size(); ++i) {
         if (toks[i].kind == Tok::End) break;
         if (drop.count(i)) continue;
         if (auto it = replace.find(i); it != replace.end()) {
-            raw += it->second;
+            out += it->second;
             continue;
         }
-        raw.append(src, toks[i].begin, toks[i].end - toks[i].begin);
-    }
-    std::string out;
-    out.reserve(raw.size());
-    size_t p = 0;
-    while (p < raw.size()) {
-        if (raw[p] == '\n' || raw[p] == '\r') {
-            while (p < raw.size() && (raw[p] == '\n' || raw[p] == '\r' || raw[p] == ' ' ||
-                                      raw[p] == '\t'))
-                ++p;
-            out += '\n';
+
+        if (toks[i].kind == Tok::Space) {
+            if (toks[i].text.find('\n') != std::string::npos) {
+                if (!out.empty() && out.back() != '\n') out += '\n';
+            } else if (!out.empty() && out.back() != ' ' && out.back() != '\n') {
+                out += ' ';
+            }
             continue;
         }
-        out += raw[p];
-        ++p;
+        if (toks[i].kind == Tok::String || toks[i].kind == Tok::LineComment ||
+            toks[i].kind == Tok::BlockComment) {
+            out.append(src, toks[i].begin, toks[i].end - toks[i].begin);
+            continue;
+        }
+        out.append(src, toks[i].begin, toks[i].end - toks[i].begin);
     }
     return out;
 }
@@ -544,6 +573,7 @@ std::string simplifyLocals(const std::string& src, int& inlined, int& deadStores
         if (round >= (n > 1000000 ? 24 : 400)) break;
         std::map<size_t, std::vector<size_t>> declLists;
         const std::map<std::string, NameUses> index = indexNames(toks, declLists);
+        const std::vector<int> depths = functionDepths(toks);
         std::set<size_t> drop;
         std::map<size_t, std::string> replace;
         std::set<size_t> declClaimed;
@@ -551,6 +581,13 @@ std::string simplifyLocals(const std::string& src, int& inlined, int& deadStores
         int roundDead = 0;
         for (const auto& [name, u] : index) {
             if (u.ambiguous || u.declName == kNone) continue;
+
+            bool captured = false;
+            for (size_t w : u.writes)
+                if (depths[w] != depths[u.declName]) captured = true;
+            for (size_t r : u.reads)
+                if (depths[r] != depths[u.declName]) captured = true;
+            if (captured) continue;
             if (u.writes.size() == 1 && u.reads.size() == 1 &&
                 !declClaimed.count(u.declLocal)) {
                 const size_t assign = u.writes[0];
