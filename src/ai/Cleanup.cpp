@@ -518,7 +518,6 @@ size_t scanExpressionEnd(const std::vector<Token>& toks, size_t from) {
         if (t.kind == Tok::Name) {
             const std::string& w = t.text;
             if (w == "function") {
-
                 if (last != kNone && brackets == 0 && blocks == 0) return kNone;
                 ++blocks;
             } else if (w == "end" || w == "until") {
@@ -530,7 +529,6 @@ size_t scanExpressionEnd(const std::vector<Token>& toks, size_t from) {
                 pendingDo = false;
             } else if (w == "if" || w == "for" || w == "while" || w == "repeat") {
                 if (blocks == 0 && brackets == 0) return kNone;
-
                 if (w == "for" || w == "while") pendingDo = true;
                 ++blocks;
             } else if (w == "then" || w == "else" || w == "elseif" || w == "in") {
@@ -942,21 +940,6 @@ bool hasUnterminatedString(const std::vector<Token>& toks) {
     }
     return false;
 }
-bool isBannerLine(const std::string& line);
-size_t bannerEnd(const std::string& src, const std::vector<Token>& toks) {
-    size_t cut = 0;
-    bool named = false;
-    for (const auto& t : toks) {
-        if (t.kind == Tok::Space) continue;
-        if (t.kind == Tok::LineComment || t.kind == Tok::BlockComment) {
-            if (isBannerLine(src.substr(t.begin, t.end - t.begin))) named = true;
-            cut = t.end;
-            continue;
-        }
-        break;
-    }
-    return named ? cut : 0;
-}
 bool isBannerLine(const std::string& line) {
     static const char* markers[] = {
         "AI CLEANUP",
@@ -974,51 +957,99 @@ bool isBannerLine(const std::string& line) {
     }
     return false;
 }
+bool isCommentUnit(Tok kind) {
+    return kind == Tok::LineComment || kind == Tok::BlockComment;
+}
+bool blankSlice(const std::string& text, size_t from, size_t to) {
+    for (size_t p = from; p < to; ++p) {
+        if (text[p] != ' ' && text[p] != '\t' && text[p] != '\r') return false;
+    }
+    return true;
+}
+bool isBannerUnit(Tok kind, const std::string& text) {
+    if (kind == Tok::LineComment) return isBannerLine(text);
+    size_t marked = 0;
+    size_t lines = 0;
+    size_t at = 0;
+    for (;;) {
+        const size_t nl = text.find('\n', at);
+        const size_t stop = (nl == std::string::npos) ? text.size() : nl;
+        if (!blankSlice(text, at, stop)) {
+            ++lines;
+            if (isBannerLine(text.substr(at, stop - at))) ++marked;
+        }
+        if (nl == std::string::npos) break;
+        at = nl + 1;
+    }
+    return lines > 0 && marked == lines;
+}
+size_t skipSpace(const std::vector<Token>& toks, size_t from, size_t limit) {
+    while (from < limit && toks[from].kind == Tok::Space) ++from;
+    return from;
+}
 std::string stripBanners(const std::string& src, int& removed) {
     const std::vector<Token> toks = lua::tokenize(src);
-    std::vector<Token> keep;
-    keep.reserve(toks.size());
+    const size_t n = toks.size();
+    std::vector<char> drop(n, 0);
     size_t i = 0;
-    while (i < toks.size()) {
-        if (toks[i].kind == Tok::End) break;
-        if (toks[i].kind != Tok::LineComment) {
-            keep.push_back(toks[i]);
+    while (i < n && toks[i].kind != Tok::End) {
+        if (!isCommentUnit(toks[i].kind)) {
             ++i;
             continue;
         }
-        std::vector<size_t> group;
-        size_t k = i;
+
+        size_t runEnd = i;
         for (;;) {
-            if (toks[k].kind != Tok::LineComment) break;
-            group.push_back(k);
-            size_t next = k + 1;
-            while (next < toks.size() && toks[next].kind == Tok::Space) ++next;
-            if (next >= toks.size() || toks[next].kind != Tok::LineComment) break;
-            k = next;
+            const size_t next = skipSpace(toks, runEnd + 1, n);
+            if (next >= n || toks[next].kind == Tok::End || !isCommentUnit(toks[next].kind)) break;
+            runEnd = next;
         }
-        bool allBanner = group.size() >= 2;
-        for (size_t idx : group) {
-            if (!isBannerLine(src.substr(toks[idx].begin, toks[idx].end - toks[idx].begin))) {
-                allBanner = false;
-                break;
+
+        size_t k = i;
+        while (k <= runEnd) {
+            if (!isBannerUnit(toks[k].kind, src.substr(toks[k].begin,
+                                                        toks[k].end - toks[k].begin))) {
+                ++k;
+                continue;
             }
-        }
-        if (allBanner) {
-            ++removed;
-            for (size_t idx = i; idx <= k; ++idx) {
-                if (toks[idx].kind != Tok::LineComment) keep.push_back(toks[idx]);
+            size_t last = k;
+            size_t m = k + 1;
+            for (;;) {
+                const size_t next = skipSpace(toks, m, runEnd + 1);
+                if (next > runEnd || !isBannerUnit(toks[next].kind,
+                                                  src.substr(toks[next].begin,
+                                                             toks[next].end - toks[next].begin)))
+                    break;
+                last = next;
+                m = next + 1;
             }
-            i = k + 1;
-            continue;
+            const bool loneBlock = (last == k) && toks[k].kind == Tok::BlockComment;
+            if (last > k || loneBlock) {
+                for (size_t q = k;;) {
+                    drop[q] = 1;
+                    ++removed;
+                    const size_t next = skipSpace(toks, q + 1, last + 1);
+                    if (next > last) break;
+                    for (size_t z = q + 1; z < next; ++z) drop[z] = 1;
+                    q = next;
+                }
+                if (k == 0) {
+                    const size_t after = skipSpace(toks, last + 1, n);
+                    if (after > last + 1 && toks[last + 1].text.find('\n') != std::string::npos) {
+                        for (size_t z = last + 1; z < after; ++z) drop[z] = 1;
+                    }
+                }
+            }
+            k = last + 1;
         }
-        for (size_t idx = i; idx <= k; ++idx) keep.push_back(toks[idx]);
-        i = k + 1;
+        i = runEnd + 1;
     }
     std::string out;
     out.reserve(src.size());
-    for (const auto& t : keep) {
-        if (t.kind == Tok::End) break;
-        out.append(src, t.begin, t.end - t.begin);
+    for (size_t q = 0; q < n; ++q) {
+        if (toks[q].kind == Tok::End) break;
+        if (drop[q]) continue;
+        out.append(src, toks[q].begin, toks[q].end - toks[q].begin);
     }
     std::string collapsed;
     collapsed.reserve(out.size());
@@ -1062,15 +1093,6 @@ CleanupResult cleanupLua(const std::string& source) {
             result.changed = true;
             toks = lua::tokenize(working);
         }
-    }
-    if (const size_t cut = bannerEnd(working, toks); cut > 0 && cut < working.size()) {
-        working = working.substr(cut);
-        const size_t first = working.find_first_not_of(" \t\r\n");
-        if (first == std::string::npos) return result;
-        working = working.substr(first);
-        result.bannerRemoved += 1;
-        result.changed = true;
-        toks = lua::tokenize(working);
     }
     int inlined = 0;
     int deadStores = 0;
