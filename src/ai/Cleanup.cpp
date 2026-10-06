@@ -435,7 +435,6 @@ std::string rebuildCollapsed(const std::string& src, const std::vector<Token>& t
             out += it->second;
             continue;
         }
-
         if (toks[i].kind == Tok::Space) {
             if (toks[i].text.find('\n') != std::string::npos) {
                 if (!out.empty() && out.back() != '\n') out += '\n';
@@ -500,6 +499,14 @@ bool mentionsName(const std::string& text, const std::string& name) {
     }
     return false;
 }
+size_t declarationEnd(const std::vector<Token>& toks, size_t localTok, size_t lastName) {
+    const size_t next = significantIndex(toks, lastName + 1);
+    if (next >= toks.size() || toks[next].kind != Tok::Symbol || toks[next].text != "=")
+        return statementEnd(toks, localTok, lastName);
+    const size_t value = significantIndex(toks, next + 1);
+    if (value >= toks.size()) return statementEnd(toks, localTok, lastName);
+    return skipValueEnd(toks, value);
+}
 std::string collapseExplodedTables(const std::string& src, int& collapsed) {
     const std::vector<Token> toks = lua::tokenize(src);
     const size_t n = toks.size();
@@ -543,6 +550,11 @@ std::string collapseExplodedTables(const std::string& src, int& collapsed) {
             k = vend + 1;
         }
         if (!usable || fields.size() < 2) continue;
+
+        for (size_t p = close + 1; p < k; ++p)
+            if (toks[p].kind == Tok::LineComment || toks[p].kind == Tok::BlockComment)
+                usable = false;
+        if (!usable) continue;
         std::string ctor = "{ ";
         for (size_t f = 0; f < fields.size(); ++f) {
             if (f) ctor += ", ";
@@ -581,7 +593,6 @@ std::string simplifyLocals(const std::string& src, int& inlined, int& deadStores
         int roundDead = 0;
         for (const auto& [name, u] : index) {
             if (u.ambiguous || u.declName == kNone) continue;
-
             bool captured = false;
             for (size_t w : u.writes)
                 if (depths[w] != depths[u.declName]) captured = true;
@@ -654,7 +665,7 @@ std::string simplifyLocals(const std::string& src, int& inlined, int& deadStores
             }
             if (!removed) continue;
             if (survivors.empty()) {
-                const size_t declEnd = statementEnd(toks, declLocal, last);
+                const size_t declEnd = declarationEnd(toks, declLocal, last);
                 for (size_t k = declLocal; k <= declEnd && k < n; ++k) drop.insert(k);
             } else {
                 const size_t first = names.front();
