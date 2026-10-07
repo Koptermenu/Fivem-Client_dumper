@@ -22,6 +22,7 @@ public:
     FiveMDumper(std::string baseUrl, std::string token,
                 std::string serverName, Checkpoint& checkpoint);
     bool getConfiguration();
+    bool loadConfigFile(const std::string& path);
     bool loadCachedConfiguration();
     static bool findCachedConfig(const std::string& baseUrl, std::string& outDir);
     bool configReady() const { return configFetched_; }

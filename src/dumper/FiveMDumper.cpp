@@ -79,7 +79,7 @@ FiveMDumper::FiveMDumper(std::string baseUrl, std::string token,
                          std::string serverName, Checkpoint& checkpoint)
     : baseUrl_(std::move(baseUrl)), token_(std::move(token)),
       serverName_(std::move(serverName)), checkpoint_(checkpoint) {
-    http_.setHeader("X-CitizenFX-Token", token_);
+    if (!token_.empty()) http_.setHeader("X-CitizenFX-Token", token_);
     http_.setHeader("User-Agent", "CitizenFX/1");
     if (const char* w = getenv("DUMPER_WORKERS")) {
         int v = atoi(w);
@@ -186,22 +186,26 @@ bool FiveMDumper::findCachedConfig(const std::string& baseUrl, std::string& outD
     return false;
 }
 
-bool FiveMDumper::loadCachedConfiguration() {
+bool FiveMDumper::loadConfigFile(const std::string& path) {
     if (configFetched_) return true;
-    const std::string path = "Servers/" + serverDir + "/config.json";
     auto data = readFileBytes(path);
     if (!data) return false;
     Json js;
     try {
         js = Json::parse(std::string(data->begin(), data->end()));
     } catch (const std::exception& e) {
-        LOG("Cached config parse error: " + std::string(e.what()), LogLevel::WARNING);
+        LOG("Config file parse error (" + path + "): " + std::string(e.what()), LogLevel::WARNING);
         return false;
     }
     if (!applyConfiguration(js)) return false;
     usingCachedConfig_ = true;
-    LOG("Configuration restored from cache: " + path, LogLevel::INFO);
+    rawConfig_ = std::string(data->begin(), data->end());
+    LOG("Configuration loaded from file: " + path, LogLevel::INFO);
     return true;
+}
+
+bool FiveMDumper::loadCachedConfiguration() {
+    return loadConfigFile("Servers/" + serverDir + "/config.json");
 }
 static std::string stripFxColors(const std::string& s) {
     std::string out;

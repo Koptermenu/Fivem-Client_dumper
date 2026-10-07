@@ -106,6 +106,9 @@ regisztereket az `Output_clean` fajlokban:
 | `DUMPER_CLEANUP=1` | strukturális Lua-tisztítás nem interaktív módban is |
 | `DUMPER_AI_CLEANUP=1` | AI regiszternevezo kerdes nelkuli futtatasa |
 | `DUMPER_LUAC` | luac.exe utvonal az AI-nevezes luac ellenorzeshez |
+| `DUMPER_CONFIG` | konfiguracios config.json utvonala: token es jatek-csatlakozas
+  nelkuli dumpolashoz (pl. masik geprol masolt config.json; az IP-t a
+  `DUMPER_SERVER_IP` adja meg) |
 | `CK_CLIENT_KEY_API_URL` | a klienskulcs-szolgaltatas cime (alapertelmezett `https://grantsclk.ckcloud.de5.net`); a `CK_GRANTS_CLK_API_URL` nevet is elfogadja |
 
 ## Resource dekódolás

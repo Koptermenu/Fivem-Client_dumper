@@ -163,13 +163,10 @@ int main(int argc, char** argv) {
         token = findFiveMToken();
     }
     if (token.empty()) {
-        if (!testMode) {
-            std::cerr << CLR(term::RED) << "Error: Token not found. Make sure FiveM is running "
-                         "and connected to the server. Run as administrator." << CLR(term::RESET) << "\n";
-            return 1;
-        }
-        std::cerr << CLR(term::RED) << "Error: Token not found in test mode. Set DUMPER_TOKEN." << CLR(term::RESET) << "\n";
-        return 1;
+        std::cout << CLR(term::YELLOW) << "[!]" << CLR(term::RESET)
+                  << " Nem talaltam tokent a jatek memoriajaban. Probalkozas token nelkul: nem "
+                     "minden szerver koveteli, es ha mar letezik config.json cache (sajat vagy "
+                     "masik geprol masolva), az is eleg.\n";
     }
     if (!token.empty()) {
         auto nl = token.find_first_of("\r\n");
@@ -268,8 +265,16 @@ int main(int argc, char** argv) {
         baseUrl = "http://" + ip;
         std::cout << CLR(term::GREEN) << "[+]" << CLR(term::RESET) << " Selected server IP: " << ip << "\n";
         dumper = std::make_unique<FiveMDumper>(baseUrl, token, "", checkpoint);
+        const char* envConfig = getenv("DUMPER_CONFIG");
         bool configFromCache = false;
-        if (!dumper->getConfiguration()) {
+        if (envConfig && *envConfig) {
+            configFromCache = dumper->loadConfigFile(envConfig);
+            if (!configFromCache) {
+                std::cout << CLR(term::YELLOW) << "[!]" << CLR(term::RESET)
+                          << " DUMPER_CONFIG megadva, de a fajl nem olvashato vagy nem ervenyes "
+                             "konfiguracio: " << envConfig << "\n";
+            }
+        } else if (!dumper->getConfiguration()) {
             std::string cachedDir;
             if (FiveMDumper::findCachedConfig(baseUrl, cachedDir)) {
                 std::cout << CLR(term::YELLOW) << "[!]" << CLR(term::RESET)
@@ -318,6 +323,15 @@ int main(int argc, char** argv) {
         std::cout << CLR(term::YELLOW) << "[!] Ez az IP nem valaszol a /client vegponton"
                   << (cached.empty() ? "" : (" (utoljara: " + cached + ")")) << ".\n";
         std::cout << "    Ellenorizd, hogy a jatek Csatlakoztatva van ehhez a szerverhez." << CLR(term::RESET) << "\n\n";
+        if (token.empty() && !(envConfig && *envConfig)) {
+            std::cerr << CLR(term::RED)
+                      << "Token nelkul es config-cache nelkul nincs mibol folytatni. Csatlakozz "
+                         "egyszer a szerverhez a jatekban (a token memoria-scrollal felismerheto), "
+                         "vagy masolj egy meglevo config.json-t a Servers/<nev> mappaba, illetve "
+                         "allitsd be a DUMPER_CONFIG env-valtozot."
+                      << CLR(term::RESET) << "\n";
+            return 1;
+        }
         if (testMode) {
             std::cerr << CLR(term::RED) << "Test-mode server unreachable; aborting." << CLR(term::RESET) << "\n";
             return 1;
