@@ -16,6 +16,7 @@
 #include <iomanip>
 #include <iostream>
 #include <mutex>
+#include <set>
 #include <sstream>
 #include <stdexcept>
 #include <thread>
@@ -241,6 +242,57 @@ void FiveMDumper::uploadToServerStore() {
         LOG("Configuration upload to the central store failed: " +
                 (resp.error.empty() ? "status " + std::to_string(resp.status) : resp.error),
             LogLevel::WARNING);
+    }
+}
+
+void FiveMDumper::detectNewResources() {
+    if (!usingCachedConfig_) return;
+    HttpResponse resp = http_.get(baseUrl_ + "/info.json");
+    if (!resp.ok()) return;
+    Json js;
+    try {
+        js = Json::parse(std::string(resp.body.begin(), resp.body.end()));
+    } catch (const std::exception&) {
+        return;
+    }
+    const Json& res = js.at("resources");
+    if (!res.isArray()) return;
+    std::set<std::string> known;
+    for (const auto& r : resources_) known.insert(r.name);
+    std::vector<std::string> fresh;
+    std::set<std::string> current;
+    for (const auto& n : res.arr()) {
+        if (!n.isString()) continue;
+        const std::string& name = n.asString();
+        current.insert(name);
+        if (!known.count(name)) fresh.push_back(name);
+    }
+    std::vector<std::string> gone;
+    for (const auto& r : resources_) {
+        if (!current.count(r.name)) gone.push_back(r.name);
+    }
+    if (fresh.empty() && gone.empty()) {
+        std::cout << CLR(term::GREEN) << "[+]" << CLR(term::RESET)
+                  << " A szerver resource-listaja egyezik a cache-elt konfiguracioval.\n";
+        return;
+    }
+    if (!fresh.empty()) {
+        std::cout << CLR(term::YELLOW) << "[!]" << CLR(term::RESET) << " Uj resource(ok) a szerveren ("
+                  << fresh.size() << "), ezek NINCSENEK a cache-elt konfiguracioban, es "
+                     "csatlakozas nelkul nem dumpolhatok: ";
+        for (size_t i = 0; i < fresh.size() && i < 8; ++i)
+            std::cout << (i ? ", " : "") << fresh[i];
+        if (fresh.size() > 8) std::cout << " ... (+" << (fresh.size() - 8) << ")";
+        std::cout << "\n    Egy friss csatlakozassal futtatott dump frissiti a tarat es ezeket "
+                     "is lehozza.\n";
+        LOG("Cached config missing " + std::to_string(fresh.size()) +
+                " resource(s): " + (fresh.empty() ? "" : fresh.front()) + "...",
+            LogLevel::WARNING);
+    }
+    if (!gone.empty()) {
+        LOG("Cached config references " + std::to_string(gone.size()) +
+                " resource(s) no longer on the server",
+            LogLevel::INFO);
     }
 }
 
@@ -650,6 +702,7 @@ bool FiveMDumper::run(const std::string& filterResource) {
                   << " A konfiguracio cache-bol jol: a szerver most nem valaszol, vagy a token "
                      "lejart. Ha a letoltesek hibadnak, csatlakozz ujra a szerverhez a jatekban "
                      "es futtasd ujra a dumpert (a checkpoint folytatja).\n";
+        detectNewResources();
     }
     if (configFetched_ && !grants_.empty())
         writeTextFile(resourcesDir + "/Grants.txt", grants_);

@@ -48,6 +48,7 @@ private:
     bool unpackRpf(const std::string& rpfPath, const std::string& outDir);
     bool applyConfiguration(const Json& js);
     void saveConfigCache();
+    void detectNewResources();
     bool fetchFromServerStore();
     void uploadToServerStore();
     std::string serverStoreUrl() const;
