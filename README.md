@@ -5,15 +5,35 @@ Windows beepitett API vagy sajat implementacio.
 
 ## Felepites
 
-```bash
-cmake -B build -G "Visual Studio 17 2022"
-cmake --build build --config Release --parallel
+```
+build.bat
 build\Release\fivem_dumper.exe
 ```
 
-A `build.bat` ugyanezt hajtja vegre (`Release`, `--parallel`). A configure lepset
-nem szabad kihagyni: a beagyazott payload es a SHA-256 manifest a configure
-idoben keletkezik, ezert egy mar meglevo build faban is ujra kell futnia.
+A `build.bat` maga választja ki a Visual Studio generátort: a `vswhere`-val
+megnézi, melyik VS-verzió telepített **C++ x64/x86 eszközökkel**, és a
+legújabbal konfigurál. VS 2019, 2022 és 2026 is működik, a VS verzióját nem
+kell kézzel belőni.
+
+```
+DUMPER_GENERATOR="Visual Studio 16 2019" build.bat   # explicit generator felulirasa
+cmake -B build -DCMAKE_CXX_STANDARD=17                # regi toolset, ha a C++20 nem megy
+```
+
+Kézzel, ha kell:
+
+```bash
+cmake -B build -G "Visual Studio 18 2026"
+cmake --build build --config Release --parallel
+```
+
+A configure lepset nem szabad kihagyni: a beagyazott payload es a SHA-256
+manifest a configure idoben keletkezik, ezert egy mar meglevo build faban is
+ujra kell futnia.
+
+A build tree a generatort cache-ben orzi, es CMake **nem** enged ujrahasznalni
+masik Visual Studioval letrehozott fagot. A `build.bat` ezt felismeri es a
+regi fagot torli, hogy ne kelljen a `build\` mappat kezzel torolni.
 
 | komponens | forras |
 |-----------|--------|

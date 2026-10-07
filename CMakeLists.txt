@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 3.20)
 project(FiveMDumper VERSION 1.0.0 LANGUAGES CXX)
 
-# C++20 standard
-set(CMAKE_CXX_STANDARD 20)
+# C++20 by default. Overridable with -DCMAKE_CXX_STANDARD=17, which is the fallback for
+# an older toolset: nothing here needs C++20, the only standard library feature used is
+# <filesystem>, so 17 compiles the same code.
+set(CMAKE_CXX_STANDARD 20 CACHE STRING "C++ standard used to build the dumper")
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
