@@ -16,3 +16,5 @@ Tools/verify/bin/
 Tools/verify/work/
 Tools/verify/scratch/
 Tools/verify/__pycache__/
+ai/deploy/model/
+ai/rl/out_v2/
