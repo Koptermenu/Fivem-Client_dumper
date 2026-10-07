@@ -104,7 +104,7 @@ regi fagot torli, hogy ne kelljen a `build\` mappat kezzel torolni.
 
 A tisztitas (`Output_clean`) utan a program kerdez: "AI agent betoltese?".
 Ha igen, elinditja az `ai/deploy/llama-server.exe`-t a
-`ai/deploy/qwen_lua_ck40_q4km.gguf` modellel (localhost, GPU-val), chunkonkent
+`ai/deploy/model/qwen_lua_namer_q4km.gguf` modellel (localhost, GPU-val), chunkonkent
 rename map-et kér, majd a determinisztikus applier szabályai szerint irja at a
 regisztereket az `Output_clean` fajlokban:
 

@@ -13,7 +13,7 @@ python luac_check.py --root "%ROOT%" --label BEFORE
 echo.
 echo === start server ===
 set ENGINE=%LOCALAPPDATA%\FiveMDumper\engine\cuda
-start "" /b "%ENGINE%\llama-server.exe" -m "%~dp0qwen_lua_ck40_q4km.gguf" -c 32768 -np 4 --cont-batching -ngl 99 --port %PORT% -t 8 --no-warmup
+start "" /b "%ENGINE%\llama-server.exe" -m "%~dp0model\qwen_lua_namer_q4km.gguf" -c 32768 -np 4 --cont-batching -ngl 99 --port %PORT% -t 8 --no-warmup
 timeout /t 25 /nobreak >nul
 
 echo.

@@ -21,7 +21,7 @@ namespace fs = std::filesystem;
 namespace fivem {
 namespace {
 const char* kServerExe = "ai/deploy/llama-server.exe";
-const char* kModelGguf = "ai/deploy/qwen_lua_ck40_q4km.gguf";
+const char* kModelGguf = "ai/deploy/model/qwen_lua_namer_q4km.gguf";
 const int kPort = 8742;
 const size_t kChunkBudget = 6000;
 const int kCtxTokens = 12288;
