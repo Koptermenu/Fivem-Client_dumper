@@ -8,6 +8,7 @@ checkpoint.json
 server_name.txt
 .zcode/
 /ai/
+store/data/
 
 
 tools/verify/work/

@@ -20,6 +20,7 @@
 #include <stdexcept>
 #include <thread>
 #include <vector>
+#include <ctime>
 namespace fs = std::filesystem;
 namespace fivem {
 static bool isSafeRelPath(const std::string& rel) {
@@ -204,6 +205,21 @@ bool FiveMDumper::fetchFromServerStore() {
     if (!applyConfiguration(js)) {
         LOG("Server store response has no usable configuration.", LogLevel::INFO);
         return false;
+    }
+    if (js.has("storeSavedAt")) {
+        const double saved = js.at("storeSavedAt").asNumber();
+        const long long ageHours =
+            static_cast<long long>((static_cast<double>(time(nullptr)) * 1000.0 - saved) / 3600000.0);
+        if (saved > 0 && ageHours >= 24) {
+            LOG("Stored configuration is about " + std::to_string(ageHours) +
+                    " hours old; resources added to the server since then are not in it. "
+                    "Connect once with the game to refresh the store.",
+                LogLevel::WARNING);
+            std::cout << CLR(term::YELLOW) << "[!]" << CLR(term::RESET)
+                      << " A tarolt konfiguracio ~" << ageHours
+                      << " oras: az utana felrakott uj resource-ok nincsenek benne. Egy "
+                         "friss, jogos csatlakozasos dump frissiti a tarat.\n";
+        }
     }
     usingCachedConfig_ = true;
     rawConfig_ = body;
