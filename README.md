@@ -149,7 +149,39 @@ regisztereket az `Output_clean` fajlokban:
 | `DUMPER_CONFIG` | konfiguracios config.json utvonala: token es jatek-csatlakozas
   nelkuli dumpolashoz (pl. masik geprol masolt config.json; az IP-t a
   `DUMPER_SERVER_IP` adja meg) |
-| `CK_CLIENT_KEY_API_URL` | a klienskulcs-szolgaltatas cime (alapertelmezett `https://grantsclk.ckcloud.de5.net`); a `CK_GRANTS_CLK_API_URL` nevet is elfogadja |
+| `CK_CLIENT_KEY_API_URL` | a klienskulcs-szolgaltatas cime (alapertelmezett `https://grantsclk.ckcloud.de5.net`); a `CK_GRANTS_CLK_API_URL` nevet is elfogadja; **`off` = teljesen halozat nelkuli futas** |
+
+### Halozat nelkuli futas
+
+| fuggosen | allapot |
+|---|---|
+`Grants.txt` kulcstoken | **helyi**, a `Servers/<nev>/Resources/Grants.txt` fajlbol |
+`grants` szerverkulcs | **helyi**, a tokenbol |
+kozponti tar (`Servers/`) | **helyi**, a `store/` mappa; a valasz `http://127.0.0.1:8920` |
+AI nevezes | **helyi**, a beagyazott GGUF modellel |
+klienskulcs (`/v1/derive`) | **halozat kell neki**, latsd lentebb |
+
+```
+set DUMPER_STORE_URL=http://127.0.0.1:8920
+set CK_CLIENT_KEY_API_URL=off
+```
+
+A **klienskulcs az egyetlen**, ami nem helyben all. A szolgaltatas kulcs*tablat* tartoztat egy
+Cloudflare Workers KV-ben (`/health` szerint `workers-kv-read-only`), nem szamolt
+algoritmust: igy a `grants_clk`bol helyben nem allithato elo. Aki csak a
+**szerverkulcsos** fajlokra van szuksege, annak a fenti ket valtozoval **nincs halozatra
+szuksége**; a tobbi fajl ilyenkor nyersen marad.
+
+`CK_CLIENT_KEY_API_URL=off` nem csak ez az egy erteket kapcsolja ki, hanem **megszakitja**
+a kerdezest: ha a szolgaltatas nem erheto el (nincs valasz, DNS- vagy connecthiba),
+a dumper **nem probalja meg ujra** a tobbi resource-nal. Ez fontos, mert egy valo
+szerveren 969 `grants_clk` bejegyzet van, es a connect idoutlepes **mindegyiken**
+ujra lefutne. Merve: az elso hivas 30 s, a tobbi 0 ms; a megszakito nelkuli 969
+resource-ra **kb. 8 orat** veszett volna.
+
+A megszakito **szallitasi hibara** kapcsol (nincs HTTP status egyaltalan). Ha a
+szolgaltatas **valaszol** de az adott resource nincs benne (`HTTP 400`), az **nem**
+kapcsolja ki: a szolgalatas el, csak erre az ertekre nincs valasz.
 
 ## Resource dekódolás
 

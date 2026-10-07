@@ -593,8 +593,19 @@ void Decryptor::decryptResource(const std::string& resourcePath, const std::stri
             keys = resolveKeys(resourceId, resourceName);
             if (keys.serverKeyValid) LOG(resourceName + ": grants kulcs " + keys.serverKeyHex, LogLevel::INFO);
             if (keys.clientKeyValid) LOG(resourceName + ": klien(s kulcs " + keys.clientKeyHex, LogLevel::INFO);
-            if (!keys.clientKeyError.empty())
-                LOG(resourceName + ": klien(s kulcs nem elerheto - " + keys.clientKeyError, LogLevel::WARNING);
+            if (!keys.clientKeyError.empty() && !deriveClientKeyEndpointAvailable()) {
+                static bool reportedClientKeyOutage = false;
+                if (!reportedClientKeyOutage) {
+                    reportedClientKeyOutage = true;
+                    LOG("A klienskulcs-szolgaltatas nem erheto el, ezert csak a SZERVERKULCS "
+                        "hasznalhato: " + keys.clientKeyError +
+                        ". Ez a figyelmeztetés mostantol nem per resource ismetlodik.",
+                        LogLevel::WARNING);
+                }
+            } else if (!keys.clientKeyError.empty()) {
+                LOG(resourceName + ": klien(s kulcs nem elerheto - " + keys.clientKeyError,
+                    LogLevel::WARNING);
+            }
             if (keys.candidates.empty()) {
                 LOG(resourceName + ": nincs hasznalhato kulcs, a resource atmasolva", LogLevel::WARNING);
                 ++failed_;

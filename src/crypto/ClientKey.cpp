@@ -2,9 +2,42 @@
 #include "../core/HttpClient.h"
 #include "../utils/Str.h"
 #include "../utils/Json.h"
+#include <atomic>
 #include <cstdlib>
+#include <mutex>
+#include <string>
+
 namespace fivem {
+
 static const char* kDefaultDeriveApi = "https://grantsclk.ckcloud.de5.net";
+
+namespace {
+
+// resolveKeys calls deriveClientKey once per resource, and a dump of a real server holds
+// 969 of them. Without a breaker an unreachable or DNS-failing endpoint costs the full
+// connect timeout 969 times over, so a run that only needs the server key would stall for
+// hours. A 400 is not the endpoint failing, it is the endpoint answering about one
+// resource, so only a transport failure, one where no HTTP status ever arrives, trips it.
+std::mutex g_breakerMutex;
+bool g_endpointDown = false;
+
+}  // namespace
+
+bool deriveClientKeyEndpointAvailable() {
+    std::lock_guard<std::mutex> lock(g_breakerMutex);
+    return !g_endpointDown;
+}
+
+const char* deriveClientKeyEndpoint() { return kDefaultDeriveApi; }
+
+std::string deriveClientKeyRoot() {
+    std::string root;
+    if (const char* env = getenv("CK_CLIENT_KEY_API_URL")) root = env;
+    else if (const char* env = getenv("CK_GRANTS_CLK_API_URL")) root = env;
+    while (!root.empty() && root.back() == '/') root.pop_back();
+    if (root.empty()) root = kDefaultDeriveApi;
+    return root;
+}
 std::vector<uint8_t> deriveClientKey(uint32_t resourceId, const std::vector<uint8_t>& grantsClk,
                                      std::string& errOut) {
     errOut.clear();
@@ -13,16 +46,39 @@ std::vector<uint8_t> deriveClientKey(uint32_t resourceId, const std::vector<uint
                  std::to_string(grantsClk.size()) + " bajtos van";
         return {};
     }
-    std::string root;
-    if (const char* env = getenv("CK_CLIENT_KEY_API_URL")) root = env;
-    else if (const char* env = getenv("CK_GRANTS_CLK_API_URL")) root = env;
-    while (!root.empty() && root.back() == '/') root.pop_back();
-    if (root.empty()) root = kDefaultDeriveApi;
+    std::string root = deriveClientKeyRoot();
+    if (toLower(root) == "off") {
+        {
+            std::lock_guard<std::mutex> lock(g_breakerMutex);
+            g_endpointDown = true;
+        }
+        errOut = "kikapcsolva (CK_CLIENT_KEY_API_URL=off)";
+        return {};
+    }
+    {
+        std::lock_guard<std::mutex> lock(g_breakerMutex);
+        if (g_endpointDown) {
+            errOut = "a klienskulcs-szolgaltatas nem erheto el, nem kerdesd ra ujra";
+            return {};
+        }
+    }
     const std::string idStr = std::to_string(resourceId);
     const std::string body = "{\"resourceId\":\"" + idStr + "\",\"grants_clk\":\"" +
                              hexEncode(grantsClk) + "\"}";
     HttpClient http;
     HttpResponse resp = http.postJson(root + "/v1/derive", body);
+    if (resp.status == 0) {
+        // Transport failure: no HTTP status ever arrived, so the endpoint itself is
+        // unreachable. Stop asking, or every remaining resource pays the full timeout.
+        {
+            std::lock_guard<std::mutex> lock(g_breakerMutex);
+            g_endpointDown = true;
+        }
+        errOut = "nem erheto el (" + root + "): " +
+                 (resp.error.empty() ? "nincs valasz" : resp.error) +
+                 "; a további resource-oknal nem probaljuk ujra";
+        return {};
+    }
     if (!resp.ok()) {
         errOut = "derive service returned HTTP " + std::to_string(resp.status) +
                  (resp.error.empty() ? "" : (" (" + resp.error + ")"));
