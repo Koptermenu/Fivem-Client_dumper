@@ -60,7 +60,15 @@ idoben keletkezik, ezert egy mar meglevo build faban is ujra kell futnia.
   `.rpf` megmarad
 - Titkosított (`.fxap`) resource-ok: ket reteges FXAP -> ChaCha20 -> Lua-decompile
   (reszletek lent, a "Resource dekódolás" szakaszban)
-- Connection reset / timeout: automatikus 3x retry, exponential backoff
+- Connection reset / timeout: automatikus 5x retry, exponential backoff (2/4/8/16 s —
+  egy szerver-restart ablakat is at hidalt)
+- **Config-gyorsitotar es szerver-restart-tureles**: az elso sikeres `/client`
+  valasz `Servers/<nev>/config.json`-be kerul. Ha kesobb a szerver nem valaszol
+  (restart) vagy a tokent visszautasitja, a dumper ezt a cache-t tolti be es
+  folytatja — a jatek kapcsolata csak uj tokenhez kell, nem az egesz dumphoz.
+- **Checkpoint csak akkor torlodik, ha minden kivalasztott resource kesz lett**;
+  egy restartnel félbeszakadt dump a kovetkezo futtatásnál ott folytatodik, ahol
+  elakadt
 - A warning-ok csak a `dumper.log`-ba mennek, a konzol tiszta
 - **AI regiszternevezo (opcionalis)**: a strukturális tisztitas utan felajanlja,
   hogy egy helyi kis modell (Qwen2.5-Coder-0.5B fine-tune) a megmaradt SHX

@@ -4,6 +4,7 @@
 #include <map>
 #include "../core/HttpClient.h"
 #include "../core/Checkpoint.h"
+#include "../utils/Json.h"
 namespace fivem {
 struct FileEntry {
     std::string name;
@@ -21,6 +22,10 @@ public:
     FiveMDumper(std::string baseUrl, std::string token,
                 std::string serverName, Checkpoint& checkpoint);
     bool getConfiguration();
+    bool loadCachedConfiguration();
+    static bool findCachedConfig(const std::string& baseUrl, std::string& outDir);
+    bool configReady() const { return configFetched_; }
+    bool usingCachedConfig() const { return usingCachedConfig_; }
     bool fetchDynamicHostname();
     static std::string probeDynamicHostname(const std::string& baseUrl, int timeoutMs);
     void fetchResource(const ResourceInfo& res);
@@ -40,12 +45,16 @@ private:
     bool downloadQuiet(const std::string& url, const std::vector<uint8_t>& key,
                        const std::vector<uint8_t>& iv, const std::string& outPath);
     bool unpackRpf(const std::string& rpfPath, const std::string& outDir);
+    bool applyConfiguration(const Json& js);
+    void saveConfigCache();
     std::string baseUrl_;
     std::string token_;
     std::string serverName_;
     std::string hostname_;
     std::string grants_;
+    std::string rawConfig_;
     bool configFetched_ = false;
+    bool usingCachedConfig_ = false;
     HttpClient http_;
     Checkpoint& checkpoint_;
     std::vector<ResourceInfo> resources_;

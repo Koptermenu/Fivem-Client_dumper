@@ -99,28 +99,9 @@ void FiveMDumper::setServerName(const std::string& name) {
         writeTextFile(resourcesDir + "/Grants.txt", grants_);
     }
 }
-bool FiveMDumper::getConfiguration() {
-    if (configFetched_) return true;
-    auto resp = http_.postForm(baseUrl_ + "/client", "method=getConfiguration");
-    if (!resp.ok()) {
-        LOG("getConfiguration failed: " + resp.error + " (status " + std::to_string(resp.status) + ")",
-            LogLevel::ERROR);
-        return false;
-    }
-    Json js;
-    try {
-        js = Json::parse(std::string(resp.body.begin(), resp.body.end()));
-    } catch (const std::exception& e) {
-        LOG(std::string("JSON parse error: ") + e.what(), LogLevel::ERROR);
-        return false;
-    }
-    if (js.has("error") && js.at("error").isString() && !js.has("resources")) {
-        LOG("Server rejected the token: " + js.at("error").asString() +
-            " - connect in FiveM to this exact server first.", LogLevel::ERROR);
-        return false;
-    }
-    std::string grants = js.strAt("grants_token", "");
-    grants_ = grants;
+bool FiveMDumper::applyConfiguration(const Json& js) {
+    grants_ = js.strAt("grants_token", "");
+    hostname_.clear();
     for (const char* key : {"hostname", "serverName", "name"}) {
         std::string v = js.strAt(key, "");
         if (!v.empty()) { hostname_ = v; break; }
@@ -154,7 +135,72 @@ bool FiveMDumper::getConfiguration() {
             if (!info.name.empty()) resources_.push_back(std::move(info));
         }
     }
-    LOG("Configuration fetched: " + std::to_string(resources_.size()) + " resources", LogLevel::INFO);
+    LOG("Configuration applied: " + std::to_string(resources_.size()) + " resources", LogLevel::INFO);
+    return !resources_.empty();
+}
+
+bool FiveMDumper::getConfiguration() {
+    if (configFetched_) return true;
+    auto resp = http_.postForm(baseUrl_ + "/client", "method=getConfiguration");
+    if (!resp.ok()) {
+        LOG("getConfiguration failed: " + resp.error + " (status " + std::to_string(resp.status) + ")",
+            LogLevel::ERROR);
+        return false;
+    }
+    Json js;
+    const std::string body(resp.body.begin(), resp.body.end());
+    try {
+        js = Json::parse(body);
+    } catch (const std::exception& e) {
+        LOG(std::string("JSON parse error: ") + e.what(), LogLevel::ERROR);
+        return false;
+    }
+    if (js.has("error") && js.at("error").isString() && !js.has("resources")) {
+        LOG("Server rejected the token: " + js.at("error").asString() +
+            " - connect in FiveM to this exact server first.", LogLevel::ERROR);
+        return false;
+    }
+    if (!applyConfiguration(js)) return false;
+    rawConfig_ = body;
+    return true;
+}
+
+void FiveMDumper::saveConfigCache() {
+    if (rawConfig_.empty() || serverDir.empty()) return;
+    writeTextFile("Servers/" + serverDir + "/config.json", rawConfig_);
+    writeTextFile("Servers/" + serverDir + "/config_ip.txt", baseUrl_);
+}
+
+bool FiveMDumper::findCachedConfig(const std::string& baseUrl, std::string& outDir) {
+    std::error_code ec;
+    for (auto& e : fs::directory_iterator("Servers", ec)) {
+        if (!e.is_directory(ec)) continue;
+        auto ip = readFileBytes((e.path() / "config_ip.txt").string());
+        if (!ip) continue;
+        std::string stored(ip->begin(), ip->end());
+        if (trim(stored) != baseUrl) continue;
+        if (!fs::exists(e.path() / "config.json", ec)) continue;
+        outDir = e.path().filename().string();
+        return true;
+    }
+    return false;
+}
+
+bool FiveMDumper::loadCachedConfiguration() {
+    if (configFetched_) return true;
+    const std::string path = "Servers/" + serverDir + "/config.json";
+    auto data = readFileBytes(path);
+    if (!data) return false;
+    Json js;
+    try {
+        js = Json::parse(std::string(data->begin(), data->end()));
+    } catch (const std::exception& e) {
+        LOG("Cached config parse error: " + std::string(e.what()), LogLevel::WARNING);
+        return false;
+    }
+    if (!applyConfiguration(js)) return false;
+    usingCachedConfig_ = true;
+    LOG("Configuration restored from cache: " + path, LogLevel::INFO);
     return true;
 }
 static std::string stripFxColors(const std::string& s) {
@@ -216,7 +262,7 @@ void FiveMDumper::downloadAndDecrypt(const std::string& url, const std::vector<u
                                      const std::string& expectedChecksum,
                                      const ByteProgress& onBytes,
                                      const SizeCallback& onStart) {
-    static const int maxRetries = 3;
+    static const int maxRetries = 5;
     HttpResponse resp;
     for (int attempt = 0; attempt < maxRetries; ++attempt) {
         SizeCallback firstAttempt = (attempt == 0) ? onStart : SizeCallback();
@@ -225,7 +271,7 @@ void FiveMDumper::downloadAndDecrypt(const std::string& url, const std::vector<u
         if (attempt < maxRetries - 1) {
             LOG("Download retry " + std::to_string(attempt + 1) + "/" + std::to_string(maxRetries) +
                 " for " + outPath + ": " + resp.error, LogLevel::WARNING);
-            std::this_thread::sleep_for(std::chrono::seconds(1 << attempt));
+            std::this_thread::sleep_for(std::chrono::seconds(2 << attempt));
         } else {
             LOG("Download failed after " + std::to_string(maxRetries) + " attempts for " +
                 outPath + ": " + resp.error, LogLevel::WARNING);
@@ -515,6 +561,13 @@ void FiveMDumper::fetchResource(const ResourceInfo& res) {
 }
 bool FiveMDumper::run(const std::string& filterResource) {
     if (!getConfiguration()) return false;
+    saveConfigCache();
+    if (usingCachedConfig_) {
+        std::cout << CLR(term::YELLOW) << "[!]" << CLR(term::RESET)
+                  << " A konfiguracio cache-bol jol: a szerver most nem valaszol, vagy a token "
+                     "lejart. Ha a letoltesek hibadnak, csatlakozz ujra a szerverhez a jatekban "
+                     "es futtasd ujra a dumpert (a checkpoint folytatja).\n";
+    }
     if (configFetched_ && !grants_.empty())
         writeTextFile(resourcesDir + "/Grants.txt", grants_);
     std::vector<ResourceInfo> sorted = resources_;
@@ -598,8 +651,22 @@ bool FiveMDumper::run(const std::string& filterResource) {
     }
     LOG("Processing " + std::to_string(chosen.size()) + " resource(s)...", LogLevel::INFO);
     for (const auto& r : chosen) fetchResource(r);
-    checkpoint_.clear();
-    LOG("All selected resources downloaded successfully.", LogLevel::SUCCESS);
+    bool allDone = !chosen.empty();
+    for (const auto& r : chosen) {
+        if (std::find(checkpoint_.completed_resources.begin(),
+                      checkpoint_.completed_resources.end(),
+                      safeName(r.name)) == checkpoint_.completed_resources.end()) {
+            allDone = false;
+        }
+    }
+    if (allDone) {
+        checkpoint_.clear();
+        LOG("All selected resources downloaded successfully.", LogLevel::SUCCESS);
+    } else {
+        LOG("Not every resource finished; the checkpoint is kept so the next run "
+            "continues where this one stopped (reconnect in FiveM first if the "
+            "token expired).", LogLevel::WARNING);
+    }
     return true;
 }
 } 

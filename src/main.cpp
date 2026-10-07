@@ -268,7 +268,24 @@ int main(int argc, char** argv) {
         baseUrl = "http://" + ip;
         std::cout << CLR(term::GREEN) << "[+]" << CLR(term::RESET) << " Selected server IP: " << ip << "\n";
         dumper = std::make_unique<FiveMDumper>(baseUrl, token, "", checkpoint);
-        if (dumper->getConfiguration()) {
+        bool configFromCache = false;
+        if (!dumper->getConfiguration()) {
+            std::string cachedDir;
+            if (FiveMDumper::findCachedConfig(baseUrl, cachedDir)) {
+                std::cout << CLR(term::YELLOW) << "[!]" << CLR(term::RESET)
+                          << " A szerver most nem valaszol (vagy elutasitotta a tokent), de van "
+                             "korabbi, cache-elt konfiguracio: " << cachedDir << "\n";
+                dumper->setServerName(cachedDir);
+                configFromCache = dumper->loadCachedConfiguration();
+                if (configFromCache) {
+                    std::cout << CLR(term::GREEN) << "[+]" << CLR(term::RESET)
+                              << " Cache-elt konfiguracio betoltve. Szerverujrainditas utan a "
+                                 "fajlletoltesek lehet, hogy nem mennek: ilyenkor csatlakozz "
+                                 "ujra a jatekban, es a checkpoint folytatja.\n";
+                }
+            }
+        }
+        if (dumper->configReady()) {
             serverName = dumper->hostname();
             if (serverName.empty() && envName && *envName) serverName = envName;
             bool gotDynamicResponse = false;
