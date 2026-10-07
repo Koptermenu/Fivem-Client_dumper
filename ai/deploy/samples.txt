@@ -1,0 +1,286 @@
+{"file": "0r_lib\\modules\\client\\events.lua", "before": "SHX2_1", "after": "OnPlayerLoaded", "line": "local SHX0_1, text1, SHX2_1"}
+{"file": "0r_lib\\modules\\client\\main.lua", "before": "SHX0_3", "after": "p", "line": "function num23(SHX0_3)"}
+{"file": "0r_lib\\shared\\common.lua", "before": "SHX6_2", "after": "frame", "line": "local SHX1_2Fn2, flag2, table2, SHX4_2, Lib22, SHX6_2, SHX7_2, flag22, Lib23, Lib2, SHX6_2Fn2"}
+{"file": "17mov_GruppeSechs\\client\\client.lua", "before": "SHX6_4", "after": "player", "line": "local flag4, Lang4, SHX3_4, SHX1_4Fn4, flag42, SHX6_4, flag43, SHX8_4, flag44, SHX10_4, SHX11_4, SHX9_4Fn4, SHX13_4, SHX14_4, SHX15_4"}
+{"file": "ReaperV4\\classes\\class.lua", "before": "SHX0_1", "after": "assert", "line": "local SHX0_1, SHX1_1, SHX2_1, getinfo1, SHX4_1, SHX5_1, SHX6_1, SHX7_1"}
+{"file": "ReaperV4\\classes\\client\\Detections.lua", "before": "SHX3_1", "after": "ToString", "line": "local SHX0_1Fn1, text13, SHX2_1, SHX3_1, SHX4_1, SHX5_1, InvokeFunctionReference1, SHX7_1Fn1, text14, SHX9_1, SHX10_1, SHX11_1, SHX12_1, on1, text1, text12, flag1"}
+{"file": "ReaperV4\\classes\\client\\Entities.lua", "before": "SHX15_1", "after": "NetworkSetEntityIsNetworked", "line": "local SHX0_1Fn1, text1, SHX2_1, API1, SHX5_1, SHX7_1Fn1, text14, SHX9_1, SHX10_1, SHX12_1, SHX14_1, SHX15_1, SHX17_1, SHX19_1Fn1, text12, SHX21_1, SHX22_1, register1, SHX25_1, text13, SHX27_1"}
+{"file": "ReaperV4\\classes\\client\\Math.lua", "before": "SHX2_2", "after": "min", "line": "function SHX1_1(SHX0_2, SHX1_2, SHX2_2)"}
+{"file": "ReaperV4\\classes\\client\\NUI.lua", "before": "SHX11_1", "after": "GetConvarValue", "line": "local SHX0_1Fn1, text1, SHX2_1, new1, SHX4_1, Await1, SHX8_1, encode1, SHX11_1, SHX12_1, SHX13_1, SHX14_1, SHX16_1, SHX17_1, on1, SHX19_1, text12, SHX21_1"}
+{"file": "ReaperV4\\classes\\client\\NativeChecks.lua", "before": "SHX20_1", "after": "SetThreadPriority", "line": "local SHX0_1Fn1, text1, SHX2_1, insert1, decode1, SHX6_1, SHX9_1, SHX10_1, SHX11_1, gmatch1, SHX13_1, encode1, table1, SHX16_1, SHX17_1, SHX18_1, SHX19_1, SHX20_1, new1, SHX22_1"}
+{"file": "ReaperV4\\classes\\client\\PedConfigFlags.lua", "before": "num1", "after": "const", "line": "local table1, text1, num1"}
+{"file": "ReaperV4\\classes\\client\\PedTaskTypes.lua", "before": "num1", "after": "entity", "line": "local table1, num1, num12"}
+{"file": "ReaperV4\\classes\\client\\Player.lua", "before": "SHX11_2", "after": "buffer", "line": "local state2, num22, cache2, SHX6_2Fn2, key32, text22, SHX9_2Fn2, SHX10_2Fn2, SHX11_2, SHX12_2Fn2, SHX13_2"}
+{"file": "ReaperV4\\classes\\client\\String.lua", "before": "SHX9_2", "after": "dst", "line": "local SHX2_2Fn2, SHX3_2, num2, len2, SHX5_2Fn2, text2, SHX9_2, SHX10_2"}
+{"file": "ReaperV4\\classes\\client\\Table.lua", "before": "SHX11_2", "after": "group_key", "line": "local num22, num23, num24, SHX2_2Fn2, SHX3_2Fn2, SHX7_2, SHX8_2Fn2, SHX9_2Fn2, SHX10_2, SHX11_2"}
+{"file": "ReaperV4\\classes\\client\\Weapons.lua", "before": "SHX5_1", "after": "Garbage", "line": "local SHX0_1Fn1, text1, new1, SHX5_1"}
+{"file": "ReaperV4\\classes\\core\\client\\Logger.lua", "before": "SHX5_1", "after": "CreateLogger", "line": "local SHX3_1Fn1, text1, SHX5_1, text12, SHX7_1"}
+{"file": "ReaperV4\\classes\\core\\client\\Natives.lua", "before": "SHX11_2", "after": "_", "line": "local table2, SHX1_2Fn2, flag2, text2, SHX4_2Fn2, num2, SHX6_2Fn22, SHX7_2Fn2, SHX8_2Fn2, len2, SHX6_2Fn2, SHX11_2, SHX9_2Fn2, SHX13_2, SHX14_2, SHX15_2"}
+{"file": "ReaperV4\\classes\\core\\client\\RPC.lua", "before": "SHX10_2", "after": "callback_handler", "line": "local num22, text2, SHX3_2Fn2, num23, SHX3_2Fn22, SHX7_2Fn2, SHX8_2, SHX7_2Fn22, SHX10_2"}
+{"file": "ReaperV4\\classes\\core\\client\\Security.lua", "before": "SHX14_1", "after": "fn1", "line": "local SHX0_1Fn1, text12, byte1, gsub1, random1, format1, SHX7_1, SHX8_1, SHX9_1, num1, num12, SHX12_1, new1, SHX14_1, text1"}
+{"file": "ReaperV4\\client.lua", "before": "SHX0_1", "after": "Core", "line": "local SHX0_1, SHX1_1, SHX2_1, SHX3_1, SHX4_1, SHX5_1, SHX6_1, log1, SHX9_1, text1, text12, SHX12_1, SHX13_1, encode1, SHX15_1, SHX16_1, SHX17_1, SHX18_1, insert1, sort1, reverse1, GetFunctionReference1, SHX23_1, on1, tex"}
+{"file": "ReaperV4\\imports\\bypass.lua", "before": "SHX10_1", "after": "PeekResourceState", "line": "local SHX0_1, SHX1_1, SHX2_1, SHX3_1, SHX4_1, SHX5_1, SHX9_1, SHX10_1, SHX12_1, match1, sub1, gsub1, byte1, insert1, unpack1, SHX20_1, SHX21_1, SHX23_1, pack_args1, unpack12, SHX26_1, decode1, encode1, pack1, SHX31_1, SH"}
+{"file": "ReaperV4\\resource\\client\\anti_godmode.lua", "before": "SHX5_1", "after": "AntiBubbleDetections", "line": "local SHX0_1, SHX2_1, SHX3_1, addDetection1, SHX5_1, table1, SHX7_1"}
+{"file": "ReaperV4\\scripts\\adminMenu\\client.lua", "before": "SHX5_1", "after": "SetMenuData", "line": "local SHX0_1, SHX1_1, SHX2_1, SHX3_1, log1, SHX5_1, text15, text16, text17, decode1, encode1, flag1, SHX17_1, SHX18_1, on1, text1, text12, text13, text14, SHX24_1"}
+{"file": "ReaperV4\\scripts\\detections\\client.lua", "before": "SHX77_1", "after": "GetEntityWindowTintRd", "line": "local SHX0_1, SHX1_1, SHX2_1, SHX3_1, SHX4_1, Detections1, SHX7_1, SHX10_1, SHX11_1, SHX12_1, SHX13_1, SHX14_1, SHX15_1, abs1, floor1, match1, SHX19_1, SHX20_1, decode1, SHX23_1, SHX24_1, SHX28_1, SHX29_1, SHX30_1, SHX31"}
+{"file": "ReaperV4\\scripts\\detections\\pro_detections\\one.lua", "before": "SHX0_1", "after": "Core", "line": "local SHX0_1, SHX1_1, SHX2_1, SHX3_1, SHX4_1, SHX6_1, SHX7_1, SHX8_1, SHX9_1, SHX12_1, SHX13_1, SHX14_1, SHX15_1, SHX16_1, SHX17_1, SHX18_1, SHX19_1, SHX20_1, SHX21_1, SHX22_1, SHX23_1, SHX24_1, SHX25_1, SHX26_1, SHX27_1"}
+{"file": "ReaperV4\\scripts\\detections\\pro_detections\\pvp_detections.lua", "before": "SHX0_1", "after": "LoadResourceFile", "line": "local SHX0_1, SHX1_1"}
+{"file": "ReaperV4\\scripts\\entities\\client.lua", "before": "SHX4_1", "after": "entitiesCleanup", "line": "local onNet1, SHX2_1, text1, SHX4_1"}
+{"file": "ReaperV4\\scripts\\entities\\client\\npc_population.lua", "before": "SHX4_2", "after": "_", "line": "local num2, num22, num23, SHX4_2, SHX6_2, SHX7_2"}
+{"file": "ReaperV4\\scripts\\js_support\\client.lua", "before": "SHX10_2", "after": "env", "line": "local SHX2_2Fn2, text2, text22, text23, text24, hash2, hash22, SHX9_2, SHX10_2, SHX11_2Fn2, SHX12_2"}
+{"file": "ReaperV4\\scripts\\stream-cast\\client.lua", "before": "SHX8_1", "after": "streamCastRequest", "line": "local SHX0_1, SHX1_1, SHX2_1, SHX3_1, register1, SHX6_1, text1, SHX8_1"}
+{"file": "ReaperV4\\scripts\\systemChecks\\client.lua", "before": "SHX17_1", "after": "filterEntityToPedAttachments", "line": "local SHX0_1, SHX1_1, SHX2_1, SHX3_1, SHX4_1Fn1, text14, text15, SHX7_1, SHX8_1, SHX9_1, SHX10_1, insert1, SHX12_1, SHX13_1, encode1, decode1, SHX16_1, SHX17_1, text1, text12, text13"}
+{"file": "ReaperV4\\scripts\\weapons\\client.lua", "before": "SHX7_3", "after": "LastWeaponDamage", "line": "local SHX0_3Fn3, getCurrentWeapon3, SHX2_3Fn3, SHX3_3Fn3, table32, table33, table34, SHX7_3"}
+{"file": "ak47_business\\client\\job.lua", "before": "SHX5_5", "after": "seenNums", "line": "local SHX2_5, SHX3_5, SHX4_5, SHX5_5, SHX6_5"}
+{"file": "ak47_business\\client\\main.lua", "before": "SHX46_4", "after": "last9", "line": "local SHX4_4Fn4, SHX5_4Fn4, num417, num418, num419, flag47, num42, SHX11_4, flag4, num43, SHX15_4, SHX16_4, SHX17_4, num44, num45, flag42, SHX22_4, flag43, SHX24_4, SHX26_4, SHX27_4, SHX28_4, SHX29_4, num47, num48, num49"}
+{"file": "ak47_damagenumber\\client\\main.lua", "before": "SHX4_2", "after": "ent", "line": "local SHX2_2Fn2, SHX3_2Fn2, SHX4_2, SHX4_2Fn2, SHX6_2, SHX7_2Fn2, SHX8_2Fn2, Color26, Color2, Color22, Color23, Color24, Color25, SHX13_2Fn2, SHX16_2Fn2, num22, x2, z2, cos2, cos22, color2, sqrt2, SHX24_2Fn2, num23, num2"}
+{"file": "ak47_hookahloungev2\\client\\bar.lua", "before": "SHX6_1", "after": "TipZonesData", "line": "local SHX0_1, text1, TipZones1, SHX3_1, SHX1_1Fn1, SHX5_1, SHX6_1, zones1, insert1, coords1, SHX10_1"}
+{"file": "ak47_hookahloungev2\\client\\heater.lua", "before": "SHX2_1", "after": "handle", "line": "local CreateThread1, text1, SHX2_1, text12, text13, SHX5_1"}
+{"file": "ak47_hookahloungev2\\client\\job.lua", "before": "num2", "after": "Contexts", "line": "local TriggerServerCallback2, num2, sort2"}
+{"file": "ak47_hookahloungev2\\client\\main.lua", "before": "SHX15_3", "after": "PlayerEyeShift", "line": "local SHX1_3Fn3, text3, U3, text32, price3, text33, num34, SHX8_3Fn3, SHX9_3Fn3, num3, flag3, flag32, flag33, num32, SHX15_3, flag34, flag35, flag36, flag37, num33, SHX3_3Fn3"}
+{"file": "ak47_hookahloungev2\\client\\target.lua", "before": "SHX4_1", "after": "Clear", "line": "local SHX0_1, flag1, SHX2_1, text1, SHX4_1"}
+{"file": "ak47_moneywash\\client\\main.lua", "before": "SHX2_3", "after": "coords", "line": "local SHX1_3, SHX2_3, machine3, machine32, machine33, machine34"}
+{"file": "ak47_moneywash\\client\\teleport.lua", "before": "SHX3_1", "after": "TeleportThread", "line": "local flag1, CreateThread1, SHX3_1"}
+{"file": "ak47_smokingv2\\client\\usable.lua", "before": "SHX2_1", "after": "Event", "line": "local SHX0_1, flag1, SHX2_1, text1, SHX4_1"}
+{"file": "ak47_smokingv2\\client\\vape.lua", "before": "SHX3_3", "after": "_", "line": "local num3, num311, num312, SHX3_3, text3, text32, num313, SHX7_3Fn3, num314, text33, num32, num33, SHX12_3Fn3, num34, num35, num36, num37, num38, num39, num310, flag3, SHX9_3Fn3"}
+{"file": "brutal_boxing\\client\\nui.lua", "before": "SHX2_1", "after": "onPlayButtonClicked", "line": "local text1, SHX2_1"}
+{"file": "cd_dispatch\\client\\main\\client.lua", "before": "SHX7_1", "after": "GetPlayerDispatchData", "line": "local flag1, flag12, SHX2_1, text13, flag13, SHX5_1, SHX6_1, SHX7_1, num1, SHX9_1, text1, text12, SHX12_1"}
+{"file": "cdev_lib\\client\\alert.lua", "before": "SHX6_1", "after": "onOkayOnce", "line": "local table1, table12, table13, RegisterNUIMessageHandler1, SHX4_1, text1, SHX6_1"}
+{"file": "cdev_lib\\client\\events.lua", "before": "SHX1_3", "after": "func", "line": "local SHX0_3, SHX1_3"}
+{"file": "cdev_lib\\client\\notification.lua", "before": "SHX3_1", "after": "RegisterNotification", "line": "local table1, SHX1_1, text1, SHX3_1"}
+{"file": "cdev_lib\\client\\nui.lua", "before": "SHX3_1", "after": "FocusCallback", "line": "local table1, SHX1_1, text1, SHX3_1"}
+{"file": "cdev_lib\\client\\shop.lua", "before": "SHX1_3", "after": "quantity", "line": "function table2(SHX0_3, SHX1_3)"}
+{"file": "cdev_lib\\shared\\config_init.lua", "before": "SHX0_3", "after": "framework", "line": "function SHX2_2(SHX0_3)"}
+{"file": "cdev_lib\\shared\\external.lua", "before": "SHX2_3", "after": "Request", "line": "function num24(SHX0_3, SHX1_3Fn3, SHX2_3)"}
+{"file": "cdev_lib\\shared\\keys.lua", "before": "SHX0_2", "after": "meta", "line": "function table1(SHX0_2, SHX1_2)"}
+{"file": "cdev_lib\\shared\\localizer.lua", "before": "SHX2_1", "after": "_", "line": "local table1, Language1, SHX2_1"}
+{"file": "cdev_lib\\shared\\menu.lua", "before": "SHX5_3", "after": "oldHandler", "line": "local SHX0_3, eventHandlers3, value3, SHX0_3Fn3, SHX4_3, SHX5_3"}
+{"file": "codewave-handbags\\client\\client.lua", "before": "SHX21_1", "after": "SetPlayerIdentifier", "line": "local SHX0_1, SHX1_1, Items12, CraftingRecipes1, flag13, text111, text112, flag14, SHX8_1, SHX9_1, SHX10_1, text1, SHX12_1, SHX13_1, flag1, SHX15_1, CreateThread1, text12, Items1, NPC1, SHX20_1, SHX21_1, CreateThread12, "}
+{"file": "codewave-lashes\\client\\client.lua", "before": "SHX24_1", "after": "CloseCrafting", "line": "local SHX0_1, SHX1_1, Items12, CraftingRecipes1, flag13, text110, text111, flag14, SHX8_1, SHX9_1, SHX10_1, text1, SHX12_1, SHX13_1, flag1, SHX15_1, CreateThread1, text12, Items1, NPC1, SHX20_1, SHX21_1, CreateThread12, "}
+{"file": "devkit_bbq\\client\\cl_edits.lua", "before": "SHX3_2", "after": "target", "line": "local Notify2, SHX3_2, SHX4_2"}
+{"file": "devkit_bbq\\client\\cl_models.lua", "before": "SHX0_3", "after": "_", "line": "function table27(SHX0_3)"}
+{"file": "devkit_bbq\\client\\client.lua", "before": "SHX8_1", "after": "TriggerEvent", "line": "local SHX0_1Fn1, flag12, flag13, flag14, flag15, SHX6_1, SHX8_1, flag16, flag1, SHX12_1, text1, text12, SHX15_1"}
+{"file": "devkit_dancingpoles\\client\\client.lua", "before": "SHX3_3", "after": "ID", "line": "local showContext3, text3, table3, SHX3_3"}
+{"file": "devkit_dancingpoles\\client\\dataview.lua", "before": "SHX7_1", "after": "fn", "line": "local SHX0_1Fn1, table1, table12, table13, Types1, SHX5_1, SHX3_1Fn1, SHX7_1, SHX8_1, packsize12, SHX10_1, format1, SHX12_1, SHX13_1, packsize1, SHX11_1Fn1"}
+{"file": "exotic_hoephone_v2\\client.lua", "before": "SHX2_1", "after": "spawnNPC", "line": "local SHX0_1, text1, SHX2_1"}
+{"file": "fixtextureloss\\client\\client.lua", "before": "SHX27_2", "after": "funcs", "line": "local text23, collisionTimeout2, SHX2_2Fn2, num210, text24, num211, ceil2, SHX9_2, table22, SHX11_2Fn2, num2, num22, num23, num24, num25, num26, SHX18_2, SHX19_2Fn2, format2, text2, flag2, text22, table23, num27, flag22,"}
+{"file": "illenium-appearance\\game\\customization.lua", "before": "SHX4_1", "after": "customization", "line": "local SHX0_1Fn1, text12, SHX2_1, SHX3_1, SHX4_1, SHX5_1, SHX6_1, SHX7_1, SHX8_1, SHX9_1, SHX10_1, SHX11_1, SHX12_1, SHX13_1, SHX14_1, SHX15_1, text1, startPlayerCustomization1"}
+{"file": "illenium-appearance\\game\\nui.lua", "before": "SHX8_2", "after": "finalPosition", "line": "local SHX2_2Fn2, deltaX2, SHX4_2Fn2, text2, SHX5_2Fn2, num2, SHX8_2"}
+{"file": "illenium-appearance\\modules\\required\\client\\interface\\main.lua", "before": "SHX1_3", "after": "_", "line": "local store3, SHX1_3"}
+{"file": "jg-advancedgarages\\client\\cl-garage.lua", "before": "SHX8_1", "after": "cb", "line": "local flag1, table1, SHX2_1, SHX3_1, SHX4_1, SHX5_1, callback1, text1, SHX8_1"}
+{"file": "jg-advancedgarages\\client\\cl-impound.lua", "before": "SHX15_2", "after": "GetVehicleModelName", "line": "local table2, Client22, table22, text23, text24, SHX3_2Fn2, flag2, text25, job2, text2, name2, SHX10_2Fn2, SHX13_2, SHX14_2, SHX15_2, SHX16_2, text22"}
+{"file": "jg-advancedgarages\\client\\cl-interior.lua", "before": "SHX4_1", "after": "SetFlag", "line": "local num1, table1, table12, SHX4_1, table13, SHX6_1, SHX7_1, SHX8_1, SHX9_1, SHX10_1, SHX11_1, SHX12_1, SHX13_1, SHX14_1, onCache1, text1, SHX17_1"}
+{"file": "jg-advancedgarages\\client\\cl-main.lua", "before": "SHX2_1", "after": "AdvancedParkingCallback", "line": "local SHX0_1, text1, SHX2_1"}
+{"file": "jg-advancedgarages\\client\\cl-private-garages.lua", "before": "SHX6_1", "after": "ShowPrivateGaragesNUICallback", "line": "local SHX0_1, SHX1_1, SHX2_1, SHX3_1, SHX4_1, text1, SHX6_1"}
+{"file": "jg-advancedgarages\\client\\cl-spawn.lua", "before": "SHX2_1", "after": "SetVehicleModel", "line": "local SHX0_1, SHX1_1, SHX2_1, SHX3_1, SHX4_1, callback1, text1, text12, SHX8_1"}
+{"file": "jg-advancedgarages\\client\\cl-vehicle.lua", "before": "SHX5_1", "after": "SetVehiclePlateText", "line": "local SHX0_1, SHX1_1, num1, SHX3_1, SHX4_1, SHX5_1, SHX6_1, SHX7_1, SHX8_1, text1, SHX10_1"}
+{"file": "jg-advancedgarages\\shared\\main.lua", "before": "SHX11_2", "after": "num", "line": "local Debug2, table22, text2, num2, VehicleLabels2, num22, SHX3_2Fn2, SHX9_2Fn2, encode2, SHX11_2"}
+{"file": "jg-dealerships\\client\\cl-admin.lua", "before": "SHX13_2", "after": "filteredModel", "line": "local flag24, flag25, model2, category2, price2, dealerships2, callback22, text22, flag2, flag22, SHX12_2, SHX13_2, SHX14_2, SHX15_2, SHX16_2"}
+{"file": "jg-dealerships\\client\\cl-direct-sales.lua", "before": "SHX2_1", "after": "DirectSale", "line": "local SHX0_1, text1, SHX2_1, flag1"}
+{"file": "jg-dealerships\\client\\cl-display-vehicles.lua", "before": "SHX11_1", "after": "RemoveGeneratorsAroundDealership2Manager", "line": "local table1, table12, flag1, flag12, table13, num12, num13, num14, num15, num1, SHX11_1, SHX12_1, onCache1, text1, SHX15_1"}
+{"file": "jg-dealerships\\client\\cl-employees.lua", "before": "SHX0_1", "after": "RegisterEvent", "line": "local SHX0_1, text1, SHX2_1"}
+{"file": "jg-dealerships\\client\\cl-finance.lua", "before": "SHX3_1", "after": "FinanceMakePayment", "line": "local SHX0_1, SHX1_1, MyFinanceCommand1, SHX3_1, flag1"}
+{"file": "jg-dealerships\\client\\cl-management.lua", "before": "SHX2_1", "after": "openManagement", "line": "local SHX0_1, text1, SHX2_1"}
+{"file": "jg-dealerships\\client\\cl-sell-vehicle.lua", "before": "SHX0_1", "after": "RegisterEvent", "line": "local SHX0_1, text1, SHX2_1"}
+{"file": "jg-dealerships\\client\\cl-showroom.lua", "before": "SHX0_1", "after": "LoadConfig", "line": "local SHX0_1, SHX1_1, SHX2_1, flag1, SHX5_1, num1, text1, text12, SHX9_1"}
+{"file": "jg-dealerships\\client\\cl-spawn.lua", "before": "SHX5_3", "after": "_", "line": "local waitFor3, num3, text3, num32, flag3, SHX5_3, flag32"}
+{"file": "jg-dealerships\\client\\cl-test-drive.lua", "before": "SHX5_1", "after": "LeaveTestDrive", "line": "local SHX0_1, SHX1_1, SHX2_1, SHX3_1, SHX4_1, SHX5_1, text1, SHX7_1"}
+{"file": "jg-handling\\client\\cl-editor.lua", "before": "SHX3_1", "after": "ExitPreviewMode", "line": "local SHX0_1, SHX1_1, SHX2_1, SHX3_1, EditorCommand1, text1, SHX6_1"}
+{"file": "jg-handling\\client\\cl-main.lua", "before": "SHX1_2", "after": "Player", "line": "function SHX0_1(SHX0_2, SHX1_2, table2)"}
+{"file": "jg-handling\\client\\cl-profiles.lua", "before": "SHX2_1", "after": "CreateProfile", "line": "local SHX0_1, text1, SHX2_1"}
+{"file": "jg-handling\\client\\cl-telemetry.lua", "before": "SHX8_1", "after": "GetSpeed", "line": "local flag1, SHX1_1, SHX2_1, SHX3_1, SHX4_1, SHX5_1, SHX6_1, table1, SHX8_1, SHX9_1, EnableStandaloneTimingTool1, text1, SHX12_1"}
+{"file": "jg-handling\\client\\cl-vehicle.lua", "before": "SHX4_1", "after": "VehicleCache", "line": "local SHX0_1, SHX1_1, onCache1, text1, SHX4_1"}
+{"file": "jg-handling\\shared\\constants.lua", "before": "table1", "after": "handling_table", "line": "local table1, num1"}
+{"file": "jg-handling\\shared\\main.lua", "before": "SHX0_1", "after": "GetVehiclePlateText", "line": "local SHX0_1, text1"}
+{"file": "kq_outfitbag2\\client\\cache.lua", "before": "SHX2_2", "after": "_", "line": "function SHX1_1(SHX0_2, SHX1_2, SHX2_2)"}
+{"file": "kq_outfitbag2\\client\\fixed.lua", "before": "SHX0_2", "after": "bag", "line": "local SHX0_2, fixedBags22, SHX2_2Fn2, SHX0_2Fn2, num2, bagObject2, SHX6_2Fn2, outfits2, num22, SHX6_2Fn22, SHX10_2, SHX11_2, fixedBags2, table2, text2, bags2"}
+{"file": "kq_outfitbag2\\client\\functions.lua", "before": "SHX2_1", "after": "SetBags", "line": "local SHX0_1, text1, SHX2_1"}
+{"file": "kq_outfitbag2\\client\\main.lua", "before": "SHX8_3", "after": "_", "line": "local SHX0_3Fn3, SHX1_3Fn32, text3, SHX3_3, SHX4_3, SHX5_3, SHX6_3, SHX4_3Fn3, SHX8_3, SHX9_3, SHX10_3Fn3, SHX11_3, SHX12_3Fn3, SHX13_3Fn3, SHX1_3Fn3"}
+{"file": "kq_outfitbag2\\client\\management.lua", "before": "SHX3_1", "after": "SetOutfits", "line": "local SHX0_1, text1, SHX2_1, SHX3_1"}
+{"file": "kq_outfitbag2\\client\\skin.lua", "before": "SHX7_3", "after": "SetPedProp", "line": "local bagAnimation3, bagAnimation32, text3, num3, num32, num33, SHX6_3, SHX7_3, SHX8_3, SHX9_3, drawable3, texture3, palette3"}
+{"file": "kq_outfitbag2\\client\\utils.lua", "before": "SHX0_1", "after": "PlayAnimDict", "line": "local SHX0_1, SHX1_1"}
+{"file": "lation_ui\\client\\components\\alert.lua", "before": "SHX2_1", "after": "registerAlertCallback", "line": "local table1, SHX1_1, SHX2_1, text1, text12, SHX5_1"}
+{"file": "lation_ui\\client\\components\\input.lua", "before": "SHX1_1", "after": "TypeChecking", "line": "local table1, SHX1_1, SHX2_1, text1, text12, SHX5_1"}
+{"file": "lation_ui\\client\\components\\menu.lua", "before": "SHX2_1", "after": "select", "line": "local SHX0_1, SHX1_1, SHX2_1, SHX3_1, SHX4_1, SHX5_1, SHX6_1, text1, SHX8_1"}
+{"file": "lation_ui\\client\\components\\notify.lua", "before": "SHX3_1", "after": "_notify", "line": "local SHX0_1, SHX1_1, text1, SHX3_1"}
+{"file": "lation_ui\\client\\components\\progressbar.lua", "before": "SHX6_1", "after": "AllowWhileDead", "line": "local SHX0_1, SHX1_1, state1, table1, SHX5_1, SHX6_1, SHX7_1, table12, SHX9_1, SHX10_1, SHX11_1, SHX12_1, SHX13_1, text1, text12, flag1, text13"}
+{"file": "lation_ui\\client\\components\\radial.lua", "before": "SHX8_1", "after": "RadialMenuFocusChanged", "line": "local flag1, SHX1_1, SHX2_1, SHX3_1, SHX4_1, flag12, SHX6_1, SHX7_1, SHX8_1, SHX9_1, text1, text12, text13, radial1, SHX14_1, SHX15_1, text14, SHX17_1"}
+{"file": "lation_ui\\client\\components\\skillcheck.lua", "before": "SHX3_1", "after": "skillCheckCancel", "line": "local SHX0_1, SHX1_1, SHX2_1, SHX3_1, SHX4_1, text1, SHX6_1"}
+{"file": "lation_ui\\client\\components\\textui.lua", "before": "SHX4_1", "after": "TextUI", "line": "local table1, SHX1_1, SHX2_1, SHX3_1, SHX4_1, text1, SHX6_1"}
+{"file": "lation_ui\\client\\utils\\locale.lua", "before": "SHX2_1", "after": "localeFile", "line": "local SHX0_1Fn1, table1, SHX2_1, SHX3_1, SHX4_1, text1, SHX7_1"}
+{"file": "lation_ui\\client\\utils\\positions.lua", "before": "SHX2_1", "after": "positionNotify", "line": "local SHX0_1Fn1, table1, SHX2_1, SHX3_1, text1, SHX6_1"}
+{"file": "lb-phone\\client\\apps\\custom.lua", "before": "text1", "after": "resourceName", "line": "local SHX0_1, text12, SHX2_1, SHX3_1, text13, text14, text15, text16, text17, text18, text1, SHX11_1"}
+{"file": "lb-phone\\client\\apps\\default\\appstore.lua", "before": "SHX3_2", "after": "logger", "line": "local action2, SHX3_2, text2, text22, price2"}
+{"file": "lb-phone\\client\\apps\\default\\camera.lua", "before": "SHX8_1", "after": "SetShowPhotos", "line": "local flag1, flag12, SHX3_1, table1, SHX5_1, SHX6_1, SHX7_1, SHX8_1, SHX9_1, text1, SHX11_1"}
+{"file": "lb-phone\\client\\apps\\default\\clock.lua", "before": "SHX3_2", "after": "debugPrint", "line": "local action2, SHX3_2, text2, text22, label2, hours2, minutes2, minutes22"}
+{"file": "lb-phone\\client\\apps\\default\\mail.lua", "before": "SHX1_1", "after": "SendAction", "line": "local SHX0_1, SHX1_1, SHX2_1, text1, SHX4_1"}
+{"file": "lb-phone\\client\\apps\\default\\maps.lua", "before": "SHX9_2", "after": "Saved", "line": "local flag2, SHX3_2Fn2, text22, x2, x22, SHX3_2Fn22, remove2, SHX9_2, SHX4_2Fn2"}
+{"file": "lb-phone\\client\\apps\\default\\messages.lua", "before": "SHX0_3", "after": "messages", "line": "function text22(SHX0_3)"}
+{"file": "lb-phone\\client\\apps\\default\\notes.lua", "before": "SHX0_2", "after": "note", "line": "function SHX2_1(SHX0_2, SHX1_2)"}
+{"file": "lb-phone\\client\\apps\\default\\phone.lua", "before": "SHX9_1", "after": "EndCustomCall", "line": "local SHX0_1, SHX1_1, SHX2_1, SHX3_1, SHX4_1, num1, flag1, SHX7_1, num12, SHX9_1, SHX10_1, SHX11_1, SHX12_1, text1, SHX14_1"}
+{"file": "lb-phone\\client\\apps\\default\\voicememo.lua", "before": "SHX1_2", "after": "description", "line": "function SHX2_1(SHX0_2, SHX1_2)"}
+{"file": "lb-phone\\client\\apps\\other\\crypto.lua", "before": "SHX1_1", "after": "RegisterCryptoCallback", "line": "local Crypto1, SHX1_1, SHX2_1, SHX3_1, SHX4_1, SHX5_1, SHX6_1, SHX7_1, text1, SHX9_1"}
+{"file": "lb-phone\\client\\apps\\other\\darkchat.lua", "before": "SHX2_1", "after": "darkChat", "line": "local SHX0_1, text1, SHX2_1"}
+{"file": "lb-phone\\client\\apps\\other\\marketplace.lua", "before": "SHX1_2", "after": "originalEvent", "line": "function SHX2_1(SHX0_2, SHX1_2)"}
+{"file": "lb-phone\\client\\apps\\other\\music.lua", "before": "SHX0_1", "after": "GetMusicPlaylist", "line": "local SHX0_1, text1, SHX3_1"}
+{"file": "lb-phone\\client\\apps\\other\\pages.lua", "before": "SHX1_2", "after": "trigger", "line": "function SHX2_1(SHX0_2, SHX1_2)"}
+{"file": "lb-phone\\client\\apps\\social\\instagram.lua", "before": "SHX2_1", "after": "constants", "line": "local SHX0_1, SHX1_1, SHX2_1, text1, text12, text13"}
+{"file": "lb-phone\\client\\apps\\social\\tiktok.lua", "before": "SHX3_1", "after": "TriggerTikTok", "line": "local SHX0_1, SHX1_1, text1, SHX3_1"}
+{"file": "lb-phone\\client\\apps\\social\\tinder.lua", "before": "SHX0_1", "after": "spark", "line": "local SHX0_1, text1, text12, text13, SHX4_1"}
+{"file": "lb-phone\\client\\apps\\social\\twitter.lua", "before": "SHX1_1", "after": "GetPosts", "line": "local SHX0_1, SHX1_1, SHX2_1, text1, text12, text13"}
+{"file": "lb-phone\\client\\client.lua", "before": "SHX6_1", "after": "Main", "line": "local SHX0_1, SHX1_1, SHX3_1, SHX4_1, SHX5_1, SHX6_1, SHX7_1, SHX8_1, text14, flag1, text1, text12, num1, SHX11_1Fn1, num12, text13, Command1, Command12, Command13, flag12"}
+{"file": "lb-phone\\client\\misc\\accountSwitcher.lua", "before": "SHX3_1", "after": "AccountSwitcher", "line": "local table1, SHX1_1, text1, SHX3_1"}
+{"file": "lb-phone\\client\\misc\\airshare.lua", "before": "SHX3_1", "after": "AirShare", "line": "local SHX0_1, SHX1_1, text1, SHX3_1"}
+{"file": "lb-phone\\client\\misc\\backup.lua", "before": "SHX0_1", "after": "DebugPrint", "line": "local SHX0_1, text1, SHX3_1"}
+{"file": "lb-phone\\client\\misc\\battery.lua", "before": "SHX2_1", "after": "setBattery", "line": "local SHX0_1, flag1, SHX2_1, SHX3_1, text1, SHX5_1"}
+{"file": "lb-phone\\client\\misc\\controllerCompatibility.lua", "before": "SHX8_1", "after": "ToggleController", "line": "local num1, num12, num13, SHX3_1, SHX4_1, SHX5_1, SHX6_1, text1, SHX8_1"}
+{"file": "lb-phone\\client\\misc\\customApp.lua", "before": "SHX2_1", "after": "SendCustomAppMessage", "line": "local SHX0_1, text1, SHX2_1"}
+{"file": "lb-phone\\client\\misc\\errors.lua", "before": "SHX9_2", "after": "num", "line": "local SHX2_2Fn2, SHX3_2Fn2, text2, num2, table2, text22, SHX8_2, SHX9_2, SHX10_2"}
+{"file": "lb-phone\\client\\misc\\exports.lua", "before": "SHX3_1", "after": "HiddenApps", "line": "local table1, text1, text12, SHX3_1"}
+{"file": "lb-phone\\client\\misc\\flashlight.lua", "before": "SHX1_1", "after": "ToggleFlashlight", "line": "local SHX0_1, SHX1_1, SyncFlash1, text1, SHX4_1, text12, num1, flag1"}
+{"file": "lb-phone\\client\\misc\\hearNearby.lua", "before": "SHX14_1", "after": "distanceIsLive", "line": "local Voice1, SHX1_1, SHX2_1, SHX3_1, text12, SHX5_1, new1, SHX7_1, text13, num1, flag1, text1, SHX12_1, SHX14_1, SHX15_1, SHX16_1"}
+{"file": "lb-phone\\client\\misc\\notifications.lua", "before": "SHX7_1", "after": "NotificationHandler", "line": "local table1, SHX1_1, SHX2_1, SHX3_1, SHX4_1, SHX5_1, text1, SHX7_1"}
+{"file": "lb-phone\\client\\misc\\security.lua", "before": "SHX1_1", "after": "lastVerifiedPin", "line": "local SHX0_1, SHX1_1, SHX2_1, SHX3_1, SHX4_1, text1, SHX6_1"}
+{"file": "lb-phone\\client\\misc\\sound.lua", "before": "SHX9_1", "after": "GetAudioBankName", "line": "local SHX0_1, SHX1_1, SHX2_1, SHX3_1, SHX4_1, SHX5_1, SHX6_1, text12, text13, SHX9_1, text1, SHX11_1"}
+{"file": "lb-phone\\client\\misc\\spatialAudio.lua", "before": "SHX14_2", "after": "px", "line": "local rad2, x22, y23, z2, sin22, cos2, sin23, cos22, sin2, x2, y2, y22, SHX14_2, num2, table2, SHX17_2, sqrt2, num22, num23, num24, SHX10_2Fn2, SHX23_2"}
+{"file": "lb-phone\\client\\misc\\tray\\musictray.lua", "before": "SHX6_1", "after": "MusicTray", "line": "local table1, table12, SHX2_1, SHX3_1, SHX4_1, SHX5_1, SHX6_1, text1, SHX8_1"}
+{"file": "lb-phone\\client\\misc\\walkableCam.lua", "before": "SHX46_1", "after": "utils", "line": "local Camera1, Camera112, Camera114, Camera115, Camera116, Camera117, Camera118, Camera119, Camera120, Camera121, Camera12, Camera13, Camera14, Camera15, Camera16, Camera17, Camera18, Camera19, Camera110, Camera111, Came"}
+{"file": "lb-phone\\client\\misc\\webrtc.lua", "before": "SHX2_1", "after": "webrtc", "line": "local SHX0_1, text1, SHX2_1"}
+{"file": "lb-phone\\shared\\escrowed\\defaultConfig.lua", "before": "table19", "after": "German", "line": "local table1, table14, table18, num1, num12, text120, text121, text122, Norsk1, table19, table12, table13, Czech1, Svenska1, Polski1, Magyar1, T_195_188rk_195_167e1, Portugu_195_170s_Brasil1, Portugu_195_170s1, Italiano1"}
+{"file": "lokos_anim\\client\\main.lua", "before": "SHX2_1", "after": "originalNum2", "line": "local flag1, SHX1_1, SHX2_1, SHX3_1Fn1, num1, num12, num13, keysLocale1, text19, defaultKeys1, text1, text12, text13, text14, text15, text16, text17, text18"}
+{"file": "nation-pedscale\\client\\main.lua", "before": "SHX2_1", "after": "RegisterEvent", "line": "local SHX0_1, SHX1_1, SHX2_1, SetScaleCommand1, SHX4_1, text12, CreateThread12, text13, num12, num1, SHX14_1, SHX15_1, SHX16_1, CreateThread1, text1, SHX19_1"}
+{"file": "nolag_properties\\client\\Admin.lua", "before": "SHX1_1", "after": "LoadInventoryDataFromMetadata", "line": "local SHX0_1, SHX1_1, SHX2_1, AdminPanelCommand1, SHX4_1, flag1, SHX6_1, SHX7_1, SHX8_1, text1, SHX10_1"}
+{"file": "nolag_properties\\client\\Exports.lua", "before": "SHX2_1", "after": "GetCurrentProperty", "line": "local SHX0_1, text1, SHX2_1"}
+{"file": "nolag_properties\\client\\Freecam.lua", "before": "SHX17_1", "after": "GetFreecamZ", "line": "local SHX8_1, flag1, SHX10_1, SHX11_1, SHX12_1, SHX13_1, SHX15_1, SHX17_1, SHX18_1, table1, num1, num12, SHX22_1, SHX23_1, SHX24_1, text1, SHX26_1"}
+{"file": "nolag_properties\\client\\Functions.lua", "before": "SHX1_1", "after": "SpawnCamera", "line": "local SHX0_1, SHX1_1, text1, SHX3_1"}
+{"file": "nolag_properties\\client\\InteractablePoints.lua", "before": "SHX1_2", "after": "interactable", "line": "local SHX1_2"}
+{"file": "nolag_properties\\client\\OffSetFinder.lua", "before": "SHX1_1", "after": "entity", "line": "local EnableOffsetFinder1, SHX1_1, addKeybind1, text1, SHX4_1Fn1, flag1, text12"}
+{"file": "nolag_properties\\client\\building\\Building.lua", "before": "SHX31_2", "after": "ownId", "line": "local SHX2_2Fn2, text23, name2, label2, text24, id27, id28, text25, num2, x2, y2, z2, flag2, SHX12_2Fn2, OwnerDisplay2, id2, owner2, id22, SHX17_2Fn2, id23, cancelled2, owner22, id24, SHX22_2Fn2, text2, SHX14_2Fn2, flag2"}
+{"file": "nolag_properties\\client\\building\\BuildingManager.lua", "before": "SHX1_3", "after": "ID", "line": "local SHX0_3, SHX1_3"}
+{"file": "nolag_properties\\client\\building\\BuildingUi.lua", "before": "SHX15_2", "after": "cb", "line": "local ownedByMe2, text2, forSale2, forRent2, hasKeys2, tags2, search2, num2, PropertiesPerPage2, buildingId2, getBuildingById2, properties2, table2, SHX15_2, SHX16_2, SHX17_2, SHX15_2Fn2, SHX19_2, SHX20_2, isOwner2, isRe"}
+{"file": "nolag_properties\\client\\doors\\main.lua", "before": "SHX2_1", "after": "entities", "line": "local DoorLock1, DoorLock12, SHX2_1, SHX3_1, unlocked1, unlocked12, unlocked13, unlocked14, unlocked15, unlocked16, num1, num12, num13, num14, num15"}
+{"file": "nolag_properties\\client\\doors\\utils.lua", "before": "SHX8_1", "after": "CreateDoorN", "line": "local SHX1_1, SHX2_1, SHX3_1, SHX4_1, SHX5_1, SHX6_1, text1, SHX8_1"}
+{"file": "nolag_properties\\client\\furniture\\controls.lua", "before": "SHX1_2", "after": "ResetFlag", "line": "local flag2, SHX1_2"}
+{"file": "nolag_properties\\client\\furniture\\furniture.lua", "before": "SHX0_2", "after": "props", "line": "function SHX1_1(SHX0_2, spawnObject2)"}
+{"file": "nolag_properties\\client\\furniture\\main.lua", "before": "SHX15_2", "after": "slots", "line": "local text2, flag2, y22, z22, x2, y23, z23, x22, y2, z2, num2, ped2, num22, SHX15_2, SHX16_2, SHX17_2, SHX18_2, table2, table22, SHX21_2"}
+{"file": "nolag_properties\\client\\polyzone\\BoxZone.lua", "before": "SHX0_2", "after": "box", "line": "function SHX4_1(SHX0_2, scale2, num24)"}
+{"file": "nolag_properties\\client\\polyzone\\client.lua", "before": "SHX7_1", "after": "distanceFunc", "line": "local SHX0_1, num1, num12, num13, num14, num15, SHX6_1, SHX7_1, SHX8_1, SHX9_1, SHX10_1, SHX11_1, SHX12_1, SHX13_1, SHX14_1, SHX15_1, SHX16_1, SHX17_1"}
+{"file": "nolag_properties\\client\\property\\Property.lua", "before": "text24", "after": "distance", "line": "local callback2, text22, flag22, owner2, text23, metadata2, metadata22, price2, text24"}
+{"file": "nolag_properties\\client\\property\\PropertyUi.lua", "before": "SHX5_1", "after": "_", "line": "local table1, SHX1_1, SHX2_1, text1, text12, SHX5_1"}
+{"file": "nolag_properties\\shared\\init.lua", "before": "SHX6_1", "after": "GetFurnitureData", "line": "local SHX0_1Fn1, text1, text12, SHX3_1, text13, text14, SHX6_1"}
+{"file": "nolag_storageunits\\client\\Creation.lua", "before": "SHX22_2", "after": "red", "line": "local SHX1_2Fn2, SHX2_2Fn2, num29, num210, num211, SHX4_2Fn2, SHX7_2Fn2, x22, x23, y2, z2, x2, y22, z22, num2, num22, num23, num24, num25, num26, num27, SHX22_2, SHX23_2, SHX24_2, SHX25_2, flag22, flag23, num28, SHX29_2,"}
+{"file": "nolag_storageunits\\client\\Main.lua", "before": "text23", "after": "storageIndex", "line": "function text13(loadStoragesFromDatabase2, print2, text23)"}
+{"file": "nolag_storageunits\\client\\StorageManager.lua", "before": "SHX0_2", "after": "storage2", "line": "function text1(SHX0_2)"}
+{"file": "nolag_storageunits\\client\\Utils.lua", "before": "SHX15_3", "after": "total", "line": "local num3, SHX2_3Fn3, num32, SHX4_3Fn3, SHX5_3Fn3, floor3, floor32, SHX8_3, format3, text3, SHX11_3, SHX12_3, SHX13_3, SHX14_3, SHX15_3, SHX16_3"}
+{"file": "okokBilling\\client.lua", "before": "SHX2_1", "after": "RegisterEvent", "line": "local flag1, flag12, SHX2_1, EventPrefix1, text1"}
+{"file": "patoche_wipeout_script\\client\\elevator.lua", "before": "SHX3_1", "after": "DeleteDoorFrame", "line": "local table1, SHX1_1, SHX2_1, SHX3_1, SHX4_1, zones1, text1, SHX7_1Fn1, num12, num13, num1"}
+{"file": "patoche_wipeout_script\\client\\games_mechanics.lua", "before": "SHX6_1", "after": "GetInitialCoords", "line": "local pi1, sin1, cos1, abs1, min1, SHX5_1, SHX6_1, SHX7_1, SHX8_1, SHX9_1"}
+{"file": "patoche_wipeout_script\\client\\main.lua", "before": "SHX10_1", "after": "UpdateGameTimer", "line": "local require1, text1, SHX2_1, SHX3_1, SHX4_1, deepclone1, text15, SHX7_1, SHX8_1, SHX9_1, SHX10_1, SHX11_1, SHX12_1, SHX13_1, SHX14_1, SHX15_1, SHX16_1, SHX17_1, SHX18_1, SHX19_1, text12, SHX21_1, SHX22_1, SHX23_1, SHX2"}
+{"file": "patoche_wipeout_script\\client\\target.lua", "before": "SHX4_3", "after": "targets", "line": "local num3, SHX1_3, name3, name32, SHX4_3"}
+{"file": "patoche_wipeout_script\\config\\data.lua", "before": "num18", "after": "Scale", "line": "local table1, num111, table12, table13, table14, table15, SHX6_1Fn1, SHX7_1Fn1, num120, num121, num1, num12, num13, num14, num15, num16, num17, num18, num19, num110, num112, num113, num114, num115, num116, num117, num118"}
+{"file": "pl_uwucafe\\client\\cats.lua", "before": "SHX8_1", "after": "CreateServerThread", "line": "local SHX0_1Fn1, table1, table12, table13, table14, SHX5_1, SHX6_1, SHX7_1, SHX8_1, text1, SHX10_1"}
+{"file": "pl_uwucafe\\client\\custombilling.lua", "before": "SHX3_1", "after": "openPaymentRequestMenu", "line": "local SHX0_1, SHX1_1, text1, SHX3_1"}
+{"file": "pl_uwucafe\\client\\main.lua", "before": "SHX8_3", "after": "_", "line": "local SHX1_3Fn3, sin3, SHX3_3Fn3, x3, y3, SHX6_3, SHX7_3, SHX8_3"}
+{"file": "pl_uwucafe\\client\\toys.lua", "before": "SHX2_1", "after": "handle", "line": "local SHX0_1, SHX1_1Fn1, SHX2_1, SHX3_1, text1, SHX5_1"}
+{"file": "pl_uwucafe\\locales\\locale.lua", "before": "SHX1_1", "after": "lang", "line": "local table1, SHX1_1"}
+{"file": "prism_uipack\\init.lua", "before": "SHX12_1", "after": "CurrentTimer", "line": "local decode1, prism_uipack1, text12, text13, table1, SHX5_1Fn1, text14, num1, table12, text15, SHX10_1, SHX8_1Fn1, SHX12_1, SHX13_1, SHX14_1, SHX15_1, SHX15_1Fn1, SHX17_1, text1, SHX19_1, SHX20_1, SHX1_1Fn1"}
+{"file": "prism_uipack\\main.lua", "before": "SHX3_1", "after": "radial", "line": "local SHX0_1, SHX1_1, text1, SHX3_1"}
+{"file": "prism_uipack\\modules\\alert.lua", "before": "SHX5_2", "after": "_", "line": "local table2, new2, flag2, SHX5_2"}
+{"file": "prism_uipack\\modules\\context.lua", "before": "SHX1_1", "after": "originalEvent", "line": "local table1, SHX1_1, SHX2_1, SHX3_1, text1, SHX5_1"}
+{"file": "prism_uipack\\modules\\dialog.lua", "before": "SHX6_2", "after": "_", "line": "local new2, flag2, num2, SHX6_2, SHX7_2Fn2, SHX8_2"}
+{"file": "prism_uipack\\modules\\menu.lua", "before": "SHX7_2", "after": "_", "line": "local id22, text2, text22, flag2, SHX4_2Fn2, SHX7_2"}
+{"file": "prism_uipack\\modules\\notify.lua", "before": "SHX0_1", "after": "resourceNotification", "line": "local SHX0_1, table1, SHX2_1Fn1, SHX3_1, text1, num1"}
+{"file": "prism_uipack\\modules\\progress.lua", "before": "SHX9_1", "after": "RequestModel", "line": "local SHX0_1, SHX1_1, state1, table1, SHX5_1Fn1, text15, num1, table12, SHX9_1, SHX10_1, text1, text12, flag1, SHX14_1, text13, text14"}
+{"file": "prism_uipack\\modules\\radial.lua", "before": "SHX2_1", "after": "radial", "line": "local flag1, SHX1_1, SHX2_1, SHX3_1, SHX4_1, SHX5_1, SHX6_1, SHX7_1, text13, addKeybind1, prism_radial1, SHX11_1Fn1, text1, text12"}
+{"file": "prism_uipack\\modules\\skillcheck.lua", "before": "SHX3_1", "after": "SkillCheckCancelled", "line": "local SHX0_1, SHX1_1, text1, SHX3_1"}
+{"file": "prism_uipack\\modules\\utils.lua", "before": "SHX6_1", "after": "endTime", "line": "local table1, SHX1_1Fn1, SHX2_1, table12, SHX5_1, SHX6_1"}
+{"file": "rahe-audio\\client\\cl_main.lua", "before": "SHX4_1", "after": "onEvent", "line": "local SHX0_1, SHX1_1, SHX2_1, SHX3_1, SHX4_1, SHX5_1, SHX6_1, SHX7_1, SHX8_1, SHX9_1, SHX10_1, SHX11_1, flag1, SHX13_1, SHX14_1, num1, SHX16_1, SHX17_1, SHX18_1, SHX19_1, text1, text12, num12, text13, SHX24_1, SHX25_1, S"}
+{"file": "rahe-audio\\shared\\sh_main.lua", "before": "SHX0_1", "after": "roundTo", "line": "local SHX0_1, SHX1_1"}
+{"file": "rahe-racing\\resource\\game\\racing\\client.lua", "before": "SHX10_1", "after": "UpdateCountdown", "line": "local table1, table12, SHX2_1, table13, text1, table14, table15, SHX7_1, text12, text13, SHX10_1"}
+{"file": "rahe-racing\\resource\\game\\trackCreation\\client.lua", "before": "SHX1_1", "after": "CreateActiveRaceObjects", "line": "local SHX0_1, SHX1_1, SHX2_1, SHX3_1, num1, num12, num13, SHX7_1, SHX8_1, text1, SHX10_1"}
+{"file": "rahe-racing\\resource\\tablet\\client.lua", "before": "SHX2_1", "after": "serverTabDataRequested", "line": "local SHX0_1, text1, SHX2_1"}
+{"file": "rahe-racing\\resource\\tablet\\tabs\\home\\client.lua", "before": "SHX15_2", "after": "cnt", "line": "local table2, text25, table22, num22, SHX3_2Fn2, SHX7_2, text26, SHX9_2Fn2, text2, text22, text23, SHX13_2Fn2, text24, SHX15_2"}
+{"file": "rahe-racing\\resource\\tablet\\tabs\\leaderboard\\client.lua", "before": "SHX0_1", "after": "LoadResourceFile", "line": "local SHX0_1, SHX1_1"}
+{"file": "rahe-racing\\resource\\tablet\\tabs\\profile\\client.lua", "before": "SHX2_1", "after": "changeName", "line": "local SHX0_1, text1, SHX2_1"}
+{"file": "rahe-racing\\resource\\tablet\\tabs\\races\\client.lua", "before": "SHX2_1", "after": "cb", "line": "local SHX0_1, text1, SHX2_1"}
+{"file": "rahe-racing\\resource\\tablet\\tabs\\tracks\\client.lua", "before": "SHX0_2", "after": "competitionTracks", "line": "function text12(SHX0_2, leaderBoard2)"}
+{"file": "rahe-racing\\resource\\util\\client.lua", "before": "SHX3_1", "after": "RequestInfo", "line": "local flag1, text1, SHX3_1"}
+{"file": "rahe-racing\\resource\\util\\shared.lua", "before": "SHX12_2", "after": "_", "line": "local text2, table2, text23, text24, format2, SHX5_2, SHX3_2Fn2, SHX7_2, SHX8_2, SHX9_2, text22, SHX11_2Fn2, SHX12_2"}
+{"file": "rahe-speakers\\client\\cl_admin.lua", "before": "SHX0_1", "after": "SpeakerTypeRegistry", "line": "local SHX0_1, callback1, text1, SHX3_1"}
+{"file": "rahe-speakers\\client\\cl_attach.lua", "before": "SHX7_1", "after": "GetEntityBoneIndexByName", "line": "local SHX0_1, SHX1_1, SHX2_1, SHX3_1, text12, text13, text14, SHX7_1, SHX8_1, SHX9_1, SHX10_1, callback1, text1, SHX13_1, SHX14_1"}
+{"file": "rahe-speakers\\client\\cl_carry.lua", "before": "SHX3_1", "after": "DEFAULT_SPEAKER_ID", "line": "local SHX0_1, SHX1_1, SHX2_1, SHX3_1, flag12, flag13, SHX6_1, SHX7_1, SHX8_1, SHX9_1, SHX10_1, SHX11_1, SHX12_1, SHX13_1, SHX14_1, text1, SHX16_1, flag1, SHX18_1, text12, SHX20_1"}
+{"file": "rahe-speakers\\client\\cl_creation.lua", "before": "SHX8_2", "after": "_", "line": "local table23, registerContext2, table24, SHX6_2Fn2, SHX4_2Fn2, SHX8_2, SHX9_2, floor2, maxRange2, maxVolume2, SHX13_2, table2, title2, table22, SHX17_2Fn2, text2, maxRange22, maxVolume22, SHX21_2"}
+{"file": "rahe-speakers\\client\\cl_filters.lua", "before": "SHX1_1", "after": "_", "line": "local SHX0_1, SHX1_1, SHX2_1, SHX3_1, SHX4_1, text1, SHX6_1"}
+{"file": "rahe-speakers\\client\\cl_gizmo.lua", "before": "SHX1_1", "after": "original_func", "line": "local SHX0_1, SHX1_1, SHX4_1, SHX5_1, SHX6_1, callback1, text1, SHX9_1"}
+{"file": "rahe-speakers\\client\\cl_groupqueue.lua", "before": "SHX10_2", "after": "groupTable", "line": "local table23, registerContext2, table24, SHX5_2Fn2, SHX3_2Fn2, SHX7_2, SHX8_2, insert2, SHX10_2, table2, title2, SHX13_2, SHX14_2"}
+{"file": "rahe-speakers\\client\\cl_groups.lua", "before": "SHX12_2", "after": "_", "line": "local num2, SHX3_2Fn2, insert2, text22, SHX6_2Fn2, SHX7_2Fn2, text23, name22, connectCode2, SHX11_2, SHX12_2, name2, text2, volume2, maxVolume2, range2, maxRange2"}
+{"file": "rahe-speakers\\client\\cl_interact.lua", "before": "SHX3_1", "after": "ShowYoutubeLink", "line": "local table1, text1, SHX2_1, SHX3_1"}
+{"file": "rahe-speakers\\client\\cl_other.lua", "before": "SHX1_1", "after": "LoadResourceFile", "line": "local locale1, SHX1_1"}
+{"file": "rahe-speakers\\client\\cl_points.lua", "before": "SHX4_1", "after": "interactWithClosestSpeaker", "line": "local table1, table12, SHX2_1, SHX3_1, SHX4_1, SHX5_1, SHX6_1, SHX7_1, SHX8_1, SHX9_1, SHX10_1, SHX11_1, callback1, text1, SHX14_1"}
+{"file": "rahe-speakers\\client\\cl_settings.lua", "before": "SHX3_1", "after": "SpeakerSettingsClient", "line": "local SHX0_1, SHX1_1, text1, SHX3_1"}
+{"file": "rahe-speakers\\client\\cl_startup.lua", "before": "SHX13_2", "after": "filter", "line": "local state2, routingBucket2, text2, location2, SHX5_2Fn2, blip2, SHX10_2, SHX12_2, SHX13_2"}
+{"file": "rahe-speakers\\client\\cl_util.lua", "before": "SHX7_2", "after": "trigger", "line": "local SHX5_2, text2, SHX7_2"}
+{"file": "rcore_radiocar\\client\\core\\globals.lua", "before": "table1", "after": "defaults", "line": "local table1, SHX1_1, SHX2_1, SHX3_1"}
+{"file": "rcore_radiocar\\client\\core\\utils.lua", "before": "SHX0_2", "after": "resource", "line": "function SHX0_1(SHX0_2)"}
+{"file": "rcore_radiocar\\client\\music\\queue.lua", "before": "SHX2_1", "after": "radioCarSkipMusic", "line": "local SHX0_1, text1, SHX2_1"}
+{"file": "rcore_radiocar\\client\\music\\songs_edit.lua", "before": "SHX5_2", "after": "_", "line": "local SHX1_2, SHX2_2Fn2, num2, UPDATE_MUSIC_EVENT2, SHX5_2, SHX6_2, table2, url2"}
+{"file": "rcore_radiocar\\client\\ui\\notif.lua", "before": "SHX1_2", "after": "cb", "line": "function SHX0_1(SHX0_2, SHX1_2)"}
+{"file": "rcore_radiocar\\shared\\limit_tasks.lua", "before": "SHX0_2", "after": "event", "line": "function SHX3_1(SHX0_2)"}
+{"file": "rcore_radiocar\\shared\\que_tasks.lua", "before": "SHX1_2", "after": "cb", "line": "function SHX2_1(SHX0_2, SHX1_2)"}
+{"file": "rtx_themepark\\client\\attr1.lua", "before": "SHX1_1", "after": "GetGameVersion", "line": "local table1, SHX1_1, SHX2_1, flag1, SHX4_1, SHX5_1, table13, SHX7_1Fn1, table14, table15, num1, table12, SHX12_1Fn1, num12, SHX14_1, SHX15_1"}
+{"file": "rtx_themepark\\client\\attr2.lua", "before": "SHX2_1", "after": "GetGameLanguage", "line": "local table1, SHX1_1, SHX2_1, flag1, SHX4_1, SHX5_1, table13, SHX7_1Fn1, table14, table15, num1, table12, SHX12_1Fn1, num12, num13, SHX15_1"}
+{"file": "rtx_themepark\\client\\attr3.lua", "before": "SHX3_1", "after": "GetEntityParents", "line": "local table1, SHX1_1, flag1, SHX3_1, SHX4_1, table12, SHX6_1Fn1, table13, table14, num14, num1, num12, num13"}
+{"file": "rtx_themepark\\client\\attr4.lua", "before": "SHX1_1", "after": "player", "line": "local table1, SHX1_1, flag1, SHX3_1, SHX4_1, table12, SHX6_1Fn1, table13, table14, num14, num1, num12, num13"}
+{"file": "rtx_themepark\\client\\attr5.lua", "before": "SHX3_1", "after": "GetEntityCoords", "line": "local table1, SHX1_1, flag1, SHX3_1, SHX4_1, table12, SHX6_1Fn1, table13, table14, num14, num1, num12, num13"}
+{"file": "rtx_themepark\\client\\attr7.lua", "before": "SHX0_1", "after": "lastFrame", "line": "local SHX0_1, SHX1_1, flag1, table15, SHX4_1Fn1, table16, table17, num1, table18, table19, table1, table12, table13, table14"}
+{"file": "rtx_themepark\\client\\attr8.lua", "before": "SHX6_1", "after": "ind_prop_dlc_roller_car_rotation", "line": "local table1, SHX1_1, SHX2_1, flag1, SHX5_1, SHX6_1, table13, table14, table15, SHX10_1Fn1, table12, SHX12_1Fn1, num1, num12, num13, num14, num15, num16"}
+{"file": "rtx_themepark\\client\\attr9.lua", "before": "SHX8_1", "after": "GetEntityParent", "line": "local SHX0_1, SHX1_1, SHX2_1, SHX3_1, SHX4_1, flag1, SHX6_1, SHX7_1, SHX8_1, SHX9_1, SHX10_1, Target1, text1, playshootingrange1, SHX14_1Fn1, num1, num12, num13"}
+{"file": "rtx_themepark\\client\\main.lua", "before": "SHX3_3", "after": "_", "line": "function num22(SHX0_3, SHX1_3, SHX2_3, SHX3_3)"}
+{"file": "rtx_themepark\\client\\sound.lua", "before": "SHX17_2", "after": "MusicVolumeNormalized", "line": "local Wait2, flag2, num24, num25, sub2, table22, find2, sub22, text2, num26, num2, SHX11_2, num22, musicmaxdistance2, musicmaxdistance22, SHX15_2, SHX16_2, SHX17_2, floor2, table2, num23"}
+{"file": "senor-squads\\client\\blips.lua", "before": "SHX4_1", "after": "ResourceNameResourceStop", "line": "local SHX0_1, SHX1_1, SHX2_1, text1, SHX4_1"}
+{"file": "senor-squads\\client\\exports.lua", "before": "SHX6_2", "after": "player", "line": "local text2, mySquad22, Settings2, SHX1_2Fn2, SHX5_2, SHX6_2, serverId2"}
+{"file": "senor-squads\\client\\group.lua", "before": "SHX2_1", "after": "resourceStop", "line": "local SHX0_1, text1, SHX2_1"}
+{"file": "senor-squads\\client\\hud.lua", "before": "SHX0_1", "after": "GetSquadPlayers", "line": "local SHX0_1, SHX1_1, SHX2_1, SHX3_1, text1, SHX5_1"}
+{"file": "senor-squads\\client\\ping.lua", "before": "SHX16_1", "after": "GetClosestPlayerEntityID", "line": "local table1, text1, text13, text14, text15, text16, text17, table12, num1, SHX9_1, SHX10_1, SHX11_1, SHX12_1, SHX13_1, SHX14_1, SHX15_1, SHX16_1, SHX18_1, addKeybind1, squad_ping1, text12, SHX22_1"}
+{"file": "senor-squads\\client\\squad.lua", "before": "SHX9_2", "after": "ownerServerId", "line": "local SHX1_2Fn2, players2, players22, owner2, SHX2_2Fn2, SHX3_2Fn2, SHX7_2, SHX8_2, SHX9_2"}
+{"file": "senor-squads\\client\\tags.lua", "before": "SHX13_1", "after": "ChangeGamerTagAlpha", "line": "local table1, Settings1, DefaultNameTagHudId1, table12, SHX5_1, SHX6_1, SHX7_1, SHX8_1, SHX9_1, SHX10_1, SHX12_1, SHX13_1, SHX14_1, SHX15_1, SHX16_1, text1, SHX18_1"}
+{"file": "senor-squads\\client\\utils.lua", "before": "SHX6_2", "after": "_", "line": "local table2, text2, table22, SHX4_2, SHX2_2Fn2, SHX6_2, SHX7_2, SHX8_2"}
+{"file": "svdden_banking\\client\\cl_atmsPrompts.lua", "before": "SHX12_2", "after": "bankPed", "line": "local num2, num22, num23, SHX3_2, SHX4_2Fn2, SHX5_2Fn2, num24, num25, flag22, flag23, flag2, SHX11_2Fn2, SHX12_2, SHX6_2Fn2"}
+{"file": "svdden_banking\\client\\cl_callback.lua", "before": "SHX6_2", "after": "handler", "line": "local text2, new2, new22, Await2, SHX5_2, SHX6_2"}
+{"file": "svdden_banking\\client\\cl_points.lua", "before": "SHX3_1", "after": "MainLoop", "line": "local SHX0_1, SHX2_1, SHX3_1"}
+{"file": "tdev_moneythrowESX\\client.lua", "before": "SHX3_1", "after": "LoadAnimDict", "line": "local flag1, SHX1_1, table1, SHX3_1, SHX4_1, ox_target1, text1, table12, table13, MaxDistance1"}
+{"file": "thug-lean-system\\client\\drinking.lua", "before": "SHX7_1", "after": "Get_CupMaterial", "line": "local table1, table12, table13, SHX3_1Fn1, num1, num12, text1, SHX7_1"}
+{"file": "thug-lean-system\\client\\effects.lua", "before": "SHX8_1", "after": "Get_Doses", "line": "local table1, SHX1_1, SHX2_1, SHX3_1, SHX4_1, SHX5_1, SHX6_1, SHX7_1, SHX8_1, SHX9_1, SHX10_1, SHX11_1, text1, SHX13_1"}
+{"file": "thug-lean-system\\client\\functions.lua", "before": "SHX0_1", "after": "RequestModelAnimDict", "line": "local SHX0_1, SHX1_1"}
+{"file": "thug-lean-system\\client\\main.lua", "before": "SHX13_1", "after": "Get_Drink_Identifier", "line": "local table1, table13, table14, table15, SHX4_1Fn1, num12, num13, num14, num15, num16, num1, table12, text1, SHX13_1"}
+{"file": "thug-lean-system\\shared\\data.lua", "before": "num13", "after": "blue", "line": "local table1, table12, table13, table14, num1, num12, num13"}
+{"file": "tk_bossmenu\\client\\admin_menu.lua", "before": "SHX0_1", "after": "RegisterEvent", "line": "local SHX0_1, text1, SHX2_1"}
+{"file": "tk_bossmenu\\client\\boss_locations.lua", "before": "SHX4_2", "after": "func", "line": "local SHX0_2, Jobs2, SHX2_2, SHX0_2Fn2, SHX4_2, SHX5_2, locations2, SHX7_2Fn22, SHX8_2, SHX9_2, SHX7_2Fn2, SHX11_2, SHX12_2, coords2, AddZone2, table2, text2, table22, U2, text22"}
+{"file": "tk_bossmenu\\client\\employees.lua", "before": "SHX2_1", "after": "UpdateEmployeeData", "line": "local table1, text1, SHX2_1"}
+{"file": "tk_bossmenu\\client\\grades.lua", "before": "SHX2_1", "after": "SetGradeSalary", "line": "local table1, text1, SHX2_1"}
+{"file": "tk_bossmenu\\client\\permissions.lua", "before": "SHX7_2", "after": "trigger", "line": "local table2, SHX3_2Fn2, text2, table22, SHX6_2Fn2, SHX7_2, SHX5_2Fn2, SHX9_2, SHX10_2, SHX11_2Fn2, SHX12_2"}
+{"file": "tk_bossmenu\\client\\shop.lua", "before": "SHX5_1", "after": "OnMenuItemEvent", "line": "local table1, SHX1_1, SHX2_1, SHX3_1, SHX4_1, SHX5_1, SHX6_1, text1, SHX8_1"}
+{"file": "tk_bossmenu\\client\\society_money.lua", "before": "SHX2_1", "after": "DepositMoney", "line": "local table1, text1, SHX2_1"}
+{"file": "tk_bossmenu\\client\\statistics.lua", "before": "SHX2_1", "after": "ShowStatistics", "line": "local text1, SHX2_1"}
+{"file": "tk_bossmenu\\client\\tablet.lua", "before": "SHX4_1", "after": "GetCurrentBossJob", "line": "local table1, flag1, SHX2_1, SHX3_1, SHX4_1, SHX5_1, Commands12, text1, text12, flag12, Commands1"}
+{"file": "tk_bossmenu\\client\\zones.lua", "before": "SHX13_1", "after": "_", "line": "local SHX0_1, SHX1_1, SHX2_1, huge12, SHX4_1, num1, SHX6_1, SHX7_1, SHX8_1, SHX9_1, huge1, SHX11_1, SHX12_1, SHX13_1, SHX14_1, SHX15_1, SHX16_1, SHX17_1, SHX18_1, SHX19_1, SHX20_1, SHX21_1, SHX22_1, SHX23_1, text1, SHX25"}
+{"file": "tk_bossmenu\\shared\\utils.lua", "before": "SHX1_1", "after": "LoadInstructionalButton", "line": "local SHX0_1, SHX1_1, SHX2_1Fn1, text1, SHX4_1"}
+{"file": "uniqers-uipack\\client\\drawtext.lua", "before": "SHX6_1", "after": "DrawTextUnloaded", "line": "local flag1, SHX1_1, SHX2_1, SHX3_1, SHX4_1, SHX5_1, SHX6_1, SHX7_1, SHX8_1"}
+{"file": "uniqers-uipack\\client\\notify.lua", "before": "SHX0_1", "after": "RegisterEvent", "line": "local SHX0_1, text1, flag1, flag12, SHX4_1, text12, SHX6_1, flag13"}
+{"file": "vms_gym\\client\\client.lua", "before": "SHX3_1", "after": "_", "line": "local table1, SHX1_1, SHX2_1, SHX3_1, SHX4_1, SHX5_1, table12, table13, Core1, text13, text1, StatisticDescription1, text12, StatisticKey1"}
+{"file": "vms_gym\\client\\lib.lua", "before": "SHX0_1", "after": "Globals", "line": "local SHX0_1, SHX1_1"}
+{"file": "vms_gym\\client\\nui.lua", "before": "SHX2_1", "after": "notifyStatus", "line": "local SHX0_1, text1, SHX2_1"}
+{"file": "wasabi_bridge\\callback\\client.lua", "before": "SHX6_3", "after": "trigger", "line": "local unpack3, SHX2_3Fn3, SHX2_3Fn32, SHX5_3, SHX6_3, SHX7_3, SHX6_3Fn3"}
+{"file": "wasabi_bridge\\utils\\client\\cache.lua", "before": "SHX4_1", "after": "CachePlayerPed", "line": "local cache1, table1, cache12, SHX4_1, SHX6_1"}
+{"file": "wasabi_bridge\\utils\\client\\client.lua", "before": "SHX0_1", "after": "GetTargetIdentifier", "line": "local SHX0_1, SHX1_1"}
+{"file": "wasabi_bridge\\utils\\client\\game.lua", "before": "SHX1_1", "after": "GetClosestVehicle", "line": "local SHX0_1, SHX1_1"}
+{"file": "wasabi_bridge\\utils\\client\\helpers.lua", "before": "SHX0_1", "after": "Bridge", "line": "local SHX0_1, SHX1_1Fn1, text1, SHX3_1"}
+{"file": "wasabi_bridge\\utils\\client\\points.lua", "before": "SHX2_1", "after": "total", "line": "local table1, table12, SHX2_1, SHX6_2Fn1, SHX4_1, SHX5_1, SHX6_1, SHX7_1, table13, SHX9_1"}
+{"file": "wasabi_bridge\\utils\\client\\stream.lua", "before": "SHX0_2", "after": "dict", "line": "function table1(SHX0_2, SHX1_2)"}
+{"file": "wasabi_bridge\\utils\\client\\ui.lua", "before": "SHX0_2", "after": "original_game_state", "line": "function flag1(SHX0_2)"}
+{"file": "wasabi_bridge\\utils\\client\\zones.lua", "before": "SHX7_1", "after": "Clamp", "line": "local SHX0_1, SHX1_1, SHX2_1, SHX3_1, SHX4_1, SHX5_1, SHX6_1, SHX7_1, SHX8_1, SHX9_1, SHX10_1, SHX11_1, SHX12_1, SHX13_1, SHX14_1, SHX15_1, SHX16_1, zones1, SHX18_1"}
+{"file": "wasabi_carlock\\client\\functions.lua", "before": "SHX15_2", "after": "Format", "line": "local unpack2, text25, SHX8_2Fn2, SHX11_2Fn2, text2, SHX13_2Fn2, num2, SHX15_2, SHX15_2Fn2"}
+{"file": "wasabi_mdt\\client\\cameras.lua", "before": "SHX14_1", "after": "OnEnter", "line": "local table1, table12, table13, SHX3_1, SHX4_1, SHX5_1, flag1, Cameras1, SHX8_1, SHX9_1, SHX10_1, SHX11_1, text1, SHX13_1, SHX14_1, SHX15_1, SHX16_1, SHX17_1, text12, SHX19_1, text13, SHX21_1"}
+{"file": "wasabi_mdt\\client\\dispatch.lua", "before": "SHX7_1", "after": "NotifyPlayer", "line": "local SHX0_1, SHX1_1, SHX2_1, num1, flag12, SHX5_1, SHX6_1, SHX7_1, SHX8_1, SHX9_1, SHX10_1, SHX11_1, text1, text12, DispatchKeybinds1, flag1, DispatchKeybinds12"}
+{"file": "wasabi_mdt\\client\\utils.lua", "before": "SHX8_4", "after": "TextStream", "line": "local stream4, text43, text44, text45, SHX6_4, SHX7_4, SHX8_4, SHX6_4Fn4, SHX10_4, SHX11_4, SHX12_4, SHX13_4, flag4, text4, num4, text42, num42, SHX19_4, flag42, flag43, flag44, num43, stat4, value4, flag45, flag46, flag"}
+{"file": "wasabi_mdt\\init.lua", "before": "text1", "after": "txt", "line": "local table1, text1, SHX2_1Fn1, SHX0_1Fn1, SHX4_1, SHX5_1, SHX6_1Fn1, name1, name12"}

@@ -7,7 +7,6 @@ Servers/
 checkpoint.json
 server_name.txt
 .zcode/
-/ai/
 store/data/
 
 
@@ -16,5 +15,14 @@ Tools/verify/bin/
 Tools/verify/work/
 Tools/verify/scratch/
 Tools/verify/__pycache__/
-ai/deploy/model/
+
+# The Q4_K_M model is committed: it is the deliverable and there is no other way to
+# get it back. Everything below is an intermediate or a vendored dependency, so it is
+# not, because all of it can be rebuilt from the committed scripts plus the base weights.
+ai/deploy/model/merged/
+ai/deploy/model/qwen_lua_namer_f16.gguf
 ai/rl/out_v2/
+ai/deploy/*.exe
+ai/deploy/*.dll
+ai/deploy/LICENSE-LLVM-OpenMP
+__pycache__/

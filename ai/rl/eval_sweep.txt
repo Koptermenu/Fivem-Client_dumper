@@ -1,0 +1,24 @@
+## out_v2/checkpoint-10
+exact name match            : 338 (41.9%)
+registers covered           : 784 (97.3%)
+well formed complete maps   : 22/25
+## out_v2/checkpoint-20
+exact name match            : 331 (41.1%)
+registers covered           : 784 (97.3%)
+well formed complete maps   : 22/25
+## out_v2/checkpoint-30
+exact name match            : 337 (41.8%)
+registers covered           : 783 (97.1%)
+well formed complete maps   : 21/25
+## out_v2/checkpoint-40
+exact name match            : 337 (41.8%)
+registers covered           : 784 (97.3%)
+well formed complete maps   : 22/25
+## out_v2/checkpoint-50
+exact name match            : 331 (41.1%)
+registers covered           : 784 (97.3%)
+well formed complete maps   : 22/25
+## out_v2/final
+exact name match            : 331 (41.1%)
+registers covered           : 786 (97.5%)
+well formed complete maps   : 23/25
