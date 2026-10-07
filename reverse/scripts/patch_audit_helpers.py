@@ -51,7 +51,7 @@ import pefile
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-import common  # noqa: E402  (the path bootstrap has to run before the import)
+import common
 
 SCHEMA: Final[str] = "adhesive-dumper.patch-mechanisms/1"
 
@@ -183,8 +183,8 @@ CONDITIONAL_BRANCHES: Final[frozenset[str]] = frozenset(
 COPY_MNEMONICS: Final[frozenset[str]] = frozenset({"movups", "movdqu", "movaps", "movdqa"})
 FILL_STORE_SIZES: Final[frozenset[int]] = frozenset({1})
 STACK_BASES: Final[frozenset[str]] = frozenset({"rsp", "rbp"})
-# Microsoft x64: RAX, RCX, RDX and R8-R11 are volatile; RBX, RBP, RDI, RSI,
-# RSP and R12-R15 are non-volatile.
+
+
 VOLATILE_REGISTERS: Final[tuple[str, ...]] = ("rax", "rcx", "rdx", "r8", "r9", "r10", "r11")
 CANONICAL_REGISTERS: Final[Mapping[str, str]] = {
     "al": "rax", "ah": "rax", "ax": "rax", "eax": "rax", "rax": "rax",
@@ -206,8 +206,8 @@ CANONICAL_REGISTERS: Final[Mapping[str, str]] = {
 }
 ORIGIN_HOP_LIMIT: Final[int] = 6
 GUARD_TEXT_LIMIT: Final[int] = 4
-# Register writes whose symbolic effect the argument tracker models explicitly.
-# Any other instruction that writes a tracked register invalidates its entry.
+
+
 _MODELLED_WRITES: Final[Mapping[str, frozenset[str]]] = {
     "call": frozenset(VOLATILE_REGISTERS),
     "jmp": frozenset(),
@@ -216,8 +216,8 @@ _MODELLED_WRITES: Final[Mapping[str, frozenset[str]]] = {
     "movabs": frozenset(ARGUMENT_REGISTERS + ("rax",)),
     "xor": frozenset(ARGUMENT_REGISTERS + ("rax",)),
 }
-# Instructions that can destroy a tracked register value in place; only these
-# need an invalidation scan, which keeps the per-instruction cost bounded.
+
+
 _IN_PLACE_WRITES: Final[frozenset[str]] = frozenset(
     {
         "add", "sub", "and", "or", "inc", "dec", "shl", "shr", "sar",
@@ -323,9 +323,9 @@ class Inventory:
     watched_global_refs: dict[int, tuple[tuple[int, int, str], ...]] = field(default_factory=dict)
 
 
-# --------------------------------------------------------------------------- #
-# specimen access
-# --------------------------------------------------------------------------- #
+
+
+
 
 
 def _count_occurrences(blob: bytes, needle: bytes) -> int:
@@ -478,9 +478,9 @@ class Specimen:
         return rva_hits, va_hits, in_pdata
 
 
-# --------------------------------------------------------------------------- #
-# instruction classification
-# --------------------------------------------------------------------------- #
+
+
+
 
 
 def _is_skipdata(insn: capstone.CsInsn) -> bool:
@@ -1081,9 +1081,9 @@ def _function_facts(spec: Specimen, begin: int, end: int) -> FunctionFacts:
     )
 
 
-# --------------------------------------------------------------------------- #
-# whole-image sweep
-# --------------------------------------------------------------------------- #
+
+
+
 
 
 def _stub_site(rva: int, mnemonic: str, api: str, slot_rva: int) -> CallSite:
@@ -1189,9 +1189,9 @@ def build_inventory(spec: Specimen) -> Inventory:
     return inventory
 
 
-# --------------------------------------------------------------------------- #
-# inventory accessors
-# --------------------------------------------------------------------------- #
+
+
+
 
 
 def _callers_text(inventory: Inventory, rva: int) -> str:
@@ -1342,9 +1342,9 @@ def _clean(value: Any) -> str:
     return " ".join(str(value).split())
 
 
-# --------------------------------------------------------------------------- #
-# row builders
-# --------------------------------------------------------------------------- #
+
+
+
 
 
 def _subject_rows(

@@ -29,7 +29,7 @@ from typing import Any, Final, Mapping, Sequence
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-import common  # noqa: E402  (the path shim above is load-bearing)
+import common
 
 SCHEMA_PDB_CORRELATION: Final[str] = "adhesive-dumper.pdb-correlation/1"
 
@@ -37,9 +37,9 @@ SPECIMEN_RELATIVE: Final[str] = "reverse/adhesive.dll"
 BASELINE_RELATIVE: Final[str] = "reverse/evidence/baseline.json"
 OUTPUT_RELATIVE: Final[str] = "reverse/evidence/pdb_correlation.json"
 
-# Expected values, taken from the peer reports. They are assertions, not values
-# to copy silently: each one is re-derived from the bytes and then compared, so a
-# changed specimen fails loudly instead of re-baselining itself.
+
+
+
 EXPECTED_PDB_GUID: Final[str] = "cb927e36-3f3d-8d77-4c4c-44205044422e"
 EXPECTED_DEBUG_ID: Final[str] = "CB927E363F3D8D774C4C44205044422E1"
 EXPECTED_PDB_AGE: Final[int] = 1
@@ -109,9 +109,9 @@ LINKER_VERSION_RAW: Final[int] = 0x92
 RICH_SCAN_START: Final[int] = 0x40
 RICH_MARKERS: Final[tuple[tuple[str, bytes], ...]] = (("DanS", b"DanS"), ("Rich", b"Rich"))
 
-# Byte probes for a linker or compiler identity record. Every hit is reported
-# with its file offset, region and containing printable run, so a reader can
-# reject the false positives without trusting the conclusion.
+
+
+
 TOOLCHAIN_MARKER_PROBES: Final[tuple[tuple[str, bytes], ...]] = (
     ("LLD_upper", b"LLD"),
     ("lld_lower", b"lld"),
@@ -140,9 +140,9 @@ MAX_PATH_RUN: Final[int] = 300
 MAX_WORKSPACE_LINES_PER_FILE: Final[int] = 6
 MAX_WORKSPACE_FILES: Final[int] = 400
 
-# Workspace scope is explicit, so the artifact stays reproducible: adding or
-# removing a directory changes the evidence, therefore the directories are named
-# here instead of being discovered by a broad recursive walk.
+
+
+
 WORKSPACE_TEXT_TARGETS: Final[tuple[tuple[str, str], ...]] = (
     ("CMakeLists.txt", "project"),
     ("README.md", "documentation"),
@@ -263,9 +263,9 @@ BASELINE_CROSS_CHECK_PATHS: Final[tuple[str, ...]] = (
 )
 
 
-# --------------------------------------------------------------------------- #
-# hashing helpers
-# --------------------------------------------------------------------------- #
+
+
+
 
 
 def sha256_hex(payload: bytes) -> str:
@@ -343,9 +343,9 @@ def authenticode_image_digest(data: bytes, pe: Any) -> dict[str, Any]:
     }
 
 
-# --------------------------------------------------------------------------- #
-# PDB / CodeView
-# --------------------------------------------------------------------------- #
+
+
+
 
 
 def codeview_records(pe: Any, data: bytes) -> dict[str, Any]:
@@ -638,9 +638,9 @@ def retpoline_section(pe: Any, data: bytes) -> dict[str, Any]:
     return {"present": False, "tag": EXPECTED_RETPOLINE_TAG, "tag_count": 0}
 
 
-# --------------------------------------------------------------------------- #
-# version resource / FXCOMPONENT
-# --------------------------------------------------------------------------- #
+
+
+
 
 
 def _resource_leaf(pe: Any, type_id: int, name_id: int | None, name_text: str | None) -> Any:
@@ -836,9 +836,9 @@ def fxcomponent_resource(pe: Any) -> dict[str, Any]:
     return {"present": False, "parsed": False}
 
 
-# --------------------------------------------------------------------------- #
-# imports / exports / sections
-# --------------------------------------------------------------------------- #
+
+
+
 
 
 def import_export_summary(pe: Any) -> dict[str, Any]:
@@ -970,9 +970,9 @@ def section_summary(pe: Any, data: bytes) -> dict[str, Any]:
     }
 
 
-# --------------------------------------------------------------------------- #
-# embedded build-path corpus
-# --------------------------------------------------------------------------- #
+
+
+
 
 
 def build_path_corpus(data: bytes) -> dict[str, Any]:
@@ -1026,9 +1026,9 @@ def _is_vendor_path(path: str) -> bool:
     return any(marker in lowered for marker in VENDOR_SEGMENT_MARKERS)
 
 
-# --------------------------------------------------------------------------- #
-# certificate table: bytes only, no verification
-# --------------------------------------------------------------------------- #
+
+
+
 
 
 def certificate_evidence(data: bytes, pe: Any, image: Mapping[str, Any]) -> dict[str, Any]:
@@ -1246,9 +1246,9 @@ def _normalize_time(text: str) -> str | None:
     return None
 
 
-# --------------------------------------------------------------------------- #
-# workspace correlation
-# --------------------------------------------------------------------------- #
+
+
+
 
 
 def _workspace_files(root: Path) -> list[tuple[str, str]]:
@@ -1444,9 +1444,9 @@ def _module_resolution(root: Path, declared: Sequence[str]) -> dict[str, Any]:
     }
 
 
-# --------------------------------------------------------------------------- #
-# correlation keys and authenticity gate
-# --------------------------------------------------------------------------- #
+
+
+
 
 
 def correlation_keys(
@@ -1721,9 +1721,9 @@ def open_questions() -> list[dict[str, Any]]:
     ]
 
 
-# --------------------------------------------------------------------------- #
-# assembly
-# --------------------------------------------------------------------------- #
+
+
+
 
 
 def build_report(root: Path) -> tuple[dict[str, Any], list[common.Check]]:
@@ -2119,9 +2119,9 @@ def _signing_time_utc(signing: Mapping[str, Any]) -> str:
     return normalized.split(" (")[0]
 
 
-# --------------------------------------------------------------------------- #
-# cli
-# --------------------------------------------------------------------------- #
+
+
+
 
 
 def main(argv: Sequence[str] | None = None) -> int:

@@ -38,7 +38,7 @@ from typing import Any, Final, Mapping, Sequence
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-import common  # noqa: E402  (the path shim above is load-bearing)
+import common
 
 SCHEMA_AUDIT_HANDLE_FLOW: Final[str] = "adhesive-dumper.audit-handle-flow/1"
 
@@ -379,7 +379,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     reachable = forward["forward_reachable_set"]
     tables = dispatch["tables"]
 
-    # ------------------------------------------------------------------ dispatch
+
     slots_per_table = [len(table["branches"]) for table in tables]
     branch_total = sum(slots_per_table)
     inline_branches = sum(
@@ -443,7 +443,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         adjacent,
     )
 
-    # ------------------------------------------------------------------ branches
+
     per_stage = {
         stage["stage_label"]: {
             "branches": stage["branch_count"],
@@ -505,7 +505,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         wrapper_branches,
     )
 
-    # ------------------------------------------------------------------ wrappers
+
     by_stage = Counter(wrapper["stage_label"] for wrapper in wrappers)
     wrapper_rvas = tuple(wrapper["rva_hex"] for wrapper in wrappers)
     audit.expect("wrapper.count", 12, len(wrappers))
@@ -561,7 +561,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         len(wrappers),
     )
 
-    # -------------------------------------------------------- syscall site total
+
     wanted_cfg: dict[int, str] = {
         int(forward["anchor"]["function_rva_hex"], 16): "anchor",
         int(forward["anchor"]["entry_function_rva_hex"], 16): "entry_function",
@@ -606,7 +606,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         subject_syscall_total,
     )
 
-    # --------------------------------------------------------------- handle flow
+
     loads = handle["loads"]
     use_sites = handle["use_sites"]
     register_split = Counter(site["argument_register"] for site in use_sites)
@@ -663,7 +663,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         len(use_sites),
     )
 
-    # ------------------------------------------------- producer and caller border
+
     entry_negative = closure["negative_forms"].get(ENTRY_FUNCTION, {}).get("forms", {})
     entry_forms = sorted(entry_negative)
     entry_zero_forms = sorted(n for n, v in entry_negative.items() if not v.get("site_count"))
@@ -724,7 +724,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         handle["producer"]["status"],
     )
 
-    # ---------------------------------------------------- wrapper caller closure
+
     level_one = [r for r in closure_rows if r["level"] == 1 and r["edge_kind"] == "direct_call"]
     wrapper_level_one = [r for r in level_one if r["target_fn"] in ALL_WRAPPERS]
     all_sink_callers = {r["caller_fn"] for r in level_one}
@@ -754,7 +754,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         "0xC8FC00": 3, "0xC8FDE0": 3, "0xC8FF60": 3,
     }, per_wrapper_callers)
 
-    # ----------------------------------------------------- reachable set and pdata
+
     reachable_rvas = {e["rva"] for e in reachable["functions"]}
     outside_pdata = {e["rva"] for e in reachable["targets_outside_pdata"]}
     null_function = {e["rva"] for e in reachable["functions"] if not e.get("function")}
@@ -771,7 +771,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     audit.expect("reachable.exhausted", False, reachable["exhausted"])
     audit.expect("reachable.max_depth", 4, reachable["max_depth"])
 
-    # ------------------------------------------------------------ xref recompute
+
     xref_header = csv_header(args.evidence / "xref_edges.csv")
     cfg_header = csv_header(args.evidence / "cfg_functions.csv")
     inventory_header = csv_header(args.evidence / "syscall_inventory.csv")
@@ -801,7 +801,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         [(site, dist) for site, dist, _ in xref.nearest_close_handle_sites],
     )
 
-    # ------------------------------------------------ syscall inventory and class
+
     subject_sites: dict[str, str] = {}
     for site in inline_syscalls:
         subject_sites[site["rva_hex"]] = (
@@ -890,7 +890,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         dict(wrapper_shapes),
     )
 
-    # ------------------------------------------ cfg cross check of block counts
+
     forward_block_counts = {
         (s["stage_label"], b["index"]): b["instruction_count"]
         for s in stages for b in s["branches"]
@@ -925,7 +925,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                      for t in tables for key in block_count_delta if t["stage_label"] == key[0]))
     audit.expect("branch.inline_body_range", [41, 113], [min(inline_block_values), max(inline_block_values)])
 
-    # ----------------------------------------------------------- cluster identity
+
     anchor_cfg = cfg_rows["anchor"]
     entry_cfg = cfg_rows["entry_function"]
     wrapper_cluster_ids = {
@@ -954,7 +954,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     audit.expect("cluster.entry_blocks_reached", 8, int(entry_cfg["blocks_reached"]))
     audit.expect("cluster.entry_instructions", 30, int(entry_cfg["instructions"]))
 
-    # ------------------------------------------------------ argument schema check
+
     schema_agreement = {
         entry["stage_label"]: {
             "branch_count": entry["branch_count"],
@@ -972,7 +972,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     audit.expect("schema.alloc_syscall_positions", 6, schema_agreement["alloc"]["syscall_level_positions"])
     audit.expect("schema.transfer_syscall_positions", 5, schema_agreement["transfer"]["syscall_level_positions"])
 
-    # ------------------------------------------------------------ frame slot check
+
     slots = {
         s["frame_offset_hex"]: {
             "role": s["role"],
@@ -989,7 +989,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     audit.expect("slot.remote_base_readers", 2, slots["0x50"]["direct_read"])
     audit.expect("slot.remote_base_address_taken", 16, slots["0x50"]["address_taken"])
 
-    # ------------------------------------------------------------------- exits
+
     anchor_exits = forward["exits"]["anchor"]
     audit.expect("exit.anchor_count", 3, anchor_exits["exit_count"])
     audit.expect("exit.anchor_sites",
@@ -1002,7 +1002,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     audit.expect("exit.no_indirect_call_in_branches", True,
                  all(b["indirect_call_site_count"] == 0 for s in stages for b in s["branches"]))
 
-    # ------------------------------------------------------------- documentation
+
     contested: list[dict[str, Any]] = []
 
     def dispute(

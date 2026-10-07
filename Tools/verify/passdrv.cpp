@@ -1,9 +1,9 @@
-// Pass driver for the verification gate.
-// Runs the project's deterministic cleanup (fivem::cleanupLuaTree) so the gate
-// measures the current source rather than a stale prebuilt binary, and reports
-// the stats as one line of JSON. JSON is emitted here and parsed with Python
-// because PowerShell's ConvertFrom-Json throws on case-insensitive key
-// collisions such as Framework/framework, which these corpora contain.
+
+
+
+
+
+
 #include "ai/Cleanup.h"
 
 #include <cstdio>

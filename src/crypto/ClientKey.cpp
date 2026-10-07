@@ -13,15 +13,15 @@ static const char* kDefaultDeriveApi = "https://grantsclk.ckcloud.de5.net";
 
 namespace {
 
-// resolveKeys calls deriveClientKey once per resource, and a dump of a real server holds
-// 969 of them. Without a breaker an unreachable or DNS-failing endpoint costs the full
-// connect timeout 969 times over, so a run that only needs the server key would stall for
-// hours. A 400 is not the endpoint failing, it is the endpoint answering about one
-// resource, so only a transport failure, one where no HTTP status ever arrives, trips it.
+
+
+
+
+
 std::mutex g_breakerMutex;
 bool g_endpointDown = false;
 
-}  // namespace
+}
 
 bool deriveClientKeyEndpointAvailable() {
     std::lock_guard<std::mutex> lock(g_breakerMutex);
@@ -68,8 +68,8 @@ std::vector<uint8_t> deriveClientKey(uint32_t resourceId, const std::vector<uint
     HttpClient http;
     HttpResponse resp = http.postJson(root + "/v1/derive", body);
     if (resp.status == 0) {
-        // Transport failure: no HTTP status ever arrived, so the endpoint itself is
-        // unreachable. Stop asking, or every remaining resource pays the full timeout.
+
+
         {
             std::lock_guard<std::mutex> lock(g_breakerMutex);
             g_endpointDown = true;
@@ -109,4 +109,4 @@ std::vector<uint8_t> deriveClientKey(uint32_t resourceId, const std::vector<uint
     }
     return hexDecode(keyHex);
 }
-} 
+}

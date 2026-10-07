@@ -47,7 +47,7 @@ from typing import Any, Final, Mapping, Sequence
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-import common  # noqa: E402  (the path shim above is load-bearing)
+import common
 
 SPECIMEN_RELATIVE: Final[str] = "reverse/adhesive.dll"
 SCRIPTS_RELATIVE: Final[str] = "reverse/scripts"

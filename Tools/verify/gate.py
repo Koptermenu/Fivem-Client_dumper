@@ -38,23 +38,23 @@ import lualex
 
 LUAC = r"C:\Users\Admin\AppData\Local\Programs\Lua\bin\luac.exe"
 
-# The whole synthetic-register pattern. Reported in full; a previous report on
-# this project quoted only the figure that excluded one file and was misleading
-# because that file holds most of what is left.
+
+
+
 NAME_RE = re.compile(r"\b(SHX\d*_\d+|text\d+|num\d+|table\d+|L\d+_\d+)\b")
 
-# Excluded from the headline readability figure, and only from that figure.
+
 READABILITY_EXCLUDE = "rtx_themepark/client/paths.lua"
 
-# Baseline this corpus is expected to meet or beat, excluding the above file.
+
 BASELINE_BEFORE = 398346
 BASELINE_AFTER = 158871
 
-# A rebuild that drops newlines is a real failure mode. The pass legitimately
-# collapses tables and inlines aliases, which cut line counts hard (the worst
-# real file here goes 166 -> 13 lines, ratio 0.078), so the ratio bound sits well
-# below anything the pass actually does while the absolute bound catches the
-# "every newline gone" case outright.
+
+
+
+
+
 LINE_RATIO_MIN = 0.02
 LINE_COLLAPSE_AFTER = 2
 LINE_COLLAPSE_BEFORE = 10
@@ -75,7 +75,7 @@ def norm_eol(text):
     return text.replace("\r\n", "\n").replace("\r", "\n")
 
 
-# --------------------------------------------------------------------------- io
+
 
 
 def read_text(path):
@@ -109,7 +109,7 @@ def luac_ok(path):
         return False, "luac could not run: %s" % exc
 
 
-# ------------------------------------------------------------------ pass timing
+
 
 
 def time_pass(pass_exe, scratch, before_path, limit):
@@ -140,7 +140,7 @@ def time_pass(pass_exe, scratch, before_path, limit):
     return elapsed, elapsed > limit, killed, stats
 
 
-# ------------------------------------------------------------------- the checks
+
 
 
 def _empty_result(name, pairs):
@@ -184,7 +184,7 @@ def analyze_corpus(name, pairs, pass_exe=None, scratch=None, limit=SECOND_LIMIT,
     if not pairs:
         return res
 
-    # --- luac, both sides, keyed by relative path
+
     jobspec = []
     for rel, bpath, apath in pairs:
         jobspec.append((rel, "before", bpath))
@@ -228,7 +228,7 @@ def analyze_corpus(name, pairs, pass_exe=None, scratch=None, limit=SECOND_LIMIT,
         bsrc = read_text(bpath)
         asrc = read_text(apath)
 
-        # comments
+
         cb = collections.Counter(norm_eol(body) for _k, body, _raw in lualex.comments(bsrc))
         ca = collections.Counter(norm_eol(body) for _k, body, _raw in lualex.comments(asrc))
         removed = cb - ca
@@ -250,7 +250,7 @@ def analyze_corpus(name, pairs, pass_exe=None, scratch=None, limit=SECOND_LIMIT,
         entry["comments_removed"] = sum(removed.values())
         entry["comments_author_removed"] = len(author)
 
-        # string literals
+
         sb = collections.Counter(v for v, closed in lualex.strings(bsrc) if closed)
         sa = collections.Counter(v for v, closed in lualex.strings(asrc) if closed)
         res["strings"]["before"] += sum(sb.values())
@@ -267,9 +267,9 @@ def analyze_corpus(name, pairs, pass_exe=None, scratch=None, limit=SECOND_LIMIT,
             res["strings"]["changed_files"].append(rel)
             res["strings"]["lost_count"] += sum(lost.values())
             if gained_n:
-                # A value the cleaned file holds that the decompiler never
-                # produced, even after ignoring CRLF normalisation. That is a
-                # rewrite, not a removed dead statement.
+
+
+
                 res["strings"]["mutated_files"].append(rel)
                 res["strings"]["examples"].append({
                     "rel": rel, "kind": "value rewritten",
@@ -284,7 +284,7 @@ def analyze_corpus(name, pairs, pass_exe=None, scratch=None, limit=SECOND_LIMIT,
         entry["strings_before"] = sum(sb.values())
         entry["strings_after"] = sum(sa.values())
 
-        # line structure
+
         lb = lualex.line_count(bsrc)
         la = lualex.line_count(asrc)
         ratio = (la / lb) if lb else 1.0
@@ -297,8 +297,8 @@ def analyze_corpus(name, pairs, pass_exe=None, scratch=None, limit=SECOND_LIMIT,
         entry["lines_before"] = lb
         entry["lines_after"] = la
 
-        # live stores: a name that was assigned before, is still read after, and
-        # is never assigned after. That is the signature of a deleted live store.
+
+
         assigned_before = lualex.names_assigned(bsrc)
         assigned_after = lualex.names_assigned(asrc)
         read_after = lualex.names_read(asrc)
@@ -308,7 +308,7 @@ def analyze_corpus(name, pairs, pass_exe=None, scratch=None, limit=SECOND_LIMIT,
             res["live_stores"]["violations"].append([rel, orphan[:8]])
         entry["live_store_orphans"] = len(orphan)
 
-        # readability
+
         rb = len(NAME_RE.findall(bsrc))
         ra = len(NAME_RE.findall(asrc))
         res["readability"]["before"] += rb
@@ -331,13 +331,13 @@ def analyze_corpus(name, pairs, pass_exe=None, scratch=None, limit=SECOND_LIMIT,
         res["lines"]["min_ratio"] = round(ratios[0][0], 4)
         res["lines"]["min_ratio_rel"] = ratios[0][1]
 
-    # worst per-file readability leftovers, excluding the one excluded file
+
     worst = [(e["reg_after"], rel) for rel, e in res["per_file"].items() if "reg_after" in e]
     worst.sort(reverse=True)
     res["readability"]["worst"] = [[rel, n] for n, rel in worst[:10]]
     res["readability"]["baseline_applies"] = res["readability"]["files_excl"] == 328
 
-    # runtime, one pass run per file
+
     if timing and pass_exe:
         scratch = scratch or os.path.join(os.path.dirname(os.path.abspath(__file__)), "scratch", "time")
         os.makedirs(scratch, exist_ok=True)
@@ -363,7 +363,7 @@ def analyze_corpus(name, pairs, pass_exe=None, scratch=None, limit=SECOND_LIMIT,
     return res
 
 
-# -------------------------------------------------------------------- verdicts
+
 
 
 def corpus_verdict(r):
@@ -396,7 +396,7 @@ def corpus_verdict(r):
     return r["pass"]
 
 
-# --------------------------------------------------------------------- corpora
+
 
 
 def collect_pairs(before_root, after_root):
@@ -447,7 +447,7 @@ def write_json(path, obj):
         json.dump(obj, fh, indent=1, sort_keys=True, default=str)
 
 
-# ------------------------------------------------------------------- reporting
+
 
 
 def report(r, out):
@@ -562,11 +562,11 @@ def report(r, out):
         w("    FAIL %s\n" % f)
 
 
-# ----------------------------------------------------------------------- main
+
 
 
 def main(argv=None):
-    # Comment bodies in these corpora contain text outside the console codepage.
+
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--yes-root", default=None, help="dir holding Output/ and Output_gate/")

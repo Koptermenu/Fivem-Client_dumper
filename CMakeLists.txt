@@ -1,14 +1,14 @@
 cmake_minimum_required(VERSION 3.20)
 project(FiveMDumper VERSION 1.0.0 LANGUAGES CXX)
 
-# C++20 by default. Overridable with -DCMAKE_CXX_STANDARD=17, which is the fallback for
-# an older toolset: nothing here needs C++20, the only standard library feature used is
-# <filesystem>, so 17 compiles the same code.
+
+
+
 set(CMAKE_CXX_STANDARD 20 CACHE STRING "C++ standard used to build the dumper")
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Compiler options
+
 if(MSVC)
     add_compile_options(/W3 /utf-8 /D_CRT_SECURE_NO_WARNINGS)
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
@@ -16,20 +16,20 @@ else()
     add_compile_options(-Wall -Wextra)
 endif()
 
-# Prevent Windows headers from polluting std::min/std::max and the ERROR macro
+
 add_compile_definitions(WIN32_LEAN_AND_MEAN NOMINMAX NOGDI)
 
-# No external packages needed:
-#  - HTTP   : WinHTTP   (system, linked below)
-#  - AES    : BCrypt    (system, linked below)
-#  - SHA256 : own impl  (src/crypto/Sha256.cpp)
-#  - ChaCha20: own impl (src/crypto/ChaCha20.cpp)
-#  - JSON   : own impl  (src/utils/Json.cpp)
 
-# ---- Embedded payload: the EXE ships alone (extracted to %LOCALAPPDATA%) ----
-# Entire Bin/ (minus CitiTest build artifacts) so Unpacker.exe's full FXServer
-# component stack loads from the extracted payload, plus the VC++ runtime DLLs
-# it imports, so the target machine needs no redistributable install.
+
+
+
+
+
+
+
+
+
+
 set(DUMPER_PAYLOAD_ITEMS "")
 file(GLOB _bin_top LIST_DIRECTORIES false CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/Bin/*")
 foreach(_f IN LISTS _bin_top)
@@ -48,12 +48,12 @@ foreach(_f IN LISTS _bin_citizen)
     file(RELATIVE_PATH _rel "${CMAKE_SOURCE_DIR}" "${_f}")
     list(APPEND DUMPER_PAYLOAD_ITEMS "${_rel}|${_f}")
 endforeach()
-# The vertex repair tool and its .NET dependencies. It is a framework-dependent net8.0
-# app, so travelling with the payload is not sufficient on its own: the target machine
-# also needs the .NET 8 runtime. When it is missing the apphost raises a dialog and
-# exits, which runVertexFix treats as a failed run rather than a hang.
-# Filtered like _bin_top: `dotnet publish` emits .pdb by default and symbols have no
-# business in a 226MB exe.
+
+
+
+
+
+
 file(GLOB_RECURSE _bin_vfix LIST_DIRECTORIES false CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/Bin/vertex-fixer/*")
 foreach(_f IN LISTS _bin_vfix)
     file(TO_CMAKE_PATH "${_f}" _vfc)
@@ -70,8 +70,8 @@ get_filename_component(_d2 "${_d1}" DIRECTORY)
 get_filename_component(_d3 "${_d2}" DIRECTORY)
 get_filename_component(_msvc_root "${_d3}" DIRECTORY)
 file(GLOB _vcrt_dirs "${_msvc_root}/redist/MSVC/*/x64/Microsoft.VC*")
-# Ascending natural order so the last match wins => highest toolset version,
-# independent of glob result order.
+
+
 list(SORT _vcrt_dirs COMPARE NATURAL)
 foreach(_dll msvcp140.dll msvcp140_2.dll msvcp140_atomic_wait.dll vcruntime140.dll vcruntime140_1.dll)
     set(_src "")
@@ -103,8 +103,8 @@ foreach(pair IN LISTS DUMPER_PAYLOAD_ITEMS)
     if(NOT EXISTS "${_src}")
         message(FATAL_ERROR "Payload file missing: ${_name} (${_src})")
     endif()
-    # Payload content is baked into RCDATA + the SHA-256 manifest at configure
-    # time, so any change to it has to re-trigger configure.
+
+
     set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${_src}")
     file(SHA256 "${_src}" _sha)
     file(SIZE "${_src}" _size)
@@ -136,8 +136,8 @@ file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "src/*.cpp")
 
 add_executable(fivem_dumper ${SOURCES} "${CMAKE_BINARY_DIR}/payload.rc")
 
-# UTF-8 process code page: server names from /dynamic.json (accents, emoji)
-# must convert correctly through narrow std::string -> filesystem paths.
+
+
 if(MSVC)
     target_link_options(fivem_dumper PRIVATE
         "/MANIFEST:EMBED"

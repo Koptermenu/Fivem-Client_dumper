@@ -225,8 +225,8 @@ _SCRIPT_DIR: Final[Path] = Path(__file__).resolve().parent
 if str(_SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(_SCRIPT_DIR))
 
-import common  # noqa: E402  sibling module, resolved from the script directory
-import syscall_args as s7  # noqa: E402  P0/S7, the phase this one extends
+import common
+import syscall_args as s7
 
 SCHEMA_CSV: Final[str] = "adhesive-dumper.syscall-inventory/1"
 SCHEMA_JSON: Final[str] = "adhesive-dumper.syscall-service-map/1"
@@ -262,11 +262,11 @@ CSV_COLUMNS: Final[tuple[str, ...]] = S7_COLUMNS + tuple(
 CHAIN_MAX_DEPTH: Final[int] = 10
 CHAIN_CELL_ENTRIES: Final[int] = 24
 MAX_EXAMPLES: Final[int] = 5
-# A P0/S7 cell holds one argument's evidence. A P0/S8 basis cell holds the verdict
-# of the whole site: the kind, the symbolic operand that stopped the fold, the
-# service number, the anchor group, the producer rva and the reconciliation marks,
-# and every one of those is read by a check or by a reader, so the budget is raised
-# rather than letting the cell cut a verdict token. The shedding rule is unchanged.
+
+
+
+
+
 CELL_LIMIT: Final[int] = 320
 
 RAX: Final[int] = capstone.x86.X86_REG_RAX
@@ -338,9 +338,9 @@ SERVICE_CLASSES: Final[tuple[str, ...]] = (
     CLASS_OTHER,
 )
 
-# Documented PROCESSINFOCLASS values, used only to key the anchor groups and only
-# as a hypothesis. A name is written to `nt_service` when, and only when, the
-# producer chain also folds to a static service number.
+
+
+
 INFO_CLASS_BASIC: Final[int] = 0x00
 INFO_CLASS_DEBUG: Final[frozenset[int]] = frozenset({0x07, 0x1E, 0x1F})
 INFO_CLASS_CALLBACK: Final[int] = 0x28
@@ -349,9 +349,9 @@ INFO_CLASS_MAX: Final[int] = 0x80
 ALLOCATION_TYPE_COMMIT_RESERVE: Final[int] = 0x1000
 ALLOCATION_PROTECTION_EXECUTE_READWRITE: Final[int] = 0x40
 
-# The service hypothesis each information class anchor group carries. Reached
-# only through the naming gate; the group label itself is the recorded output when
-# the gate does not fire.
+
+
+
 SERVICE_HYPOTHESIS: Final[dict[str, str]] = {
     CLASS_INFO_BASIC: "NtQueryInformationProcess",
     CLASS_INFO_DEBUG: "NtQueryInformationProcess",
@@ -490,9 +490,9 @@ LIMITATIONS: Final[tuple[str, ...]] = (
 )
 
 
-# --------------------------------------------------------------------------- #
-# small helpers
-# --------------------------------------------------------------------------- #
+
+
+
 
 
 def _hex(value: int) -> str:
@@ -538,9 +538,9 @@ def _sorted_counts(counter: Counter[str]) -> dict[str, int]:
     return {name: counter[name] for name in sorted(counter)}
 
 
-# --------------------------------------------------------------------------- #
-# specimen view and phase inputs
-# --------------------------------------------------------------------------- #
+
+
+
 
 
 @dataclass(frozen=True, slots=True)
@@ -728,9 +728,9 @@ def load_inputs(
     )
 
 
-# --------------------------------------------------------------------------- #
-# RAX producer chain
-# --------------------------------------------------------------------------- #
+
+
+
 
 
 @dataclass(frozen=True, slots=True)
@@ -1107,9 +1107,9 @@ def producer_index(sweep: FunctionSweep, limit: int) -> int | None:
     return None
 
 
-# --------------------------------------------------------------------------- #
-# anchor groups and the naming gate
-# --------------------------------------------------------------------------- #
+
+
+
 
 
 def argument_class(row: dict[str, str], position: int) -> str:
@@ -1359,9 +1359,9 @@ def derive(facts: SiteFacts) -> Derivation:
     )
 
 
-# --------------------------------------------------------------------------- #
-# inventory rows
-# --------------------------------------------------------------------------- #
+
+
+
 
 
 def site_row(facts: SiteFacts, verdict: Derivation) -> dict[str, Any]:
@@ -1637,9 +1637,9 @@ def validate_reconciliation(verdicts: Sequence[Derivation]) -> list[common.Check
     ]
 
 
-# --------------------------------------------------------------------------- #
-# report
-# --------------------------------------------------------------------------- #
+
+
+
 
 
 def _histogram(values: Counter[int], limit: int = 16) -> dict[str, int]:

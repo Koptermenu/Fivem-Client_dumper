@@ -27,7 +27,7 @@ import capstone
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-import common  # noqa: E402
+import common
 
 SCHEMA: Final[str] = "adhesive-dumper.defuse-slice/1"
 

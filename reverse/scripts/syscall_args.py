@@ -189,7 +189,7 @@ _SCRIPT_DIR: Final[Path] = Path(__file__).resolve().parent
 if str(_SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(_SCRIPT_DIR))
 
-import common  # noqa: E402  sibling module, resolved from the script directory
+import common
 
 SCHEMA_CSV: Final[str] = "adhesive-dumper.syscall-arg-inventory/1"
 SCHEMA_JSON: Final[str] = "adhesive-dumper.syscall-arg-classes/1"
@@ -570,9 +570,9 @@ def _is_pseudo_window(value: int) -> bool:
     return low <= value <= high
 
 
-# --------------------------------------------------------------------------- #
-# specimen view
-# --------------------------------------------------------------------------- #
+
+
+
 
 
 @dataclass(frozen=True, slots=True)
@@ -647,9 +647,9 @@ class Image:
         return value + self.image_base if self.relocations.covers(rva) else value
 
 
-# --------------------------------------------------------------------------- #
-# phase inputs
-# --------------------------------------------------------------------------- #
+
+
+
 
 
 @dataclass(frozen=True, slots=True)
@@ -794,9 +794,9 @@ def load_inputs(
     )
 
 
-# --------------------------------------------------------------------------- #
-# resolved operand value
-# --------------------------------------------------------------------------- #
+
+
+
 
 
 @dataclass(frozen=True, slots=True)
@@ -990,9 +990,9 @@ def _rotate_left(value: int, amount: int) -> int:
     return ((value << amount) | (value >> (64 - amount))) & 0xFFFFFFFFFFFFFFFF
 
 
-# --------------------------------------------------------------------------- #
-# analysis window
-# --------------------------------------------------------------------------- #
+
+
+
 
 
 class Window:
@@ -1023,7 +1023,7 @@ class Window:
         self._active: set[tuple[str, int, int]] = set()
         self.accesses: tuple[Access, ...] = self._memory_accesses()
 
-    # -- window shape ------------------------------------------------------- #
+
 
     def _stack_deltas(self) -> tuple[int, ...]:
         """Net rsp change between each window instruction and the candidate."""
@@ -1110,7 +1110,7 @@ class Window:
                 found.append(f"{symbol}@{_hex(insn.address)}")
         return tuple(found)
 
-    # -- operand helpers ---------------------------------------------------- #
+
 
     def location(self, insn: capstone.CsInsn, index: int, operand: Any) -> str | None:
         """Normalised address of a memory operand, or None when unresolvable."""
@@ -1212,7 +1212,7 @@ class Window:
                     return insn
         return None
 
-    # -- value resolution --------------------------------------------------- #
+
 
     def stale_reason(self, insn: capstone.CsInsn, register: int | None) -> str:
         """Why a definition is not on the path that reaches the candidate.
@@ -1422,7 +1422,7 @@ class Window:
             **store_fields,
         )
 
-    # -- signals ------------------------------------------------------------ #
+
 
     def reads_and_writes(self, location: str) -> tuple[str, str]:
         """Load and store evidence of the window for one normalised address."""
@@ -1462,7 +1462,7 @@ class Window:
                 return _hex(item.insn_rva)
         return ""
 
-    # -- instruction semantics ---------------------------------------------- #
+
 
     def instruction_value(
         self,
@@ -1852,9 +1852,9 @@ class Window:
         return "" if section is None else section.name
 
 
-# --------------------------------------------------------------------------- #
-# argument facts
-# --------------------------------------------------------------------------- #
+
+
+
 
 
 @dataclass(frozen=True, slots=True)
@@ -2014,9 +2014,9 @@ def site_arguments(window: Window) -> tuple[ArgumentFacts, ...]:
     return tuple(results)
 
 
-# --------------------------------------------------------------------------- #
-# linear sweep of the owning function
-# --------------------------------------------------------------------------- #
+
+
+
 
 
 def entry_spill_of(
@@ -2226,9 +2226,9 @@ def unreached_arguments() -> tuple[ArgumentFacts, ...]:
     )
 
 
-# --------------------------------------------------------------------------- #
-# inventory rows
-# --------------------------------------------------------------------------- #
+
+
+
 
 
 def _const_cell(value: Value) -> str:
@@ -2341,9 +2341,9 @@ def build_rows(sites: Sequence[SiteFacts]) -> list[dict[str, Any]]:
     return [site_row(site) for site in sites]
 
 
-# --------------------------------------------------------------------------- #
-# validation
-# --------------------------------------------------------------------------- #
+
+
+
 
 
 def validate_rows(
@@ -2408,9 +2408,9 @@ def validate_rows(
     return checks
 
 
-# --------------------------------------------------------------------------- #
-# class report
-# --------------------------------------------------------------------------- #
+
+
+
 
 CLASS_RULES: Final[tuple[tuple[str, str], ...]] = (
     (CLASS_A1, "resolved constant inside the pseudo handle window"),
@@ -2680,9 +2680,9 @@ def build_report(
     }
 
 
-# --------------------------------------------------------------------------- #
-# entry point
-# --------------------------------------------------------------------------- #
+
+
+
 
 
 def read_stored_rows(path: Path) -> list[dict[str, str]]:

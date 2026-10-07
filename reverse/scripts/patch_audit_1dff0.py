@@ -62,7 +62,7 @@ from capstone.x86_const import X86_OP_IMM, X86_OP_MEM, X86_OP_REG, X86_REG_RIP
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-import common  # noqa: E402  (the path bootstrap has to run before the import)
+import common
 
 SCHEMA_CSV: Final[str] = "adhesive-dumper.patch-mechanisms-1dff0/1"
 SCHEMA_JSON: Final[str] = "adhesive-dumper.thread-context-map/1"
@@ -82,9 +82,9 @@ CSV_FIELDS: Final[tuple[str, ...]] = (
     "confidence",
 )
 
-# --------------------------------------------------------------------------- #
-# Subjects and constants
-# --------------------------------------------------------------------------- #
+
+
+
 
 REDIRECT_RVA: Final[int] = 0x1DFF0
 ORCHESTRATOR_RVA: Final[int] = 0x1E360
@@ -176,7 +176,7 @@ ENTRY_SIZE_BYTES: Final[int] = 4
 
 ALL_RECORDS_SENTINEL: Final[int] = -1
 
-# Symbolic expressions, shared verbatim by the csv and the json output.
+
 EXPR_RECORD: Final[str] = "rec = *(qword *)(0x1830D44F8) + index * 0x38"
 EXPR_CONTEXT_BASE: Final[str] = "ctx = rsp + 0x30"
 EXPR_CONTEXT_RIP: Final[str] = "ctx + 0xF8, reached as [rsp + 0x128]"
@@ -194,8 +194,8 @@ CONFIDENCE_SCALE: Final[Mapping[str, str]] = {
     "OPEN": "not decidable from the file alone, carried as an open question",
 }
 
-# The only three status values the table uses, matching the sibling mechanism
-# tables: an observed structure, a proven absence, and an unresolved reference.
+
+
 OBSERVED: Final[str] = "OBSERVED"
 ABSENT: Final[str] = "ABSENT"
 ASYMMETRIC: Final[str] = "ASYMMETRIC"
@@ -220,9 +220,9 @@ def _immediate_matches(observed: int, expected: int) -> bool:
     return (observed & _MASK32) == (expected & _MASK32)
 
 
-# --------------------------------------------------------------------------- #
-# Disassembly helpers
-# --------------------------------------------------------------------------- #
+
+
+
 
 
 @dataclass(frozen=True, slots=True)
@@ -343,9 +343,9 @@ def access_decomposition(value: int, table: Sequence[tuple[int, str]]) -> list[s
     return [name for mask, name in table if value & mask]
 
 
-# --------------------------------------------------------------------------- #
-# Anchor table
-# --------------------------------------------------------------------------- #
+
+
+
 
 
 @dataclass(frozen=True, slots=True)
@@ -370,13 +370,13 @@ def _snapshot(name: str, rva: int, mnemonic: str, description: str, **kw: Any) -
 
 
 ANCHORS: Final[tuple[Anchor, ...]] = (
-    # ---- frame and out-parameter zeroing --------------------------------- #
+
     _snapshot("frame_reserve", 0x1DFFC, "sub", "the frame is sized for one CONTEXT plus the cookie"),
     _snapshot("out_zero_store", 0x1E01F, "movups", "the sixteen byte out block is zeroed on entry", mem_disp=0, mem_size=16),
     _snapshot("out_zero_source", 0x1E01C, "xorps", "the zeroing source is a cleared vector register"),
     _snapshot("cookie_load", 0x1E00A, "mov", "the stack cookie is read from the guard global", rip_target=COOKIE_VA - 0x180000000, mem_size=8),
     _snapshot("cookie_check", 0x1E250, "call", "the cookie is verified before the epilogue", call_target=COOKIE_CHECK_RVA),
-    # ---- thread enumeration ---------------------------------------------- #
+
     _snapshot("snapshot_flag", 0x1E022, "mov", "the snapshot is requested for threads only", imm=SNAPSHOT_FLAG),
     _snapshot("snapshot_pid", 0x1E027, "xor", "the snapshot process identifier is zero, meaning every process"),
     _snapshot("snapshot_call", 0x1E029, "call", "the snapshot is taken", call_target=THUNK_SNAPSHOT_RVA),
@@ -395,7 +395,7 @@ ANCHORS: Final[tuple[Anchor, ...]] = (
     _snapshot("thread_id_call", 0x1E075, "call", "the current thread identifier is read"),
     _snapshot("self_exclusion", 0x1E07B, "cmp", "the calling thread itself is dropped from the list"),
     _snapshot("self_exclusion_branch", 0x1E07D, "je", "the calling thread skips itself", branch_target=0x1E1C7),
-    # ---- out block population -------------------------------------------- #
+
     _snapshot("array_load", 0x1E083, "mov", "the identifier array pointer is loaded", mem_disp=0, mem_size=8),
     _snapshot("array_capacity_init", 0x1E08F, "mov", "the initial capacity is one hundred and twenty eight entries", mem_disp=8, mem_size=4, imm=INITIAL_CAPACITY_ENTRIES),
     _snapshot("array_heap", 0x1E096, "mov", "the identifier array is taken from the shared process heap", rip_target=HEAP_HANDLE_VA - 0x180000000, mem_size=8),
@@ -415,18 +415,18 @@ ANCHORS: Final[tuple[Anchor, ...]] = (
     _snapshot("next_call", 0x1E1D7, "call", "the next thread entry is read", call_target=THUNK_NEXT_RVA),
     _snapshot("next_loop", 0x1E1DC, "jmp", "enumeration re-tests the iteration result"),
     _snapshot("snapshot_close", 0x1E0BA, "call", "the snapshot handle is closed"),
-    # ---- empty list guards ----------------------------------------------- #
+
     _snapshot("list_null_guard", 0x1E0C0, "cmp", "an unpublished array ends the mechanism", mem_disp=0, mem_size=8),
     _snapshot("list_null_branch", 0x1E0C4, "je", "a null array returns immediately", branch_target=0x1E245),
     _snapshot("list_count_guard", 0x1E0CA, "cmp", "an empty array ends the mechanism", mem_disp=0x0C, mem_size=4),
     _snapshot("list_count_branch", 0x1E0CE, "je", "an empty list returns immediately", branch_target=0x1E245),
-    # ---- index and limit derivation -------------------------------------- #
+
     _snapshot("index_argument", 0x1E0D7, "mov", "the record index argument is loaded from the frame", mem_disp=0x2C, mem_size=4),
     _snapshot("limit_base", 0x1E0DB, "mov", "the exclusive limit starts from the index argument"),
     _snapshot("limit_increment", 0x1E0DD, "inc", "the exclusive limit is the index argument plus one"),
     _snapshot("start_index", 0x1E0DF, "mov", "the first scanned record is the index argument"),
     _snapshot("start_index_sentinel", 0x1E0E2, "cmove", "the sentinel argument folds the first scanned record to zero"),
-    # ---- per thread suspend and context read ------------------------------ #
+
     _snapshot("thread_id_load", 0x1E0E9, "mov", "the thread identifier is loaded into the third argument register", operand_registers=("r8d",)),
     _snapshot("open_access", 0x1E0ED, "mov", "the requested access is the four rights the sequence needs", imm=OPEN_THREAD_ACCESS, operand_registers=("ecx",)),
     _snapshot("open_inherit", 0x1E0F2, "xor", "the handle is requested non inheritable", operand_registers=("edx", "edx")),
@@ -437,14 +437,14 @@ ANCHORS: Final[tuple[Anchor, ...]] = (
     _snapshot("context_buffer", 0x1E117, "lea", "the context structure is the frame buffer"),
     _snapshot("context_get", 0x1E11F, "call", "the thread context is read"),
     _snapshot("context_get_failed", 0x1E127, "je", "an unreadable context skips the record scan for that thread", branch_target=0x1E22D),
-    # ---- limit resolution -------------------------------------------------- #
+
     _snapshot("limit_from_argument", 0x1E12D, "mov", "the exclusive limit falls back to the index argument plus one"),
     _snapshot("limit_sentinel_test", 0x1E12F, "cmp", "the sentinel argument is recognised", mem_disp=0x2C, mem_size=4, imm=-1),
     _snapshot("limit_sentinel_load", 0x1E136, "mov", "the sentinel resolves the limit to the live record count", rip_target=RECORD_COUNT_VA - 0x180000000, mem_size=4),
     _snapshot("limit_range_check", 0x1E13C, "cmp", "a start index at or above the limit skips the record scan"),
     _snapshot("limit_range_branch", 0x1E13F, "jae", "an out of range start index closes the handle", branch_target=0x1E22D),
     _snapshot("limit_hold", 0x1E145, "mov", "the exclusive limit is kept in a register for the loop"),
-    # ---- record scan ------------------------------------------------------- #
+
     _snapshot("record_table_load", 0x1E148, "mov", "the record array is loaded once per thread", rip_target=RECORD_TABLE_VA - 0x180000000, mem_size=8),
     _snapshot("record_index_init", 0x1E14F, "mov", "the record cursor starts at the first scanned record"),
     _snapshot("record_stride", 0x1E152, "imul", "the record offset is the cursor times the record stride", imm=RECORD_STRIDE),
@@ -457,7 +457,7 @@ ANCHORS: Final[tuple[Anchor, ...]] = (
     _snapshot("context_rip_read", 0x1E173, "mov", "the saved instruction pointer is loaded per record", mem_disp=0x128, mem_size=8),
     _snapshot("record_anchor", 0x1E17B, "mov", "the record anchor is loaded", mem_disp=RECORD_ANCHOR_OFFSET, mem_size=8),
     _snapshot("entry_index_init", 0x1E17E, "xor", "the entry cursor starts at zero"),
-    # ---- entry loop -------------------------------------------------------- #
+
     _snapshot("entry_advance", 0x1E1E1, "inc", "the entry cursor advances"),
     _snapshot("entry_end", 0x1E1E4, "cmp", "the entry cursor is compared with the masked count"),
     _snapshot("entry_end_branch", 0x1E1E7, "je", "the record is abandoned when the cursor reaches the count", branch_target=0x1E221),
@@ -474,13 +474,13 @@ ANCHORS: Final[tuple[Anchor, ...]] = (
     _snapshot("record_advance", 0x1E221, "inc", "the record cursor advances"),
     _snapshot("record_end", 0x1E224, "cmp", "the record cursor is compared with the exclusive limit"),
     _snapshot("record_end_branch", 0x1E227, "jne", "the scan repeats until the limit is reached", branch_target=0x1E152),
-    # ---- per thread teardown ------------------------------------------------ #
+
     _snapshot("thread_close", 0x1E230, "call", "the thread handle is closed"),
     _snapshot("thread_advance", 0x1E236, "inc", "the thread cursor advances"),
     _snapshot("thread_count", 0x1E239, "mov", "the identifier count drives the thread loop"),
     _snapshot("thread_end", 0x1E23C, "cmp", "the thread cursor is compared with the identifier count"),
     _snapshot("thread_end_branch", 0x1E23F, "jb", "the next thread is opened until the count is reached", branch_target=0x1E0E6),
-    # ---- orchestrator lock and the two call sites -------------------------- #
+
     _snapshot("lock_take", 0x1E39A, "cmpxchg", "the orchestrator takes the shared once flag", rip_target=SPIN_LOCK_VA - 0x180000000, mem_size=4),
     _snapshot("lock_drop", 0x1E562, "xchg", "the orchestrator releases the shared once flag", rip_target=SPIN_LOCK_VA - 0x180000000, mem_size=4),
     _snapshot("lock_spin", 0x1E38F, "call", "a losing lock contender sleeps and retries"),
@@ -513,9 +513,9 @@ ANCHORS: Final[tuple[Anchor, ...]] = (
     _snapshot("resume_call_second", 0x1E537, "call", "the second resume pass is the only place a suspend is undone", rip_target=IAT_RESUME_THREAD),
     _snapshot("out_block_free", 0x1E55A, "call", "the caller frees the identifier array from the shared heap", rip_target=IAT_HEAP_FREE),
     _snapshot("out_block_free_heap", 0x1E54E, "mov", "the free uses the same shared process heap", rip_target=HEAP_HANDLE_VA - 0x180000000, mem_size=8),
-    # ---- inline patcher flag write ----------------------------------------- #
+
     _snapshot("patch_flag_write", 0x1E336, "or", "the patcher raises the skip and patched bits together through a pointer to the flag byte", mem_disp=0, mem_size=1, imm=PATCH_FLAG_MASK),
-    # ---- list builder provenance ------------------------------------------- #
+
     _snapshot("window_anchor", 0x1E61A, "add", "the window cursor is biased by the anchor", mem_disp=0, mem_size=8),
     _snapshot("window_length_agree", 0x1E829, "cmp", "the decoded length must match the opcode derived length"),
     _snapshot("window_advance", 0x1E82D, "add", "the window cursor advances by the instruction length"),
@@ -582,9 +582,9 @@ def verify_anchors(pe: pefile.PE, md: capstone.Cs) -> list[dict[str, Any]]:
     return results
 
 
-# --------------------------------------------------------------------------- #
-# Whole image reachability
-# --------------------------------------------------------------------------- #
+
+
+
 
 
 def direct_call_sites(pe: pefile.PE, section: common.Section, targets: frozenset[int]) -> list[int]:
@@ -677,11 +677,11 @@ def reachable_functions(pe: pefile.PE) -> dict[str, Any]:
     rva32 = literal_occurrences(pe, struct.pack("<I", REDIRECT_RVA))
     va64 = literal_occurrences(pe, struct.pack("<Q", REDIRECT_RVA + image_base))
 
-    # A four byte rva literal in the code section is a real pointer only when it
-    # is not part of a longer operand.  The single hit here is the displacement
-    # of a rip relative lea, recognised by the ModRM byte that precedes it, and
-    # the displacement resolves to a different address, so the hit is a byte
-    # coincidence rather than a reference.
+
+
+
+
+
     blob = common.read_rva(pe, section.virtual_address, section.raw_size)
     base = section.virtual_address
     classified: list[dict[str, Any]] = []
@@ -729,9 +729,9 @@ def reachable_functions(pe: pefile.PE) -> dict[str, Any]:
     }
 
 
-# --------------------------------------------------------------------------- #
-# Mechanism table
-# --------------------------------------------------------------------------- #
+
+
+
 
 
 def _gate(*parts: str) -> str:
@@ -1407,9 +1407,9 @@ def build_mechanisms() -> list[dict[str, str]]:
     return rows
 
 
-# --------------------------------------------------------------------------- #
-# JSON payload
-# --------------------------------------------------------------------------- #
+
+
+
 
 
 def build_payload(pe: pefile.PE, md: capstone.Cs, specimen_size: int) -> dict[str, Any]:
@@ -2306,9 +2306,9 @@ def build_payload(pe: pefile.PE, md: capstone.Cs, specimen_size: int) -> dict[st
     return payload
 
 
-# --------------------------------------------------------------------------- #
-# Output
-# --------------------------------------------------------------------------- #
+
+
+
 
 
 def _read_csv(path: Path) -> list[dict[str, str]]:

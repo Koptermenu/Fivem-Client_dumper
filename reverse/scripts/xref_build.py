@@ -109,16 +109,16 @@ from typing import Any, Final, Mapping, Sequence
 SCRIPT_DIR: Final[Path] = Path(__file__).resolve().parent
 sys.path.insert(0, str(SCRIPT_DIR))
 
-import pefile  # noqa: E402  (the path shim above is load-bearing)
+import pefile
 
-import common  # noqa: E402
-from capstone import (  # noqa: E402
+import common
+from capstone import (
     CS_AC_WRITE,
     CS_ARCH_X86,
     CS_MODE_64,
     Cs,
 )
-from capstone.x86 import (  # noqa: E402
+from capstone.x86 import (
     X86_INS_CALL,
     X86_INS_JMP,
     X86_OP_IMM,
@@ -352,7 +352,7 @@ class IatSlot:
     """One materialised import address table slot.
 
     ``symbol`` follows the doc 03 rendering: a named import keeps its name, an
-    ordinal-only import becomes ``#<ordinal> (ordinal)``. ``secondary_name`` keeps
+    ordinal-only import becomes ``
     the name pefile derives from its own ordinal table for such an entry, clearly
     separated from the file-backed identity.
     """
@@ -1102,9 +1102,9 @@ def decode_functions(
                 if is_call or is_jmp:
                     form = "call" if is_call else "jmp"
                     target = operands[0].imm - image_base
-                    # Capstone prints an immediate operand as a preferred-base VA; every address
-                    # in this evidence set is an RVA, so the operand is rendered as an RVA.
-                    # src_mnemonic already carries the verb, so src_op_str holds the operand only.
+
+
+
                     branch = _branch(
                         form, rva, raw, function, target, mnemonic, f"0x{target:x}", raw_bytes
                     )
@@ -1310,9 +1310,9 @@ def decode_branch_site(
     target_kind, target_section, code_rva, iat_rva, module, symbol = classify_rip_target(
         image_map, target, slot_by_rva, iat_by_rva
     )
-    # A jmp that lands on an IAT slot is the import thunk itself, so the runtime
-    # function that contains the instruction is also the function that contains
-    # the target thunk; a call into the same slot is a direct CALL, not a thunk hop.
+
+
+
     is_thunk = form == "jmp" and target_kind == "iat_slot"
     return IndirectSite(
         kind=f"{form}_mem_rip",

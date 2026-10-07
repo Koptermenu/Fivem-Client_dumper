@@ -16,8 +16,8 @@ _DIGITS = set("0123456789")
 _HEX = set("0123456789abcdefABCDEF")
 _WS = set(" \t\r\n\v\f")
 
-# Mirrors isBannerLine() in src/ai/Cleanup.cpp. These are the decompiler's own
-# instructions to the cleaner, not the resource author's notes.
+
+
 BANNER_MARKERS = (
     "AI CLEANUP",
     "Decompiled Lua",
@@ -39,7 +39,7 @@ NAME = "name"
 SYMBOL = "symbol"
 END = "end"
 
-# Longest-match first, so `==` is never mistaken for an assignment.
+
 _OPERATORS = (
     "...", "..", "::", "==", "~=", "<=", ">=", "//", "<<", ">>",
     "+", "-", "*", "/", "%", "^", "#", "&", "~", "|", "<", ">", "=",

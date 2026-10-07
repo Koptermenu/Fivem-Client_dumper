@@ -54,7 +54,7 @@ _SCRIPT_DIR: Final[Path] = Path(__file__).resolve().parent
 if str(_SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(_SCRIPT_DIR))
 
-import common  # noqa: E402  sibling module, resolved from the script directory
+import common
 
 CSV_COLUMNS: Final[tuple[str, ...]] = (
     "callsite",
@@ -159,9 +159,9 @@ def _full_register(register: int) -> int:
     return _GPR_ALIAS.get(register, register)
 
 
-# --------------------------------------------------------------------------- #
-# whole-image primitives
-# --------------------------------------------------------------------------- #
+
+
+
 
 
 class Image:
@@ -193,7 +193,7 @@ class Image:
     def close(self) -> None:
         self.pe.close()
 
-    # -- imports --------------------------------------------------------- #
+
 
     def _build_iat_index(self) -> None:
         self.iat: dict[str, int] = {}
@@ -214,7 +214,7 @@ class Image:
             raise KeyError(f"import not found: {name}")
         return self.iat[name]
 
-    # -- exception directory --------------------------------------------- #
+
 
     def _build_pdata_index(self) -> None:
         summary = common.pdata_summary(self.pe)
@@ -230,7 +230,7 @@ class Image:
         begin, end = self.runtime_begins[index], self.runtime_ends[index]
         return (begin, end, index) if begin <= rva < end else None
 
-    # -- vectorised byte scans ------------------------------------------- #
+
 
     def _build_vector_index(self) -> None:
         self._u8 = np.frombuffer(self.code, dtype=np.uint8)
@@ -323,7 +323,7 @@ class Image:
             total += 1
             start = index + 1
 
-    # -- decoding -------------------------------------------------------- #
+
 
     def offset_to_rva(self, offset: int) -> int:
         """Map a blob offset inside the code section to an RVA."""
@@ -498,9 +498,9 @@ class Image:
         }
 
 
-# --------------------------------------------------------------------------- #
-# instruction-level helpers
-# --------------------------------------------------------------------------- #
+
+
+
 
 
 def _branch_target(instruction: capstone.CsInsn) -> int | None:
@@ -760,9 +760,9 @@ def _iat_call_in_range(image: Image, iat_rva: int, begin: int, end: int) -> int 
     return None
 
 
-# --------------------------------------------------------------------------- #
-# derived structural facts
-# --------------------------------------------------------------------------- #
+
+
+
 
 
 @dataclass(frozen=True, slots=True)
@@ -1057,9 +1057,9 @@ class AuditResult:
         return [check for check in self.checks if not check.ok]
 
 
-# --------------------------------------------------------------------------- #
-# audit driver
-# --------------------------------------------------------------------------- #
+
+
+
 
 
 def _function_fully_decoded(image: Image, begin: int, end: int) -> bool:
@@ -1644,9 +1644,9 @@ def _build_checks(result: AuditResult) -> list[common.Check]:
     return checks
 
 
-# --------------------------------------------------------------------------- #
-# entry point
-# --------------------------------------------------------------------------- #
+
+
+
 
 
 def _read_rows(path: Path) -> list[dict[str, str]]:

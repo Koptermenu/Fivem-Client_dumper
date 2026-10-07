@@ -34,10 +34,10 @@ from typing import Any, Final, Iterator, Mapping, Sequence
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-import cfg_build  # noqa: E402  (the path shim above is load-bearing)
-import common  # noqa: E402
+import cfg_build
+import common
 
-from capstone import CS_ARCH_X86, CS_MODE_64, Cs  # noqa: E402
+from capstone import CS_ARCH_X86, CS_MODE_64, Cs
 
 SCHEMA: Final[str] = "adhesive-dumper.unresolved-regions/1"
 
@@ -90,9 +90,9 @@ CONFIDENCE_MEDIUM: Final[str] = "MEDIUM"
 CONFIDENCE_LOW: Final[str] = "LOW"
 CONFIDENCES: Final[tuple[str, ...]] = (CONFIDENCE_HIGH, CONFIDENCE_MEDIUM, CONFIDENCE_LOW)
 
-# Byte level classification thresholds. A range is data only when it carries no
-# control-flow terminator at all, most of its words are in-image RVAs or small
-# table bytes, and a straight linear sweep cannot follow it.
+
+
+
 TABLE_DWORD_RATIO: Final[float] = 0.45
 TABLE_DWORD_STRONG: Final[float] = 0.90
 SMALL_BYTE_RATIO: Final[float] = 0.60
@@ -298,8 +298,8 @@ SECURITY_ANCHORS: Final[frozenset[str]] = frozenset(
 SYSCALL_ANCHORS: Final[frozenset[str]] = frozenset({"direct_syscall_site"})
 PATCH_ANCHORS: Final[frozenset[str]] = frozenset({"patcher_entry"})
 
-# Most alarming first. A candidate whose table exists but whose targets are broken is
-# far more interesting than one the builder simply could not bound.
+
+
 SWITCH_REJECT_SEVERITY: Final[tuple[str, ...]] = (
     "TARGET_NOT_INSTRUCTION_START",
     "TARGET_OUT_OF_FUNCTION",
@@ -319,7 +319,7 @@ PATCH_RVA_COLUMNS: Final[frozenset[str]] = frozenset(
     {"rva", "site_rva", "caller_rvas", "readers", "writers"}
 )
 
-# The range named in the audit brief. Pinned so its presence and verdict are asserted.
+
 PINNED_BEGINS: Final[tuple[int, ...]] = (0x2B4D640,)
 
 CSV_COLUMNS: Final[tuple[str, ...]] = (

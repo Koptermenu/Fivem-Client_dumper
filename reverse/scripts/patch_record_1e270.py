@@ -1,4 +1,4 @@
-﻿"""Static map of the RVA 0x1E270 inline-patch record table in adhesive.dll.
+"""Static map of the RVA 0x1E270 inline-patch record table in adhesive.dll.
 
 Static file parsing only. The specimen is read from disk and is never loaded,
 mapped or executed. Every value written to the evidence set is either derived
@@ -36,7 +36,7 @@ from capstone.x86_const import X86_OP_IMM, X86_OP_MEM, X86_REG_RIP
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-import common  # noqa: E402  (the path bootstrap has to run before the import)
+import common
 
 SCHEMA: Final[str] = "adhesive-dumper.patch-record/1"
 
@@ -69,8 +69,8 @@ SCAN_LENGTH_CAP: Final[int] = 0x32
 INITIAL_CAPACITY_RECORDS: Final[int] = 0x20
 PAGE_EXECUTE_READWRITE: Final[int] = 0x40
 
-# The spin lock backoff threshold. It only saturates the Sleep argument, the
-# retry counter that feeds it is incremented without a bound.
+
+
 SPIN_BACKOFF_CAP: Final[int] = 0x20
 SLEEP_IAT_RVA: Final[int] = 0x2E4D588
 HEAPCREATE_IAT_RVA: Final[int] = 0x2E4D418
@@ -78,26 +78,26 @@ HEAPFREE_IAT_RVA: Final[int] = 0x2E4D420
 GETPROCESSHEAP_IAT_RVA: Final[int] = 0x2E4D3C0
 HEAP_ALLOCATOR_IAT_RVAS: Final[tuple[int, ...]] = (0x2E4D410, 0x2E4D428)
 
-# The orchestrator takes the lock, then tests the published heap handle. Every
-# failing path converges on the single release and return point.
+
+
 HEAP_GATE_RVA: Final[int] = 0x1E3A4
 ORCHESTRATOR_EXIT_RVA: Final[int] = 0x1E560
 HEAP_GATE_FAIL_CODE: Final[int] = 0x02
 SINGLE_PATH_EMPTY_CODE: Final[int] = 0x04
 SINGLE_PATH_SKIP_CODE: Final[int] = 0x05
 
-# The three holders of the spin lock and the site where each of them takes it.
+
 LOCK_HOLDERS: Final[tuple[tuple[str, int], ...]] = (
     ("init", 0x1DCA3),
     ("registrar", 0x1DD33),
     ("orchestrator", 0x1E39A),
 )
 
-# The closed patch component, from the arena prologue to the end of the builder.
+
 COMPONENT_LOW_RVA: Final[int] = 0x1D280
 COMPONENT_HIGH_RVA: Final[int] = 0x1E9D0
 
-# Symbolic address expressions, shared verbatim by the json and the csv output.
+
 EXPR_RECORD: Final[str] = "rec = *(qword *)(0x1830D44F8) + index * 0x38"
 EXPR_PATCH_SITE: Final[str] = "rec + 0x00 - 5 * (rec[0x20] & 1)"
 EXPR_JUMP_DEST: Final[str] = "rec + 0x08"
@@ -110,9 +110,9 @@ EXPR_RECORD_LOOKUP: Final[str] = "rec + 0x00 == caller argument"
 EXPR_HEAP_HANDLE: Final[str] = "qword *(0x1830D44F0)"
 EXPR_HEAP_GATE: Final[str] = "cmp qword *(0x1830D44F0), 0"
 
-# The two write groups that make up the patched region. With flag bit 0 set the
-# patch site is rec + 0x00 - 5, so the five byte group ends exactly where the two
-# byte group on the anchor begins and the two groups are adjacent.
+
+
+
 EXPR_PATCH_SITE_GROUP: Final[str] = "patch_site .. patch_site + 5"
 EXPR_ANCHOR_GROUP: Final[str] = "patch_site + 5 .. patch_site + 7"
 
@@ -168,24 +168,24 @@ _READ_WRITE_MNEMONICS: Final[frozenset[str]] = frozenset(
 )
 _STORE_MNEMONICS: Final[frozenset[str]] = frozenset({"mov", "movzx", "movsx", "movsxd", "stosq", "stosd"})
 
-# The 8 ModRM bytes with mod equal to zero and r/m equal to five, the only
-# encoding of a rip relative memory operand in 64 bit mode.
+
+
 _RIP_RELATIVE_MODRM: Final[tuple[int, ...]] = (0x05, 0x0D, 0x15, 0x1D, 0x25, 0x2D, 0x35, 0x3D)
 
-# Bytes that can follow a rip relative displacement inside the same instruction,
-# an immediate for instance. The candidate filter has to allow for them, the
-# decoder then confirms the real instruction end.
+
+
+
 _TRAILING_BYTES: Final[tuple[int, ...]] = (0, 1, 2, 4, 8)
 
-# The direct branch forms whose operand is a resolved rva: the relative call and
-# the whole j family, so a short conditional jump is a destination as well.
+
+
 _BRANCH_NAMES: Final[frozenset[str]] = frozenset({"call", "jmp"})
 _BRANCH_PREFIX: Final[str] = "j"
 
 
-# --------------------------------------------------------------------------- #
-# Disassembly helpers
-# --------------------------------------------------------------------------- #
+
+
+
 
 
 @dataclass(frozen=True, slots=True)
@@ -494,9 +494,9 @@ def offset_hex(value: int) -> str:
     return f"0x{value:02X}"
 
 
-# --------------------------------------------------------------------------- #
-# Anchor table
-# --------------------------------------------------------------------------- #
+
+
+
 
 
 @dataclass(frozen=True, slots=True)
@@ -674,9 +674,9 @@ def verify_anchors(pe: pefile.PE, md: capstone.Cs) -> list[dict[str, Any]]:
     return results
 
 
-# --------------------------------------------------------------------------- #
-# Derived evidence
-# --------------------------------------------------------------------------- #
+
+
+
 
 
 def _function_card(pe: pefile.PE, name: str, probe_rva: int, role: str) -> dict[str, Any]:
@@ -1577,9 +1577,9 @@ def open_questions(pe: pefile.PE, section_text: common.Section, table: Mapping[s
     ]
 
 
-# --------------------------------------------------------------------------- #
-# Assembly
-# --------------------------------------------------------------------------- #
+
+
+
 
 
 def build_evidence(root: Path, specimen: Path, relative_specimen: str) -> dict[str, Any]:

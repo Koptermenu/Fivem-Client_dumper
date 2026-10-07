@@ -1,13 +1,13 @@
-// Central configuration store for the FiveM dumper.
-// One JSON file per server, keyed by safeName("http://ip:port").
-//
-//   GET  /v1/servers/<key>   -> stored /client response (200) or 404
-//   POST /v1/servers/<key>   -> store the request body as the configuration
-//
-// The dumper uploads the raw /client response after every successful live
-// fetch and falls back to GET when the live server is unreachable or the
-// token is rejected, so a server dumped once can be dumped again without
-// anyone connecting to it.
+
+
+
+
+
+
+
+
+
+
 
 import { existsSync, mkdirSync, readFileSync, renameSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
@@ -17,17 +17,17 @@ const DATA = path.resolve(import.meta.dir, "data");
 
 mkdirSync(DATA, { recursive: true });
 
-// A /client valasz egy teljes FiveM kliens dumpja, ezert szoban kell lenni,
-// de a store a neten fut, igy egy rosszindulat vagy hibas kliens nem fogyaszthat
-// korlatlan memoriat.
+
+
+
 const MAX_BODY = 32 * 1024 * 1024;
 
 const validKey = (key: string): boolean => /^[A-Za-z0-9._-]{1,120}$/.test(key);
 
 const fileOf = (key: string): string => path.join(DATA, `${key}.json`);
 
-// Atirani a temppel, hogy egy kozben bekovo GET ne lasson felezett JSON-t:
-// egy rossz fajl a servert foleg hataroloan, hatarozatlan ideig elrettenti.
+
+
 const writeAtomic = (file: string, body: string): void => {
   const tmp = `${file}.${process.pid}.tmp`;
   writeFileSync(tmp, body);
@@ -62,8 +62,8 @@ Bun.serve({
       try {
         stored = JSON.parse(readFileSync(file, "utf8")) as Record<string, unknown>;
       } catch {
-        // Egy serult fajlbol nem szabad 500-at adni, mert az a dumper logjaban
-        // indistinguishable a hoszneti hibatol.
+
+
         return new Response("stored configuration is corrupt\n", { status: 500 });
       }
       stored.storeSavedAt = meta.savedAt;

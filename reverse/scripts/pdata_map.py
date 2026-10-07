@@ -23,7 +23,7 @@ from typing import Any, Final, Iterator, Mapping, Sequence
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-import common  # noqa: E402  (the path shim above is load-bearing)
+import common
 
 SCHEMA_PDATA_STATS: Final[str] = "adhesive-dumper.pdata-stats/1"
 

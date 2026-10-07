@@ -27,18 +27,18 @@ import gate
 import lualex
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-# Corpora live under this directory, not at an absolute scratch path: the gate has to work
-# from a checkout, and it previously reported "no pairs" on any machine but the one it was
-# written on.
+
+
+
 YES = os.path.join(HERE, "work", "yes", "Servers", "yes")
 MACHO = os.path.join(HERE, "work", "macho")
 
 WORK = os.path.join(HERE, "work", "selfcheck")
 
-# Small, clean, and known to satisfy luac on both sides.
+
 SIMPLE = "0r_lib/modules/client/events.lua"
 
-# A real resource that carries the author's own comments in the cleaned output.
+
 AUTHOR = None
 
 
@@ -102,7 +102,7 @@ def run(name, rel, before_path, after_path):
     return res
 
 
-# ----------------------------------------------------------------- the mutations
+
 
 
 def mutate_drop_newlines(src):
@@ -129,7 +129,7 @@ def mutate_delete_author_comment(src):
             if line.endswith(("\n", "\r")):
                 return src.replace(line, "", 1), "deleted the comment line"
             continue
-        # trailing comment: drop the comment, keep the code
+
         idx = line.find("--")
         if idx != -1 and line[idx + 2:].strip() == picked:
             return src.replace(line, line[:idx], 1), "deleted the trailing comment"
@@ -170,12 +170,12 @@ def mutate_delete_live_store(src):
         if len(lhs) != 1:
             continue
         name = code[lhs[0]].text
-        # the whole point: this is the only place the name is ever assigned, so
-        # removing the store leaves it read but never assigned
+
+
         if name in lualex.KEYWORDS or counts[name] != 1:
             continue
-        # end of this statement: next token that starts a new line and is not
-        # a continuation of the current expression
+
+
         end = i + 1
         depth = 0
         while end < n:
@@ -189,7 +189,7 @@ def mutate_delete_live_store(src):
             elif depth == 0 and c.kind == lualex.SYMBOL and c.text in (",", ";", "="):
                 break
             end += 1
-        # the whole statement must sit on one line
+
         start = src.rfind("\n", 0, t.begin) + 1
         line_end = src.find("\n", t.end)
         line_end = len(src) if line_end == -1 else line_end + 1
@@ -207,7 +207,7 @@ def mutate_delete_live_store(src):
     return None, "no single line store to a name that is still read"
 
 
-# ------------------------------------------------------------------------ cases
+
 
 def _macho_dirs():
     if not os.path.isdir(MACHO):
@@ -295,7 +295,7 @@ def main():
 
     results = []
 
-    # control: the untouched pair must satisfy every check the mutations target
+
     pairs = pairs_for(os.path.join(YES, "Output"), os.path.join(YES, "Output_gate"),
                       wanted=SIMPLE)
     control = run("control", SIMPLE, pairs[0][1], pairs[0][2])
@@ -370,7 +370,7 @@ def main():
             ex = res["lines"]["violations"]
             detail += " (e.g. %s)" % (ex[0] if ex else "-")
 
-        # For the two cases luac cannot see, prove that explicitly.
+
         luac_note = ""
         if signal in ("lines", "live_stores"):
             ok_before, _ = gate.luac_ok(before_path)

@@ -59,7 +59,7 @@ import pefile
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-import common  # noqa: E402  (the path bootstrap has to run before the import)
+import common
 
 SCHEMA: Final[str] = "adhesive-dumper.forward-flow/1"
 DATAFLOW_SCHEMA: Final[str] = "adhesive-dumper.defuse-slice/1"

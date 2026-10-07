@@ -20,23 +20,23 @@ namespace {
 
 const char* kFixerRel = "Bin/vertex-fixer/FivemDecryptFixer.Cli.exe";
 
-// Measured at 0.3 to 0.6 seconds per model file, so 785 models took 242 seconds. The
-// tool rewrites in place and a hung child is otherwise indistinguishable from a slow one,
-// so the wait is bounded and an overrun is treated as a failure rather than a hang.
+
+
+
 const DWORD kChildTimeoutMs = 30 * 60 * 1000;
 
-// Only these three carry vertex buffers this tool knows how to rebuild. Kept separate
-// from Decryptor.cpp's STREAM_EXTENSIONS on purpose: that list is not a "files needing
-// repair" list, it is a decryption-format classification. Every entry in it is an
-// RSC7/RSC8 container, and .awc/.ybn/.ymap/.ymf/.ytd/.ytyp carry no vertex buffers at
-// all. Unifying the two lists would either break findFilenameEnd for the non-model RSC
-// files or make this scan binaries it cannot repair.
+
+
+
+
+
+
 bool isFixable(const std::string& lowerName) {
     return endsWith(lowerName, ".ydr") || endsWith(lowerName, ".ydd") ||
            endsWith(lowerName, ".yft");
 }
 
-// Reads one pipe to EOF into its own string.
+
 void drain(HANDLE pipe, std::string& sink) {
     char buf[8192];
     DWORD got = 0;
@@ -83,15 +83,15 @@ ChildResult runFixer(const std::string& exe, const std::string& workDir) {
     std::vector<char> buf(cmd.begin(), cmd.end());
     buf.push_back('\0');
 
-    // The tool is .NET and resolves its own dependencies next to its assembly, so the
-    // working directory must be the tool's own folder, exactly like the reference driver.
-    // path::c_str() is wchar_t on Windows and CreateProcessA wants narrow bytes, so the
-    // directory is converted once into a std::string that outlives the call.
+
+
+
+
     const std::string cwd = fsx::path(exe).parent_path().string();
 
     PROCESS_INFORMATION pi{};
-    // bInheritHandles must be TRUE for the pipes, and the only handles that survive to the
-    // child are the two write ends, since the read ends were cleared just above.
+
+
     if (!CreateProcessA(nullptr, buf.data(), nullptr, nullptr, TRUE, CREATE_NO_WINDOW,
                         nullptr, cwd.empty() ? nullptr : cwd.c_str(), &si, &pi)) {
         CloseHandle(outRd); CloseHandle(outWr); CloseHandle(errRd); CloseHandle(errWr);
@@ -99,14 +99,14 @@ ChildResult runFixer(const std::string& exe, const std::string& workDir) {
         return res;
     }
     res.started = true;
-    // The parent's copies of the write ends must close or the child never sees EOF.
+
     CloseHandle(outWr);
     CloseHandle(errWr);
 
-    // Both pipes must be drained at the same time. The tool writes to both, and a real
-    // dump produced 345KB of stdout: draining one and then the other would fill the
-    // 64KB buffer of the second and deadlock. Two separate sinks, because appending to
-    // one shared std::string from two threads is a data race, not a merge.
+
+
+
+
     std::string errText;
     std::thread a([&] { drain(outRd, res.output); });
     std::thread b([&] { drain(errRd, errText); });
@@ -132,8 +132,8 @@ ChildResult runFixer(const std::string& exe, const std::string& workDir) {
     return res;
 }
 
-// "[MODEL] scanned=N, repaired=N, failed=N". Read it off the end: a long run prints one
-// [MODEL n/N] line per file first, and only the trailing line carries all three counters.
+
+
 bool parseSummary(const std::string& out, VertexFixStats& st) {
     const size_t at = out.rfind("[MODEL] scanned=");
     if (at == std::string::npos) return false;
@@ -148,13 +148,13 @@ bool parseSummary(const std::string& out, VertexFixStats& st) {
     return true;
 }
 
-// copy_file opens the destination CREATE_ALWAYS, so an interrupted copy leaves a
-// truncated model, which is worse than an unrepaired one. Write to a sibling temporary
-// and rename over the original instead, the same way Bundler.cpp stages the payload.
+
+
+
 bool replaceFile(const fsx::path& src, const fsx::path& dest) {
     std::error_code ec;
     const uintmax_t bytes = fsx::file_size(src, ec);
-    if (ec || bytes == 0) return false;  // an empty result means a truncated write
+    if (ec || bytes == 0) return false;
     std::ifstream in(src, std::ios::binary);
     if (!in) return false;
     fsx::path tmp(dest);
@@ -174,7 +174,7 @@ bool replaceFile(const fsx::path& src, const fsx::path& dest) {
         fsx::remove(tmp, ec);
         return false;
     }
-    // AV and indexers hold new files open for a moment after the writer closes them.
+
     for (int attempt = 0; attempt < 5; ++attempt) {
         std::error_code renameEc;
         fsx::rename(tmp, dest, renameEc);
@@ -185,7 +185,7 @@ bool replaceFile(const fsx::path& src, const fsx::path& dest) {
     return false;
 }
 
-}  // namespace
+}
 
 VertexFixStats runVertexFix(const std::string& root) {
     VertexFixStats st;
@@ -193,9 +193,9 @@ VertexFixStats runVertexFix(const std::string& root) {
     if (root.empty() || !fsx::is_directory(root, ec)) return st;
 
     const fsx::path base(root);
-    std::vector<std::pair<fsx::path, fsx::path>> files;  // original, relative
-    // A dedicated error_code per call: sharing one would let a single transient failure
-    // end the walk silently and leave a subset of the models unrepaired.
+    std::vector<std::pair<fsx::path, fsx::path>> files;
+
+
     for (fsx::recursive_directory_iterator it(base, ec), end; it != end; it.increment(ec)) {
         if (ec) {
             st.message = "a modellfajlok bejarasa megszakadt";
@@ -207,7 +207,7 @@ VertexFixStats runVertexFix(const std::string& root) {
         if (!isFixable(lower)) continue;
         std::error_code relEc;
         const fsx::path rel = fsx::relative(it->path(), base, relEc);
-        if (relEc || rel.empty()) continue;  // never stage onto the scratch root itself
+        if (relEc || rel.empty()) continue;
         files.emplace_back(it->path(), rel);
     }
     if (files.empty()) {
@@ -216,8 +216,8 @@ VertexFixStats runVertexFix(const std::string& root) {
     }
     st.files = static_cast<int>(files.size());
 
-    // The scratch tree sits next to the dump rather than in %TEMP%, so it is always on the
-    // same volume as the several hundred megabytes it is about to duplicate.
+
+
     fsx::path scratch = base / ("vertexfix-" + std::to_string(GetCurrentProcessId()));
     {
         std::error_code rmEc;
@@ -237,8 +237,8 @@ VertexFixStats runVertexFix(const std::string& root) {
         return st;
     }
 
-    // Keep the relative path. Two resources can both ship "prop.ydr", and flattening would
-    // let one overwrite the other in the scratch tree and then be copied back twice.
+
+
     for (const auto& f : files) {
         std::error_code dirEc;
         fsx::create_directories((scratch / f.second).parent_path(), dirEc);
@@ -256,9 +256,9 @@ VertexFixStats runVertexFix(const std::string& root) {
         st.ok = false;
         st.message = "a javito nem zart be idoben, leallitva";
     } else if (!summaryOk) {
-        // Without the counters there is no evidence the run did anything. Treating that
-        // as success would report "0 repaired, 0 scanned, 0 errors" for a tool that
-        // never ran.
+
+
+
         st.ok = false;
         st.message = "a javito nem adott osszegzest, nem tekinthető sikeresnek";
     } else if (child.exitCode != 0 || st.failed > 0) {
@@ -274,10 +274,10 @@ VertexFixStats runVertexFix(const std::string& root) {
         st.ok = true;
     }
 
-    // Only copy back on a clean run. The tool rewrites in place, so a run that died
-    // partway through leaves a truncated file in the scratch tree, and copying that over
-    // a good original would destroy the model for good: there is no second copy once
-    // Temp, TempCompiled and Unpacked have been deleted.
+
+
+
+
     if (st.ok) {
         for (const auto& f : files) {
             if (replaceFile(scratch / f.second, f.first)) st.written++;
@@ -293,4 +293,4 @@ VertexFixStats runVertexFix(const std::string& root) {
     return st;
 }
 
-}  // namespace fivem
+}
