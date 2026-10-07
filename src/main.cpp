@@ -14,6 +14,7 @@
 #include "dumper/FiveMDumper.h"
 #include "dumper/Decryptor.h"
 #include "ai/Cleanup.h"
+#include "ai/LlmNaming.h"
 #include "utils/Str.h"
 #include "utils/Term.h"
 #include "utils/Json.h"
@@ -78,6 +79,56 @@ static void runReadabilityPass(const std::string& serverRoot, bool testMode) {
             " valtozonak (nincs egyertelmű kotes vagy a nevet globalis foglalja)", LogLevel::INFO);
     }
 }
+
+static void runAiNamingPass(const std::string& serverRoot, bool testMode) {
+    const std::string cleanDir = serverRoot + "/Output_clean";
+    std::error_code ec;
+    if (!fs::is_directory(cleanDir, ec)) return;
+    const bool forceAi = getenv("DUMPER_AI_CLEANUP") != nullptr;
+    if (!aiNamingAvailable()) {
+        if (forceAi) {
+            std::cout << CLR(term::YELLOW) << "[!]" << CLR(term::RESET)
+                      << " DUMPER_AI_CLEANUP beallitva, de az AI kornyezet (ai/deploy) nem "
+                         "talalhato: az AI lepes kihagyva.\n";
+        }
+        return;
+    }
+    bool wantAi = forceAi;
+    if (!wantAi) {
+        if (testMode) return;
+        wantAi = askYesNo(
+            "\nAI agent betoltese? (egy helyi kis modell megprobalja a megmaradt SHX "
+            "regisztereket ertelmes nevekre cserelni a Output_clean fajlokban)",
+            false);
+    }
+    if (!wantAi) return;
+    std::cout << CLR(term::CYAN) << "[*]" << CLR(term::RESET)
+              << " AI regiszternevezo indul...\n";
+    const NamingStats ns = runAiNaming(cleanDir);
+    if (ns.files == 0) {
+        std::cout << CLR(term::YELLOW) << "[!]" << CLR(term::RESET)
+                  << " Nincs SHX regisztert tartalmazo .lua fajl az Output_clean konyvtarban.\n";
+        return;
+    }
+    std::cout << CLR(ns.renamed > 0 ? term::GREEN : term::YELLOW) << "[+]" << CLR(term::RESET)
+              << " AI nevezo kesz: " << ns.files << " fajlba neezve, " << ns.proposed
+              << " javaslat, " << ns.accepted << " elfogadva, " << ns.rejected
+              << " elutasitva, " << ns.renamed << " regiszter atirva " << ns.filesChanged
+              << " fajlban";
+    if (ns.luacChecked > 0) {
+        std::cout << " (luac: " << ns.luacChecked << " ellenorizve, " << ns.luacReverted
+                  << " visszavonva)";
+    }
+    std::cout << "\n";
+    if (ns.rejected > 0) {
+        LOG("AI nevezo: " + std::to_string(ns.rejected) + " javaslat elutasitva a "
+            "biztonsagi ellenorzesen", LogLevel::INFO);
+    }
+    if (ns.luacReverted > 0) {
+        LOG("AI nevezo: " + std::to_string(ns.luacReverted) + " fajl visszaallitva luac hiba miatt",
+            LogLevel::WARNING);
+    }
+}
 int main(int argc, char** argv) {
     SetConsoleOutputCP(CP_UTF8);
     fivem::term::enableColors();
@@ -92,6 +143,15 @@ int main(int argc, char** argv) {
     std::cout << CLR(term::CYAN) << "==============================================\n";
     std::cout << "   FiveM Dumper C++ v1.0 - AllInOne\n";
     std::cout << "==============================================" << CLR(term::RESET) << "\n";
+    if (const char* aiDir = getenv("DUMPER_AI_DIR")) {
+        if (*aiDir) {
+            const NamingStats ns = runAiNaming(aiDir);
+            std::cout << "AI nevezo: " << ns.files << " fajl, " << ns.proposed << " javaslat, "
+                      << ns.accepted << " elfogadott nev, " << ns.rejected << " elutasitva, "
+                      << ns.renamed << " atiras, " << ns.luacReverted << " luac-visszavonas\n";
+            return 0;
+        }
+    }
     std::cout << CLR(term::CYAN) << "[*]" << CLR(term::RESET) << " Parsing Server Info...\n";
     bool testMode = getenv("DUMPER_TEST_MODE") != nullptr;
     std::string token;
@@ -277,7 +337,10 @@ int main(int argc, char** argv) {
     std::cout << "==============================================" << CLR(term::RESET) << "\n";
     const std::string serverRoot = "Servers/" + dumper->serverDir;
     const bool keepTemp = getenv("DUMPER_KEEP_TEMP") != nullptr;
-    if (decryptOk) runReadabilityPass(serverRoot, testMode);
+    if (decryptOk) {
+        runReadabilityPass(serverRoot, testMode);
+        runAiNamingPass(serverRoot, testMode);
+    }
     if (keepTemp) {
         std::cout << CLR(term::YELLOW) << "[!]" << CLR(term::RESET)
                   << " DUMPER_KEEP_TEMP is set, keeping " << serverRoot << "/Temp, "

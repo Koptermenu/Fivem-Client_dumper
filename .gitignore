@@ -7,7 +7,7 @@ Servers/
 checkpoint.json
 server_name.txt
 .zcode/
-ai/
+/ai/
 
 
 tools/verify/work/

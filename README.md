@@ -62,6 +62,27 @@ idoben keletkezik, ezert egy mar meglevo build faban is ujra kell futnia.
   (reszletek lent, a "Resource dekódolás" szakaszban)
 - Connection reset / timeout: automatikus 3x retry, exponential backoff
 - A warning-ok csak a `dumper.log`-ba mennek, a konzol tiszta
+- **AI regiszternevezo (opcionalis)**: a strukturális tisztitas utan felajanlja,
+  hogy egy helyi kis modell (Qwen2.5-Coder-0.5B fine-tune) a megmaradt SHX
+  regisztereket ertelmes nevekre csereli. Reszletek lent.
+
+### AI regiszternevezo
+
+A tisztitas (`Output_clean`) utan a program kerdez: "AI agent betoltese?".
+Ha igen, elinditja az `ai/deploy/llama-server.exe`-t a
+`ai/deploy/qwen_lua_ck40_q4km.gguf` modellel (localhost, GPU-val), chunkonkent
+rename map-et kér, majd a determinisztikus applier szabályai szerint irja at a
+regisztereket az `Output_clean` fajlokban:
+
+- csak egesz azonosito-poziciok irnak at; string/comment/p.Tabla-kulcs
+  poziciok, lokalis-arnyekolas, globalis-utkozes es duplikatum mind elutasitasra kerul
+- a feldolgozott fajlokat `luac -p` ellenorzi (ha talalhato); hiba eseten a fajl
+  visszaallit
+- az elutasitas-okak a `dumper.log`-ba kerulnek; a modell configja a `src/ai/LlmNaming.cpp`-ben
+- az AI kornyezet nem resze a git reponek: a `ai/deploy` mappanak az exe mellett
+  kell lennie; nelkule a lepes csendben kihagyodik
+- `DUMPER_AI_CLEANUP=1`-lel kerdes nelkul fut; tesztmode-ban es ha nincs AI
+  kornyezet, a kerdes nem is jon
 
 ### Kornyezeti valtozok (opcionalisak)
 
@@ -75,6 +96,8 @@ idoben keletkezik, ezert egy mar meglevo build faban is ujra kell futnia.
 | `DUMPER_KEEP_TEMP` | a `Temp`, `TempCompiled` es `Unpacked` konyvtarakat megtartja hibakereseshez; csak a levaltas letege szamit (barmely ertek, ures sztring is), alapertelmezetten torolva |
 | `DUMPER_TEST_MODE=1` | nem interaktív mod |
 | `DUMPER_CLEANUP=1` | strukturális Lua-tisztítás nem interaktív módban is |
+| `DUMPER_AI_CLEANUP=1` | AI regiszternevezo kerdes nelkuli futtatasa |
+| `DUMPER_LUAC` | luac.exe utvonal az AI-nevezes luac ellenorzeshez |
 | `CK_CLIENT_KEY_API_URL` | a klienskulcs-szolgaltatas cime (alapertelmezett `https://grantsclk.ckcloud.de5.net`); a `CK_GRANTS_CLK_API_URL` nevet is elfogadja |
 
 ## Resource dekódolás
