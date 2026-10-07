@@ -3,6 +3,10 @@
 #include <algorithm>
 #include <cstdio>
 #include <cstdlib>
+#include <fstream>
+#include <vector>
+
+#include <windows.h>
 
 #include "core/HttpClient.h"
 #include "utils/Json.h"
@@ -58,9 +62,35 @@ std::string localQuery(HttpClient& client, const std::string& prompt, int maxTok
     return j.strAt("content");
 }
 
+std::string apiKey() {
+    const char* env = getenv("OPENROUTER_API_KEY");
+    if (env && *env) {
+        const std::string s = trim(env);
+        if (!s.empty()) return s;
+    }
+    const std::vector<std::string> paths = {
+        envOr("OPENROUTER_API_KEY_FILE", ""), "ai/deploy/openrouter.key", "openrouter.key"};
+    for (const std::string& p : paths) {
+        if (p.empty()) continue;
+        std::ifstream in(p, std::ios::binary);
+        std::string line;
+        while (in && std::getline(in, line)) {
+            const std::string s = trim(line);
+            if (!s.empty() && s[0] != '#') return s;
+        }
+    }
+    char local[MAX_PATH]{};
+    if (GetEnvironmentVariableA("LOCALAPPDATA", local, sizeof(local)) > 0) {
+        std::ifstream in(std::string(local) + "\\FiveMDumper\\openrouter.key", std::ios::binary);
+        std::string line;
+        if (in && std::getline(in, line) && !trim(line).empty()) return trim(line);
+    }
+    return std::string();
+}
+
 }  // namespace
 
-bool openRouterConfigured() { return getenv("OPENROUTER_API_KEY") != nullptr; }
+bool openRouterConfigured() { return !apiKey().empty(); }
 
 std::string openRouterModel() { return envOr("OPENROUTER_MODEL", kDefaultModel); }
 
@@ -93,9 +123,9 @@ std::string namingQuery(const std::string& prompt, int maxTokens, NamingBackend 
     HttpClient client;
     if (backend != NamingBackend::OpenRouter) return localQuery(client, prompt, maxTokens);
 
-    const char* key = getenv("OPENROUTER_API_KEY");
-    if (!key || !*key) return std::string();
-    client.setHeader("Authorization", std::string("Bearer ") + key);
+    const std::string key = apiKey();
+    if (key.empty()) return std::string();
+    client.setHeader("Authorization", "Bearer " + key);
     client.setHeader("HTTP-Referer", "https://localhost/fivem-dumper");
 
     const std::string body =
