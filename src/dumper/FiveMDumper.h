@@ -48,6 +48,10 @@ private:
     bool unpackRpf(const std::string& rpfPath, const std::string& outDir);
     bool applyConfiguration(const Json& js);
     void saveConfigCache();
+    bool fetchFromServerStore();
+    void uploadToServerStore();
+    std::string serverStoreUrl() const;
+    std::string serverStoreKey() const;
     std::string baseUrl_;
     std::string token_;
     std::string serverName_;

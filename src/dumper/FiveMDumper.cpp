@@ -142,9 +142,55 @@ bool FiveMDumper::applyConfiguration(const Json& js) {
 bool FiveMDumper::getConfiguration() {
     if (configFetched_) return true;
     auto resp = http_.postForm(baseUrl_ + "/client", "method=getConfiguration");
-    if (!resp.ok()) {
+    if (resp.ok()) {
+        Json js;
+        const std::string body(resp.body.begin(), resp.body.end());
+        bool parsed = false;
+        try {
+            js = Json::parse(body);
+            parsed = true;
+        } catch (const std::exception& e) {
+            LOG(std::string("JSON parse error: ") + e.what(), LogLevel::ERROR);
+        }
+        if (parsed) {
+            if (js.has("error") && js.at("error").isString() && !js.has("resources")) {
+                LOG("Server rejected the token: " + js.at("error").asString() +
+                    " - connect in FiveM to this exact server first.", LogLevel::ERROR);
+            } else if (applyConfiguration(js)) {
+                rawConfig_ = body;
+                uploadToServerStore();
+                return true;
+            }
+        }
+    } else {
         LOG("getConfiguration failed: " + resp.error + " (status " + std::to_string(resp.status) + ")",
             LogLevel::ERROR);
+    }
+    if (fetchFromServerStore()) return true;
+    return false;
+}
+
+std::string FiveMDumper::serverStoreUrl() const {
+    if (const char* env = getenv("DUMPER_STORE_URL")) {
+        std::string v = trim(env);
+        if (v.empty() || v == "off") return "";
+        while (!v.empty() && v.back() == '/') v.pop_back();
+        return v;
+    }
+    return "https://grantsclk.ckcloud.de5.net";
+}
+
+std::string FiveMDumper::serverStoreKey() const { return safeName(baseUrl_); }
+
+bool FiveMDumper::fetchFromServerStore() {
+    const std::string root = serverStoreUrl();
+    if (root.empty()) return false;
+    const std::string url = root + "/v1/servers/" + serverStoreKey();
+    HttpResponse resp = http_.get(url);
+    if (!resp.ok()) {
+        LOG("Server store lookup failed for " + serverStoreKey() + ": " +
+            (resp.error.empty() ? "status " + std::to_string(resp.status) : resp.error),
+            LogLevel::INFO);
         return false;
     }
     Json js;
@@ -152,17 +198,34 @@ bool FiveMDumper::getConfiguration() {
     try {
         js = Json::parse(body);
     } catch (const std::exception& e) {
-        LOG(std::string("JSON parse error: ") + e.what(), LogLevel::ERROR);
+        LOG("Server store response parse error: " + std::string(e.what()), LogLevel::WARNING);
         return false;
     }
-    if (js.has("error") && js.at("error").isString() && !js.has("resources")) {
-        LOG("Server rejected the token: " + js.at("error").asString() +
-            " - connect in FiveM to this exact server first.", LogLevel::ERROR);
+    if (!applyConfiguration(js)) {
+        LOG("Server store response has no usable configuration.", LogLevel::INFO);
         return false;
     }
-    if (!applyConfiguration(js)) return false;
+    usingCachedConfig_ = true;
     rawConfig_ = body;
+    LOG("Configuration fetched from the central server store.", LogLevel::INFO);
+    std::cout << CLR(term::GREEN) << "[+]" << CLR(term::RESET)
+              << " A konfiguracio a kozponti tarbol jon (" << serverStoreKey()
+              << ") - jatek-csatlakozas nelkul is mukodik.\n";
     return true;
+}
+
+void FiveMDumper::uploadToServerStore() {
+    const std::string root = serverStoreUrl();
+    if (root.empty() || rawConfig_.empty()) return;
+    HttpResponse resp = http_.postJson(root + "/v1/servers/" + serverStoreKey(), rawConfig_);
+    if (resp.ok()) {
+        LOG("Configuration uploaded to the central server store: " + serverStoreKey(),
+            LogLevel::INFO);
+    } else {
+        LOG("Configuration upload to the central store failed: " +
+                (resp.error.empty() ? "status " + std::to_string(resp.status) : resp.error),
+            LogLevel::WARNING);
+    }
 }
 
 void FiveMDumper::saveConfigCache() {

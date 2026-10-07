@@ -325,10 +325,10 @@ int main(int argc, char** argv) {
         std::cout << "    Ellenorizd, hogy a jatek Csatlakoztatva van ehhez a szerverhez." << CLR(term::RESET) << "\n\n";
         if (token.empty() && !(envConfig && *envConfig)) {
             std::cerr << CLR(term::RED)
-                      << "Token nelkul es config-cache nelkul nincs mibol folytatni. Csatlakozz "
-                         "egyszer a szerverhez a jatekban (a token memoria-scrollal felismerheto), "
-                         "vagy masolj egy meglevo config.json-t a Servers/<nev> mappaba, illetve "
-                         "allitsd be a DUMPER_CONFIG env-valtozot."
+                      << "Erről a szerverről nincs se élő konfiguráció, se mentett adat a "
+                         "központi tárban, se helyi cache. Lépj fel egyszer a játékban ezen a "
+                         "szerveren, és indítsd újra a dumpert: akkor a konfiguráció mentődik, "
+                         "és a jövőben már csatlakozás nélkül is dumpolható."
                       << CLR(term::RESET) << "\n";
             return 1;
         }

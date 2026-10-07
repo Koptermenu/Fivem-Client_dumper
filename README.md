@@ -66,6 +66,12 @@ idoben keletkezik, ezert egy mar meglevo build faban is ujra kell futnia.
   valasz `Servers/<nev>/config.json`-be kerul. Ha kesobb a szerver nem valaszol
   (restart) vagy a tokent visszautasitja, a dumper ezt a cache-t tolti be es
   folytatja — a jatek kapcsolata csak uj tokenhez kell, nem az egesz dumphoz.
+- **Kozponti szerver-tar (IP alapjan)**: minden sikeres konfiguracio felmegy a
+  `DUMPER_STORE_URL` (alapertelmezés: `https://grantsclk.ckcloud.de5.net`) alatti
+  tarba: `GET/POST /v1/servers/<safeName(baseUrl)>`. A dumper mindig eloszor a
+  szerveren probalkozik, utana a tarban — ha ott megvan az IP konfigja, a dump
+  **jatek-csatlakozas es token nelkul** mukodik. Ha sehol nincs adat, a dumper
+  ker egy egyszeri fellépést, es akkor tolti fel a terrat.
 - **Checkpoint csak akkor torlodik, ha minden kivalasztott resource kesz lett**;
   egy restartnel félbeszakadt dump a kovetkezo futtatásnál ott folytatodik, ahol
   elakadt
