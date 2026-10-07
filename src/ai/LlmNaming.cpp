@@ -410,15 +410,26 @@ void workerLoop(SharedState& shared) {
 }
 }  // namespace
 
+std::string findServerExe() {
+    char local[MAX_PATH];
+    const DWORD n = GetEnvironmentVariableA("LOCALAPPDATA", local, sizeof(local));
+    if (n > 0 && n < sizeof(local)) {
+        const std::string cuda =
+            std::string(local) + "\\FiveMDumper\\engine\\cuda\\llama-server.exe";
+        if (fs::exists(cuda)) return cuda;
+    }
+    return resolveTool(kServerExe);
+}
+
 bool aiNamingAvailable() {
-    const std::string exe = resolveTool(kServerExe);
+    const std::string exe = findServerExe();
     const std::string model = resolveTool(kModelGguf);
     return !exe.empty() && fs::exists(exe) && !model.empty() && fs::exists(model);
 }
 
 NamingStats runAiNaming(const std::string& cleanDir) {
     NamingStats stats;
-    const std::string exe = resolveTool(kServerExe);
+    const std::string exe = findServerExe();
     const std::string model = resolveTool(kModelGguf);
     if (exe.empty() || !fs::exists(exe) || model.empty() || !fs::exists(model)) return stats;
 
