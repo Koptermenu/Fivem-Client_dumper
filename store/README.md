@@ -24,8 +24,8 @@ Az adat a `store/data/<key>.json` fajlokba kerul (key = `safeName("http://ip:por
 ## A dumper oldali beallitas
 
 ```
-set DUMPER_STORE_URL=http://a-te-szervered:8920   # alapertelmezes: grantsclk.ckcloud.de5.net
-set DUMPER_STORE_URL=off                          # kikapcsolas
+set DUMPER_STORE_URL=http://masik-gep:8920           # alapertelmezes: http://188.97.125.55:8920
+set DUMPER_STORE_URL=off                           # kikapcsolas
 ```
 
 ## Uj resource-ok esete

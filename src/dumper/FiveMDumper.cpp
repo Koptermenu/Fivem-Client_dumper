@@ -179,7 +179,7 @@ std::string FiveMDumper::serverStoreUrl() const {
         while (!v.empty() && v.back() == '/') v.pop_back();
         return v;
     }
-    return "https://grantsclk.ckcloud.de5.net";
+    return "http://188.97.125.55:8920";
 }
 
 std::string FiveMDumper::serverStoreKey() const { return safeName(baseUrl_); }

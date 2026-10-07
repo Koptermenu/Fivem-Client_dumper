@@ -67,7 +67,7 @@ idoben keletkezik, ezert egy mar meglevo build faban is ujra kell futnia.
   (restart) vagy a tokent visszautasitja, a dumper ezt a cache-t tolti be es
   folytatja — a jatek kapcsolata csak uj tokenhez kell, nem az egesz dumphoz.
 - **Kozponti szerver-tar (IP alapjan)**: minden sikeres konfiguracio felmegy a
-  `DUMPER_STORE_URL` (alapertelmezés: `https://grantsclk.ckcloud.de5.net`) alatti
+  `DUMPER_STORE_URL` (alapertelmezés: `http://188.97.125.55:8920`) alatti
   tarba: `GET/POST /v1/servers/<safeName(baseUrl)>`. A dumper mindig eloszor a
   szerveren probalkozik, utana a tarban — ha ott megvan az IP konfigja, a dump
   **jatek-csatlakozas es token nelkul** mukodik. Ha sehol nincs adat, a dumper

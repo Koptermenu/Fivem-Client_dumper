@@ -9,7 +9,7 @@
 // token is rejected, so a server dumped once can be dumped again without
 // anyone connecting to it.
 
-import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, renameSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
 const PORT = Number(process.env.PORT ?? 8920);
@@ -17,9 +17,22 @@ const DATA = path.resolve(import.meta.dir, "data");
 
 mkdirSync(DATA, { recursive: true });
 
+// A /client valasz egy teljes FiveM kliens dumpja, ezert szoban kell lenni,
+// de a store a neten fut, igy egy rosszindulat vagy hibas kliens nem fogyaszthat
+// korlatlan memoriat.
+const MAX_BODY = 32 * 1024 * 1024;
+
 const validKey = (key: string): boolean => /^[A-Za-z0-9._-]{1,120}$/.test(key);
 
 const fileOf = (key: string): string => path.join(DATA, `${key}.json`);
+
+// Atirani a temppel, hogy egy kozben bekovo GET ne lasson felezett JSON-t:
+// egy rossz fajl a servert foleg hataroloan, hatarozatlan ideig elrettenti.
+const writeAtomic = (file: string, body: string): void => {
+  const tmp = `${file}.${process.pid}.tmp`;
+  writeFileSync(tmp, body);
+  renameSync(tmp, file);
+};
 
 interface StoreMeta {
   savedAt: number;
@@ -45,7 +58,14 @@ Bun.serve({
     if (req.method === "GET") {
       if (!existsSync(file)) return new Response("no stored configuration\n", { status: 404 });
       const meta = metaOf(file);
-      const stored = JSON.parse(readFileSync(file, "utf8")) as Record<string, unknown>;
+      let stored: Record<string, unknown>;
+      try {
+        stored = JSON.parse(readFileSync(file, "utf8")) as Record<string, unknown>;
+      } catch {
+        // Egy serult fajlbol nem szabad 500-at adni, mert az a dumper logjaban
+        // indistinguishable a hoszneti hibatol.
+        return new Response("stored configuration is corrupt\n", { status: 500 });
+      }
       stored.storeSavedAt = meta.savedAt;
       return new Response(JSON.stringify(stored), {
         status: 200,
@@ -58,6 +78,9 @@ Bun.serve({
 
     if (req.method === "POST" || req.method === "PUT") {
       const body = await req.text();
+      if (body.length > MAX_BODY) {
+        return new Response("body too large\n", { status: 413 });
+      }
       let config: unknown;
       try {
         config = JSON.parse(body);
@@ -71,7 +94,7 @@ Bun.serve({
       ) {
         return new Response("body does not look like a /client configuration\n", { status: 400 });
       }
-      writeFileSync(file, body);
+      writeAtomic(file, body);
       const meta = metaOf(file);
       console.log(`[store] ${req.method} ${key} (${meta.size} bytes)`);
       return new Response(JSON.stringify({ ok: true, key, savedAt: meta.savedAt }), {
