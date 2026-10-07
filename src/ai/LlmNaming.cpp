@@ -390,7 +390,7 @@ void workerLoop(SharedState& shared) {
             shared.jobs.pop();
         }
         const int nPredict =
-            std::min(1024, 16 + 10 * static_cast<int>(job.registers));
+            std::min(2048, 16 + 10 * static_cast<int>(job.registers));
         const std::string content =
             namingQuery(job.prompt, nPredict, shared.backend);
         if (content.empty()) {

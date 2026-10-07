@@ -128,11 +128,27 @@ std::string namingQuery(const std::string& prompt, int maxTokens, NamingBackend 
     client.setHeader("Authorization", "Bearer " + key);
     client.setHeader("HTTP-Referer", "https://localhost/fivem-dumper");
 
-    const std::string body =
-        "{\"model\":\"" + jsonEscapeForNaming(openRouterModel()) + "\",\"temperature\":0," +
-        "\"max_tokens\":" + std::to_string(std::min(4096, std::max(16, maxTokens))) +
-        ",\"messages\":[{\"role\":\"user\",\"content\":\"" + jsonEscapeForNaming(prompt) + "\"}]}";
-    const HttpResponse r = client.postJson(kOpenRouterUrl, body);
+    const std::string model = jsonEscapeForNaming(openRouterModel());
+    const std::string instructions =
+        "You rename decompiler placeholders in Lua code.\n"
+        "Output ONLY lines of the form REGISTER=readableName, one per line.\n"
+        "REGISTER must be copied exactly from the code, for example SHX3_1.\n"
+        "readableName must be a descriptive lowerCamelCase name, never nil, never the "
+        "register itself, never another synthetic placeholder.\n"
+        "Do NOT output any Lua code. Do NOT repeat the input. No explanations, no markdown.\n\n";
+    const std::string messages =
+        "\"messages\":[{\"role\":\"user\",\"content\":\"" +
+        jsonEscapeForNaming(instructions + prompt) + "\"}]";
+    const std::string head = "{\"model\":\"" + model + "\",\"temperature\":0,";
+    const std::string tail = "," + messages + "}";
+
+    std::string body =
+        head + "\"max_tokens\":" + std::to_string(maxTokens) + ",\"reasoning\":{\"enabled\":false}" + tail;
+    HttpResponse r = client.postJson(kOpenRouterUrl, body);
+    if (r.status == 400) {
+        body = head + "\"max_tokens\":" + std::to_string(maxTokens) + tail;
+        r = client.postJson(kOpenRouterUrl, body);
+    }
     if (!r.ok()) return std::string();
     const Json j = Json::parse(std::string(r.body.begin(), r.body.end()));
     if (!j.isObject()) return std::string();
