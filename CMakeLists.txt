@@ -48,6 +48,22 @@ foreach(_f IN LISTS _bin_citizen)
     file(RELATIVE_PATH _rel "${CMAKE_SOURCE_DIR}" "${_f}")
     list(APPEND DUMPER_PAYLOAD_ITEMS "${_rel}|${_f}")
 endforeach()
+# The vertex repair tool and its .NET dependencies. It is a framework-dependent net8.0
+# app, so travelling with the payload is not sufficient on its own: the target machine
+# also needs the .NET 8 runtime. When it is missing the apphost raises a dialog and
+# exits, which runVertexFix treats as a failed run rather than a hang.
+# Filtered like _bin_top: `dotnet publish` emits .pdb by default and symbols have no
+# business in a 226MB exe.
+file(GLOB_RECURSE _bin_vfix LIST_DIRECTORIES false CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/Bin/vertex-fixer/*")
+foreach(_f IN LISTS _bin_vfix)
+    file(TO_CMAKE_PATH "${_f}" _vfc)
+    get_filename_component(_vn "${_f}" NAME)
+    if(_vn MATCHES "^(\\..*|.*\\.(pdb|ilk|obj|log|xml))$")
+        continue()
+    endif()
+    file(RELATIVE_PATH _rel "${CMAKE_SOURCE_DIR}" "${_f}")
+    list(APPEND DUMPER_PAYLOAD_ITEMS "${_rel}|${_f}")
+endforeach()
 
 get_filename_component(_d1 "${CMAKE_CXX_COMPILER}" DIRECTORY)
 get_filename_component(_d2 "${_d1}" DIRECTORY)

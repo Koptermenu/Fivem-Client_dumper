@@ -13,6 +13,7 @@
 #include "core/HttpClient.h"
 #include "dumper/FiveMDumper.h"
 #include "dumper/Decryptor.h"
+#include "dumper/VertexFix.h"
 #include "ai/Cleanup.h"
 #include "ai/LlmNaming.h"
 #include "utils/Str.h"
@@ -366,6 +367,38 @@ int main(int argc, char** argv) {
                   << "/Output\n";
     }
     std::cout << "==============================================" << CLR(term::RESET) << "\n";
+
+    // Only .ydr/.ydd/.yft can need this, so on a server with no models at all this
+    // returns immediately and silently.
+    if (decryptOk) {
+        // Announced before it runs, not after: the repair measures about half a second
+        // per model file, so a server with a few thousand of them is a wait of minutes
+        // and silence during that looks like a hang.
+        std::cout << "\n" << CLR(term::BOLD) << CLR(term::CYAN)
+                  << "--- Vertex buffer repair ---" << CLR(term::RESET) << "\n"
+                  << " Modellfajlok ellenorzese es javitasa, ez tartthat egy par percig...\n"
+                  << std::flush;
+        const VertexFixStats vf = runVertexFix(decryptor.outputDir);
+        if (vf.ran) {
+            std::cout << " " << vf.files << " modellfajl, " << std::fixed << vf.seconds
+                      << " mp" << std::defaultfloat << "\n";
+            if (vf.ok) {
+                std::cout << CLR(term::GREEN) << " Kesz: " << vf.repaired << " javitva, "
+                          << vf.scanned << " atnezve, 0 hiba.\n";
+            } else {
+                std::cout << CLR(term::YELLOW) << " Kesz, de nem teljes: " << vf.repaired
+                          << " javitva, " << vf.failed << " hiba"
+                          << (vf.message.empty() ? "" : " (" + vf.message + ")") << ".\n";
+            }
+        } else if (vf.message == "nincs modellfajl") {
+            std::cout << " Nincs javitandó modellfajl, kihagyva.\n";
+        } else {
+            // ran is false here because the tool is missing, not because there was
+            // nothing to do. Say which, so a missing payload is not read as success.
+            std::cout << CLR(term::YELLOW) << " Nem futott: " << vf.message << "\n";
+        }
+    }
+
     const std::string serverRoot = "Servers/" + dumper->serverDir;
     const bool keepTemp = getenv("DUMPER_KEEP_TEMP") != nullptr;
     if (decryptOk) {

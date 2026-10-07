@@ -35,6 +35,20 @@ A build tree a generatort cache-ben orzi, es CMake **nem** enged ujrahasznalni
 masik Visual Studioval letrehozott fagot. A `build.bat` ezt felismeri es a
 regi fagot torli, hogy ne kelljen a `build\` mappat kezzel torolni.
 
+### Build bemenetek a `Bin/` mappaban
+
+A `Bin/` nincs a repoban (2,4 GB build-bemenet), de a build **osszeagyazza**
+a `Bin/` tartalmat RCDATA payloadba, amit a program futaskor kicsomagol:
+
+| bemenet | mi kell belole |
+|---|---|
+| `Bin/citizen/`, `Bin/*.dll`, `Bin/Unpacker.exe` | a FXServer komponensei |
+| `Bin/vertex-fixer/` | a vertex-javito es a .NET fuggosegei (9 fajl, 9,2 MB) |
+
+A `Bin/vertex-fixer/` a `FivemDecryptFixer.Cli` + `CodeWalker.Core` +
+`SharpDX` + `CK.VertexBridge`. Ha hianyzik, a program a vertex javitast
+**csendben kihagja**, es a dekompilalt Lua ettol meg munkadik.
+
 | komponens | forras |
 |-----------|--------|
 | HTTP | WinHTTP (Windows beepitett) |
