@@ -1,5 +1,6 @@
 #include "ai/LlmNaming.h"
 #include "ai/LuaLexer.h"
+#include "ai/NamingBackend.h"
 #include "core/HttpClient.h"
 #include "core/Logger.h"
 #include "utils/Json.h"
@@ -10,6 +11,7 @@
 #include <iostream>
 #include <filesystem>
 #include <map>
+#include <memory>
 #include <mutex>
 #include <queue>
 #include <regex>
@@ -370,6 +372,7 @@ struct ChunkJob {
 };
 
 struct SharedState {
+    NamingBackend backend = NamingBackend::Local;
     std::queue<ChunkJob> jobs;
     std::mutex jobsMutex;
     std::map<std::string, std::vector<std::map<std::string, std::string>>> results;
@@ -378,7 +381,6 @@ struct SharedState {
 };
 
 void workerLoop(SharedState& shared) {
-    HttpClient client;
     for (;;) {
         ChunkJob job;
         {
@@ -389,19 +391,12 @@ void workerLoop(SharedState& shared) {
         }
         const int nPredict =
             std::min(1024, 16 + 10 * static_cast<int>(job.registers));
-        const std::string body = "{\"prompt\":\"" + jsonEscape(job.prompt) +
-                                 "\",\"n_predict\":" + std::to_string(nPredict) +
-                                 ",\"temperature\":0,\"cache_prompt\":false,"
-                                 "\"stop\":[\"\\n\\n\",\"===\"]}";
-        const HttpResponse r =
-            client.postJson("http://127.0.0.1:" + std::to_string(kPort) + "/completion", body);
-        if (!r.ok()) {
-            if (r.status == 0) shared.fatal = true;
+        const std::string content =
+            namingQuery(job.prompt, nPredict, shared.backend);
+        if (content.empty()) {
+            if (shared.backend == NamingBackend::Local) shared.fatal = true;
             continue;
         }
-        const Json j = Json::parse(std::string(r.body.begin(), r.body.end()));
-        if (!j.isObject() || !j.has("content")) continue;
-        const std::string content = j.strAt("content");
         auto parsed = parseMap(content);
         if (parsed.empty()) continue;
         std::lock_guard<std::mutex> lock(shared.resultsMutex);
@@ -422,6 +417,9 @@ std::string findServerExe() {
 }
 
 bool aiNamingAvailable() {
+    const NamingQuery q = resolveNamingBackend();
+    if (!q.ready) return false;
+    if (q.backend == NamingBackend::OpenRouter) return true;
     const std::string exe = findServerExe();
     const std::string model = resolveTool(kModelGguf);
     return !exe.empty() && fs::exists(exe) && !model.empty() && fs::exists(model);
@@ -429,9 +427,26 @@ bool aiNamingAvailable() {
 
 NamingStats runAiNaming(const std::string& cleanDir) {
     NamingStats stats;
+    const NamingQuery backend = resolveNamingBackend();
+    if (!backend.ready) {
+        std::cout << CLR(term::RED) << "[!]" << CLR(term::RESET) << " " << backend.detail
+                  << "\n";
+        return stats;
+    }
     const std::string exe = findServerExe();
     const std::string model = resolveTool(kModelGguf);
-    if (exe.empty() || !fs::exists(exe) || model.empty() || !fs::exists(model)) return stats;
+    if (backend.backend == NamingBackend::Local &&
+        (exe.empty() || !fs::exists(exe) || model.empty() || !fs::exists(model)))
+        return stats;
+    std::unique_ptr<LlamaServer> server;
+    if (backend.backend == NamingBackend::Local) {
+        server = std::make_unique<LlamaServer>(exe, model);
+        if (!server->started()) {
+            std::cout << CLR(term::RED) << "[!]" << CLR(term::RESET)
+                      << " Az AI szervert nem sikerult elinditani.\n";
+            return stats;
+        }
+    }
 
     std::vector<FilePlan> plans;
     std::error_code ec;
@@ -457,26 +472,27 @@ NamingStats runAiNaming(const std::string& cleanDir) {
     stats.files = static_cast<int>(plans.size());
     if (plans.empty()) return stats;
     std::cout << CLR(term::CYAN) << "[*]" << CLR(term::RESET) << " " << plans.size()
-              << " fajl SHX regiszterekkel. AI szerver inditasa...\n";
-
-    LlamaServer server(exe, model);
-    if (!server.started()) {
-        std::cout << CLR(term::RED) << "[!]" << CLR(term::RESET)
-                  << " Az AI szervert nem sikerult elinditani.\n";
-        return stats;
+              << " fajl SHX regiszterekkel. ";
+    if (server) {
+        std::cout << "AI szerver inditasa...\n";
+        std::cout << CLR(term::CYAN) << "[*]" << CLR(term::RESET)
+                  << " Modell betoltese ( jellemzoen 10-30 masodperc )...\n";
+        if (!server->waitReady()) {
+            std::cout << CLR(term::RED) << "[!]" << CLR(term::RESET)
+                      << " Az AI szerver nem valaszolt idejaban.\n";
+            LOG("AI szerver health timeout: " + exe, LogLevel::WARNING);
+            return stats;
+        }
+        std::cout << CLR(term::GREEN) << "[+]" << CLR(term::RESET)
+                  << " AI szerver kesz a 127.0.0.1:" << kPort << " cimen, " << kWorkers
+                  << " parhuzamos munkassal.\n";
+    } else {
+        std::cout << CLR(term::GREEN) << "[+]" << CLR(term::RESET) << " OpenRouter: "
+                  << backend.detail << " (" << plans.size() << " fajl)\n";
     }
-    std::cout << CLR(term::CYAN) << "[*]" << CLR(term::RESET)
-              << " Modell betoltese ( jellemzoen 10-30 masodperc )...\n";
-    if (!server.waitReady()) {
-        std::cout << CLR(term::RED) << "[!]" << CLR(term::RESET)
-                  << " Az AI szerver nem valaszolt idejaban.\n";
-        LOG("AI szerver health timeout: " + exe, LogLevel::WARNING);
-        return stats;
-    }
-    std::cout << CLR(term::GREEN) << "[+]" << CLR(term::RESET) << " AI szerver kesz a 127.0.0.1:"
-              << kPort << " cimen, " << kWorkers << " parhuzamos munkassal.\n";
 
     SharedState shared;
+    shared.backend = backend.backend;
     for (const auto& plan : plans) {
         const auto bounds = chunkBounds(plan.stripped, kChunkBudget);
         for (size_t i = 0; i + 1 < bounds.size(); ++i) {

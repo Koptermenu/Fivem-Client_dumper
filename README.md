@@ -145,7 +145,31 @@ regisztereket az `Output_clean` fajlokban:
 | `DUMPER_TEST_MODE=1` | nem interaktív mod |
 | `DUMPER_CLEANUP=1` | strukturális Lua-tisztítás nem interaktív módban is |
 | `DUMPER_AI_CLEANUP=1` | AI regiszternevezo kerdes nelkuli futtatasa |
+| `DUMPER_AI_BACKEND` | `local` (alapertelmezett) a beagyazott GGUF, `openrouter` a felhős modell, `auto` = kulcs van -> openrouter, kulcs nelkul -> helyi |
+| `OPENROUTER_API_KEY` | kulcs a `DUMPER_AI_BACKEND=openrouter`hoz; **soha ne keruljön a repoba** |
+| `OPENROUTER_MODEL` | OpenRouter modell azonosito (alapertelmezett `cohere/north-mini-code:free`, ingyenes `:free` suffixszel) |
 | `DUMPER_LUAC` | luac.exe utvonal az AI-nevezes luac ellenorzeshez |
+
+### Felhős modell (OpenRouter)
+
+A `DUMPER_AI_BACKEND=openrouter` a beagyazott modell helyett a felhős modellt
+hasznalja. A keres gyakorlatilag ugyanaz, es a valasz is ugyanugyan megy at:
+`register=nev` sorok. A **modell sosem ir kodot**, igy egy altalános celu LLM
+sem tud kodot beiktatni, mert a kimenet parserenkent `key=value` sorokra esik,
+es mindent eldob, ami nem regiszter-utkozes nelkuli nev.
+
+| | |
+|---|---|
+hivas | `POST https://openrouter.ai/api/v1/chat/completions` |
+header | `Authorization: Bearer $OPENROUTER_API_KEY` |
+ingyenes modellek | `:free` suffixszel, a `GET /api/v1/models` listabol |
+
+A kulcsot **kornyezeti valtozokent** kell megadni, nem fajlban: a git-tortenet
+maradandonan kozzeteszi, es a GitHub azonnal jelenti. Nem is kerult bele.
+
+A felhős modell hatasara a hivas idokora miatt latvanyos, es a `:free` modellek
+forgalmi kerettel rendelkeznek. Ha nincs kulcs vagy nincs net, a dumper a
+beagyazott modellre esik vissza, nem all meg.
 | `DUMPER_CONFIG` | konfiguracios config.json utvonala: token es jatek-csatlakozas
   nelkuli dumpolashoz (pl. masik geprol masolt config.json; az IP-t a
   `DUMPER_SERVER_IP` adja meg) |
