@@ -26,7 +26,6 @@ public:
     bool loadCachedConfiguration();
     static bool findCachedConfig(const std::string& baseUrl, std::string& outDir);
     bool configReady() const { return configFetched_; }
-    bool usingCachedConfig() const { return usingCachedConfig_; }
     bool fetchDynamicHostname();
     static std::string probeDynamicHostname(const std::string& baseUrl, int timeoutMs);
     void fetchResource(const ResourceInfo& res);

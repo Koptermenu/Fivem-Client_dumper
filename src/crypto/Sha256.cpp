@@ -1,6 +1,5 @@
 #include "Sha256.h"
 #include <cstring>
-#include <fstream>
 #include <vector>
 namespace fivem {
 namespace {
@@ -85,64 +84,5 @@ std::vector<uint8_t> hmacSha256(const std::vector<uint8_t>& key, const std::vect
 }
 std::vector<uint8_t> hmacSha256(const std::vector<uint8_t>& key, const std::string& msg) {
     return hmacSha256(key, std::vector<uint8_t>(msg.begin(), msg.end()));
-}
-Sha256Stream::Sha256Stream() : totalBits_(0), blockLen_(0) {
-    state_[0] = 0x6a09e667u; state_[1] = 0xbb67ae85u; state_[2] = 0x3c6ef372u;
-    state_[3] = 0xa54ff53au; state_[4] = 0x510e527fu; state_[5] = 0x9b05688cu;
-    state_[6] = 0x1f83d9abu; state_[7] = 0x5be0cd19u;
-    std::memset(block_, 0, sizeof(block_));
-}
-void Sha256Stream::update(const uint8_t* data, size_t len) {
-    totalBits_ += static_cast<uint64_t>(len) * 8;
-    while (len > 0) {
-        const size_t room = 64 - blockLen_;
-        const size_t take = (len < room) ? len : room;
-        std::memcpy(block_ + blockLen_, data, take);
-        blockLen_ += take;
-        data += take;
-        len -= take;
-        if (blockLen_ == 64) {
-            transform(state_, block_);
-            blockLen_ = 0;
-        }
-    }
-}
-std::string Sha256Stream::finishHex() {
-    const uint64_t bits = totalBits_;
-    block_[blockLen_++] = 0x80;
-    if (blockLen_ > 56) {
-        while (blockLen_ < 64) block_[blockLen_++] = 0;
-        transform(state_, block_);
-        blockLen_ = 0;
-    }
-    while (blockLen_ < 56) block_[blockLen_++] = 0;
-    for (int i = 0; i < 8; ++i)
-        block_[56 + i] = static_cast<uint8_t>((bits >> (56 - i * 8)) & 0xFF);
-    transform(state_, block_);
-    blockLen_ = 0;
-    std::string out;
-    out.reserve(64);
-    for (int i = 0; i < 8; ++i) {
-        for (int b = 3; b >= 0; --b) {
-            const uint8_t byte = static_cast<uint8_t>((state_[i] >> (b * 8)) & 0xFF);
-            out += kDigits[byte >> 4];
-            out += kDigits[byte & 0x0F];
-        }
-    }
-    return out;
-}
-bool sha256HexFile(const std::string& path, std::string& hexOut) {
-    std::ifstream in(path, std::ios::binary);
-    if (!in.is_open()) return false;
-    Sha256Stream sha;
-    std::vector<char> buf(1 << 20);
-    for (;;) {
-        in.read(buf.data(), static_cast<std::streamsize>(buf.size()));
-        const std::streamsize got = in.gcount();
-        if (got <= 0) break;
-        sha.update(reinterpret_cast<const uint8_t*>(buf.data()), static_cast<size_t>(got));
-    }
-    hexOut = sha.finishHex();
-    return true;
 }
 }
