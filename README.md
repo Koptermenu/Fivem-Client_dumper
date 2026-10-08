@@ -1,204 +1,205 @@
 # FiveM Dumper - AllInOne (C++)
 
-Natív C++ FiveM resource dumper és dekódoló. Nincs külső függősége: a HTTP, az AES és a
-memóriaolvasás a Windows beépített API-ját használja, a többi (SHA-256, ChaCha20, JSON)
-saját implementáció.
+Native C++ FiveM resource dumper and decoder. No external dependencies: HTTP, AES and
+memory reading come from Windows' own APIs, the rest (SHA-256, ChaCha20, JSON) is
+implemented in this repository.
 
-## Fordítás
+## Building
 
 ```
 build.bat
 build\Release\fivem_dumper.exe
 ```
 
-A `build.bat` a `vswhere`-val megkeresi, melyik Visual Studio van telepítve C++
-x64/x86 eszközökkel, és azt használja. VS 2019, 2022 és 2026 is megy, a verziót nem
-kell kézzel belőni.
+`build.bat` runs `vswhere` to find the installed Visual Studio that has the C++ x64/x86
+tools and configures with it. VS 2019, 2022 and 2026 all work, there is no version to
+hardcode.
 
 ```
-DUMPER_GENERATOR="Visual Studio 16 2019" build.bat   # explicit generátor felülírása
-cmake -B build -DCMAKE_CXX_STANDARD=17                # régi toolset, ha a C++20 nem megy
+DUMPER_GENERATOR="Visual Studio 16 2019" build.bat   # override the generator
+cmake -B build -DCMAKE_CXX_STANDARD=17                # older toolset, if C++20 is unavailable
 ```
 
-Kézzel:
+By hand:
 
 ```
 cmake -B build -G "Visual Studio 18 2026"
 cmake --build build --config Release --parallel
 ```
 
-A configure lépést nem szabad kihagyni: a beágyazott payload és a SHA-256 manifest a
-configure idejében készül, ezért egy meglévő build fában is újra kell futnia. A build
-tree a generátort a cache-ben őrzi, és a CMake nem engedi másik Visual Studioval
-létrehozott fát újrahasználni — a `build.bat` ezt felismeri és törli a régit, hogy ne
-kelljen a `build\` mappát kézzel takarítani.
+Do not skip the configure step. The embedded payload and its SHA-256 manifest are
+produced at configure time, so it has to re-run even in an existing build tree. The tree
+caches its generator, and CMake refuses to reuse a tree created by a different Visual
+Studio. `build.bat` detects that and deletes the old tree, so you never have to clear
+`build\` by hand.
 
-### A `Bin/` mappa
+### The `Bin/` folder
 
-A `Bin/` nincs a repóban (2,4 GB), de a build összeállítja a tartalmát RCDATA
-payloadba, amit a program futáskor kicsomagol:
+`Bin/` is not in the repository (2.4 GB of build input), but the build assembles it into
+an RCDATA payload that the program unpacks at runtime:
 
-| bemenet | mi kell belőle |
+| input | what it has to contain |
 |---|---|
-| `Bin/citizen/`, `Bin/*.dll`, `Bin/Unpacker.exe` | az FXServer komponensei |
-| `Bin/vertex-fixer/` | a vertex-javító és a .NET függőségei (9 fájl, 9,2 MB) |
+| `Bin/citizen/`, `Bin/*.dll`, `Bin/Unpacker.exe` | the FXServer components |
+| `Bin/vertex-fixer/` | the vertex fixer and its .NET dependencies (9 files, 9.2 MB) |
 
-A `Bin/vertex-fixer/` a `FivemDecryptFixer.Cli`, a `CodeWalker.Core`, a `SharpDX` és a
-`CK.VertexBridge`. Ha ez hiányzik, a program a vertex javítást csendben kihagyja, és a
-dekompilált Lua ettől még működik.
+`Bin/vertex-fixer/` is `FivemDecryptFixer.Cli`, `CodeWalker.Core`, `SharpDX` and
+`CK.VertexBridge`. If it is missing, the program silently skips the vertex repair, and the
+decompiled Lua works either way.
 
-| komponens | forrás |
+| component | source |
 |---|---|
-| HTTP | WinHTTP (Windows beépített) |
-| AES-256-CBC | BCrypt (Windows beépített) |
-| SHA256 / HMAC-SHA256 | saját (`src/crypto/Sha256.cpp`) |
-| ChaCha20 (8/12 bájt nonce) | saját (`src/crypto/ChaCha20.cpp`) |
-| JSON parser | saját (`src/utils/Json.cpp`) |
-| memória-scan | Toolhelp32 + VirtualQueryEx + ReadProcessMemory |
+| HTTP | WinHTTP (built into Windows) |
+| AES-256-CBC | BCrypt (built into Windows) |
+| SHA256 / HMAC-SHA256 | own implementation (`src/crypto/Sha256.cpp`) |
+| ChaCha20 (8/12 byte nonce) | own implementation (`src/crypto/ChaCha20.cpp`) |
+| JSON parser | own implementation (`src/utils/Json.cpp`) |
+| memory scan | Toolhelp32 + VirtualQueryEx + ReadProcessMemory |
 
-## Használat
+## Usage
 
-1. Indítsd el a FiveM-et és csatlakozz a szerverhez
-2. `fivem_dumper.exe` — a token és az IP-k automatikusan a játék memóriájából kerülnek ki
-3. Válassz szervert a listából, vagy írd be az IP-t
-4. Válassz resource-okat: index (`1,3`), tartomány (`5-8`), név (`pma-voice, ox_lib`),
-   összes (`all`), vagy `q` = megszakítás
+1. Start FiveM and join a server
+2. `fivem_dumper.exe`, where the token and the IPs are picked up from the game's memory
+   automatically
+3. Pick a server from the list, or type the IP
+4. Pick resources: index (`1,3`), range (`5-8`), names (`pma-voice, ox_lib`), all
+   (`all`), or `q` to quit
 
-### Amit a dumper csinál
+### What the dumper does
 
-Az exe önmagában megáll: a teljes `Bin/` mappa és a VC++ runtime DLL-ek RCDATA
-erőforrásként benne vannak, első futáskor kicsomagolódnak a
-`%LOCALAPPDATA%\FiveMDumper\payload` mappába, méret és SHA256 alapján ellenőrizve. Ha
-egy antivírus belenyúl, újracsomagolódik. A kész exe bármilyen gépen elindul külön
-fájlok nélkül.
+The exe stands on its own. The whole `Bin/` folder and the VC++ runtime DLLs are embedded
+as RCDATA resources; on first run they are unpacked into
+`%LOCALAPPDATA%\FiveMDumper\payload`, verified by size and SHA256. If an antivirus
+deletes or touches them, they are packed again automatically. The finished exe runs on
+any machine with no extra files, and it deliberately ignores the `Bin/` folder next to
+the project root.
 
-- Szervernév automatikusan a `GET /dynamic.json` végpont `hostname` mezőjéből
-  (`sv_hostname`), nem kell begépelni. Az FX-színjelölések (^0-^9, ^^, ^s) eltűnnek,
-  a `default FXServer` / `FXServer, but unconfigured` placeholder neveket nem fogadja el
-- Név-cache `server_name.txt`-ben: a lista mutatja a nevet, és ha a dynamic.json kiesik,
-  ez a fallback még a kérdés előtt
-- Progress bar a letöltésnél és a dekódolásnál
-- Checkpoint (`checkpoint.json`): Ctrl-C, kick vagy timeout után onnan folytatja, ahol
-  abbahagyta. Csak akkor törlődik, ha minden kiválasztott resource kész lett
-- A warningök csak a `dumper.log`-ba mennek, a konzol tiszta marad
-- Titkosított (`.fxap`) resource-ok: FXAP -> ChaCha20 -> Lua-dekompilálás, két rétegben
-  (lásd lent)
-- Connection reset és timeout esetén 5 próbálkozás, exponenciális backoff (2/4/8/16 mp),
-  így egy szerver-újraindítás ablakát is átviszi
-- Dekódolás kihagyása: ha egy resource-ban nincs `.fxap`, a 2. fázis azonnali átnevezéssel
-  lezárul, nincs grants-betöltés és nincs fájlonkénti művelet
-- Manifest-backfill: ha az RPF-kitömörítés nem termel fxmanifestet, azt külön lekéri a
-  `/files` végpontról; ha az unpack egyáltalán nem sikerül, a nyers `.rpf` megmarad
-- **Konfiguráció gyorsítótár és szerver-újraindítás-tűrés**: az első sikeres `/client`
-  válasz `Servers/<név>/config.json`-be kerül. Ha később a szerver nem válaszol
-  (újraindult) vagy a tokent visszautasítja, a dumper ezt a cache-t tölti be, és folytatja
-  — a játék kapcsolata csak új tokenhez kell, nem az egész dumphoz
-- **Központi tároló (IP alapján)**: minden sikeres konfiguráció felmegy a
-  `DUMPER_STORE_URL` (alapértelmezés `http://188.97.125.55:8920`) alatti tárolóba,
-  `GET/POST /v1/servers/<safeName(baseUrl)>`. A dumper mindig először a szerveren
-  próbálkozik, utána a tárolóban — ha ott megvan az IP konfigurációja, a dump
-  játék-kapcsolat és token nélkül is működik. Ha sehol nincs adat, a dumper egyszeri
-  fellépést kér, és csak akkor tölti fel a tárolót
+- Server name comes automatically from the `hostname` field of `GET /dynamic.json`
+  (`sv_hostname`), so there is nothing to type. FX color markup (`^0`-`^9`, `^^`, `^s`)
+  is stripped, and the `default FXServer` / `FXServer, but unconfigured` placeholder
+  names are rejected
+- Name cache in `server_name.txt`: the list shows the name, and if `dynamic.json` fails
+  this is the fallback, ahead of the prompt
+- Progress bar for both the download and the decryption
+- Checkpoint (`checkpoint.json`): after Ctrl-C, a kick or a timeout it resumes where it
+  stopped. It is only deleted once every selected resource is finished
+- Warnings go to `dumper.log` only, the console stays clean
+- Encrypted (`.fxap`) resources: FXAP -> ChaCha20 -> Lua decompilation, in two layers
+  (see below)
+- Connection reset and timeout: 5 retries with exponential backoff (2/4/8/16 s), which
+  also survives a server restart window
+- Decryption is skipped when a resource has no `.fxap`: the second phase closes right
+  away with a rename, no grants load, no per-file work
+- Manifest backfill: if the RPF unpack produces no fxmanifest, it is fetched separately
+  from the `/files` endpoint; if the unpack fails outright, the raw `.rpf` is kept
+- **Config cache and server restart tolerance**: the first successful `/client` response
+  is stored in `Servers/<name>/config.json`. If the server stops answering later (it
+  restarted) or rejects the token, the dumper loads that cache and carries on; the game
+  connection is only needed for a fresh token, not for the whole dump
+- **Central store, keyed by IP**: every successful configuration is uploaded to the store
+  under `DUMPER_STORE_URL` (default `http://188.97.125.55:8920`) at
+  `GET/POST /v1/servers/<safeName(baseUrl)>`. The dumper always tries the server first
+  and the store second. If the IP's configuration is already there, the dump works with
+  no game connection and no token. If there is data nowhere, the dumper asks for a
+  one-time login and uploads the config at that point
 
-### Környezeti változók
+### Environment variables
 
-| Változó | Jelentés |
-|---------|----------|
-| `DUMPER_TOKEN` | token a memória-scan nélkül |
-| `DUMPER_SERVER_IP` | fix szerver, interaktív kérdezés nélkül |
-| `DUMPER_SERVER_NAME` | fix mappa- és szervernév |
-| `DUMPER_RESOURCE` | csak ez az egy resource |
-| `DUMPER_WORKERS` | párhuzamos letöltések száma (1-64, alapértelmezett 24) |
-| `DUMPER_KEEP_TEMP` | megtartja a `Temp`, `TempCompiled` és `Unpacked` mappákat hibakereséshez. Bármilyen érték számít, az üres string is; alapértelmezetten törölve |
-| `DUMPER_TEST_MODE=1` | nem interaktív mód |
-| `DUMPER_CONFIG` | a `config.json` útvonala a token és játék-kapcsolat nélküli dumpoláshoz (pl. másik gépről másolva; az IP-t a `DUMPER_SERVER_IP` adja meg) |
-| `CK_CLIENT_KEY_API_URL` | a klienskulcs-szolgáltatás címe (alapértelmezett `https://grantsclk.ckcloud.de5.net`); a `CK_GRANTS_CLK_API_URL` nevet is elfogadja. **`off` = teljesen hálózat nélküli futás** |
+| Variable | Meaning |
+|---|---|
+| `DUMPER_TOKEN` | token, skips the memory scan |
+| `DUMPER_SERVER_IP` | fixed server, no interactive question |
+| `DUMPER_SERVER_NAME` | fixed folder and server name |
+| `DUMPER_RESOURCE` | this one resource only |
+| `DUMPER_WORKERS` | parallel downloads (1-64, default 24) |
+| `DUMPER_KEEP_TEMP` | keeps the `Temp`, `TempCompiled` and `Unpacked` folders for debugging. Any value counts, the empty string too; deleted by default |
+| `DUMPER_TEST_MODE=1` | non-interactive mode |
+| `DUMPER_CONFIG` | path to a `config.json` for dumping without a token or a game connection (e.g. copied from another machine; `DUMPER_SERVER_IP` supplies the IP) |
+| `CK_CLIENT_KEY_API_URL` | address of the client key service (default `https://grantsclk.ckcloud.de5.net`); `CK_GRANTS_CLK_API_URL` is accepted as well. **`off` = fully offline** |
 
-### Hálózat nélküli futás
+### Running without network
 
-| függőség | állapot |
-|----------|--------|
-| `Grants.txt` kulcstoken | **helyi**, a `Servers/<név>/Resources/Grants.txt` fájlból |
-| `grants` szerverkulcs | **helyi**, a tokenből |
-| központi tároló (`Servers/`) | **helyi**, a `store/` mappa; a válasz `http://127.0.0.1:8920` |
-| klienskulcs (`/v1/derive`) | **hálózat kell neki**, lásd lentebb |
+| dependency | status |
+|---|---|
+| `Grants.txt` key token | **local**, from `Servers/<name>/Resources/Grants.txt` |
+| `grants` server key | **local**, derived from the token |
+| central store (`Servers/`) | **local**, the `store/` folder; it answers on `http://127.0.0.1:8920` |
+| client key (`/v1/derive`) | **needs network**, see below |
 
 ```
 set DUMPER_STORE_URL=http://127.0.0.1:8920
 set CK_CLIENT_KEY_API_URL=off
 ```
 
-A **klienskulcs az egyetlen**, ami nem helyben áll. A szolgáltatás kulcs*táblát*
-tartoztat egy Cloudflare Workers KV-ben (`/health` szerint `workers-kv-read-only`), nem
-számolt algoritmust: így a `grants_clk`-ból helyben nem állítható elő. Aki csak a
-**szerverkulcsos** fájlokra van szüksége, annak a fenti két változóval nincs hálózatra
-szüksége; a többi fájl ilyenkor nyersen marad.
+The **client key is the only one** that is not local. The service holds a key *table* in
+a Cloudflare Workers KV (`/health` reports `workers-kv-read-only`), not a computed
+algorithm, so it cannot be reproduced locally from `grants_clk`. If you only need the
+**server-keyed** files, those two variables are enough and you need no network at all;
+everything else stays encrypted.
 
-A `CK_CLIENT_KEY_API_URL=off` nem csak ezt az egy értéket kapcsolja ki, hanem
-**megszakítja** a kérdezést: ha a szolgáltatás nem érhető el (nincs válasz, DNS- vagy
-connecthiba), a dumper nem próbálja meg újra a többi resource-nál. Ez azért számít,
-mert egy valódi szerveren 969 `grants_clk` bejegyzet van, és a connect időtúlépés
-mindegyiken újra lefutna — az első hívás 30 mp, a többi 0 mp, a megszakító nélkül ez
-körülbelül 8 órát vinne el.
+`CK_CLIENT_KEY_API_URL=off` does not just switch off that one value, it **interrupts** the
+query: if the service is unreachable (no answer, DNS or connect error), the dumper does
+not retry it for the remaining resources. That matters because a real server has 969
+`grants_clk` entries and the connect timeout would run again on every single one: the
+first call takes 30 s, the rest 0 ms, so without the interrupt a full pass would have
+taken roughly 8 hours.
 
-A megszakító **szállítási hibára** kapcsol (nincs HTTP státusz egyáltalán). Ha a
-szolgáltatás **válaszol**, de az adott resource nincs benne (`HTTP 400`), az **nem**
-kapcsolja ki: a szolgáltatás él, csak erre az értékre nincs válasz.
+The interrupt triggers on a **transport error** (no HTTP status at all). If the service
+**does answer** but does not know the given resource (`HTTP 400`), that does **not**
+switch it off: the service is alive, it just has no entry for that value.
 
-## Resource dekódolás
+## Resource decryption
 
-Egy titkosított erőforrással a dumper két réteget bont fel:
+For an encrypted resource the dumper takes apart two layers:
 
-1. **Külső FXAP réteg** — a fájl `FXAP` fejléccel indul; a nonce a 74. bájtól olvasott
-   12 bájt, a titkosított tartalom a 86. bájttól indul. A kulcs fix.
-2. **Belső réteg** — a felbontott blokk egy változó hosszúságú meta-blokkot tartalmaz
-   (a fájl SHA-256-ja és az eredeti útvonala), **majd utána** a 12 bájtos nonce, majd a
-   titkosított tartalom. A meta-blokk hossza fájlonként változik (valós adatokon
-   74-105 bájt), ezért a nonce helye nem számítható ki fix offsetből — a `uint16`
-   hosszmezőből kell kiolvasni. A régi, fix 80/92 offset csak 74 bájtos meta-blokknál
-   lenne helyes.
+1. **Outer FXAP layer**: the file starts with the `FXAP` header; the nonce is the 12
+   bytes read from byte 74, the encrypted content starts at byte 86. The key is fixed.
+2. **Inner layer**: the unwrapped block holds a variable-length meta block (the file's
+   SHA-256 and its original path), **then** the 12 byte nonce, then the encrypted
+   content. The meta block length changes per file (74-105 bytes on real data), so the
+   nonce position cannot be computed from a fixed offset and has to be read from the
+   `uint16` length field. The old fixed 80/92 offsets would only be correct for 74 byte
+   meta blocks.
 
-A `.fxap` fejléc az erőforrás azonosítóját tartalmazza, ez alapján két kulcs juthat a
-szobájába:
+The `.fxap` header holds the resource identifier, which gives two possible keys:
 
-| kulcs | forrás | mire jó |
-|-------|-------|---------|
-| grants | a grants token `grants` mezője | szerveroldali fájlok |
-| kliens | a `grants_clk`-ból a kulcsszolgáltatás adja vissza | kliensoldali `.lua` |
+| key | source | what it opens |
+|-------|--------|---------------|
+| grants | the `grants` field of the grants token | server-side files |
+| client | returned by the key service from `grants_clk` | client-side `.lua` |
 
-**Mindig a fájlhoz reáló kulcs nyitja ki**, nem erőforrás-szinten döntünk: egyes fájlok
-a grants, mások a kliens kulccsal jönnek ki, ezért minden fájlon mindkettőt
-megpróbáljuk, és az első validált eredmény nyer.
+**The key that belongs to the file is always the one that opens it.** It is not decided
+per resource: some files come with the grants key, others with the client key, so both
+are tried on every file and the first valid result wins.
 
-A stream fájlok (`.awc .ybn .ydd .ydr .yft .ymap .ymf .ytd .ytyp`) az `RSC7`/`RSC8`
-fejléc alapján ellenőrzötten kerülnek kiírásra, hogy ne kerüljön oda ellenőrizetlen
-személy.
+Stream files (`.awc .ybn .ydd .ydr .yft .ymap .ymf .ytd .ytyp`) are only written after
+their `RSC7`/`RSC8` header has been checked, so an unverified entity cannot end up there.
 
-A klienskulcs szolgáltatásával a 78%-ban 64 bájtos `grants_clk` nem kereshető meg: a
-szolgáltatás csak a kanonikus 48 bájtos alakot fogadja el, és a token 64 bájtos értéke
-sem prefixként, sem suffixként nem tartalmazza azt. Az ilyen erőforrásnál a szerveroldali
-fájlok dekódolódnak, a kliensoldali `.lua` pedig `<fájl>.raw` néven a titkosított
-eredeti példányként megmarad.
+With the client key service, the 64 byte `grants_clk` found in 78% of cases cannot be
+resolved: the service only accepts the canonical 48 byte form, and the token's 64 byte
+value contains it neither as a prefix nor as a suffix. For those resources the
+server-side files decrypt, and the client-side `.lua` stays on disk under `<file>.raw` as
+the encrypted original.
 
-## Könyvtárszerkezet
+## Directory layout
 
 ```
-Servers/<szervernév>/
+Servers/<server name>/
   Resources/Grants.txt
-  Output/<resource>/...      <- a kész, dekódolt fájlok
-%LOCALAPPDATA%/FiveMDumper/payload/   <- az exe-ből kicsomagolt Bin/ és jar
-                                        (önálló exe: nem kell külön letölteni)
+  Output/<resource>/...      <- the finished, decoded files
+%LOCALAPPDATA%/FiveMDumper/payload/   <- Bin/ and the jar, unpacked from the exe
+                                        (standalone exe: nothing else to download)
 ```
 
-## Megjegyzések
+## Notes
 
-- Az `unluac` jar az exe-ben van (`v1.2.3.511`), de a Lua-dekompiláláshoz a gépen
-  futtatható **Java** kell, a jar önmagában nem végrehajtható. Ha a defordítás meghiúsul,
-  a program megpróbálja a `--disassemble` / `--assemble` körülfordítást a hibás címkék
-  javításával; ha ez sem sikerül, a bytecode `<fájl>.luac` és a lista `<fájl>.asm`
-  néven megmarad.
-- A beágyazott payload mérete megközelítőleg 215 MB, így a kész exe megközelítőleg
-  217 MB. A pontos méret az aktuális `Bin/` tartalomtól függ (a `Bin/` nem része a git
-  repónak).
-- Titkosítás nélküli szervertől minden simán kiemetsződik; `.fxap`-os resource-oknál a
-  grants-token határozza meg, melyik kulcs kell.
+- The `unluac` jar is in the exe (`v1.2.3.511`), but decompiling Lua needs a runnable
+  **Java** on the machine, the jar is not an executable by itself. If decompilation
+  fails, the program tries the `--disassemble` / `--assemble` round trip to repair the
+  broken labels; if that fails too, the bytecode is kept as `<file>.luac` and the listing
+  as `<file>.asm`.
+- The embedded payload is roughly 215 MB, so the finished exe comes to roughly 217 MB.
+  The exact size depends on the current contents of `Bin/` (which is not part of the git
+  repository).
+- From a server without encryption everything simply falls out. For `.fxap` resources the
+  grants token decides which key is needed.
