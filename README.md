@@ -13,9 +13,11 @@ build.bat
 The exe lands in `build\Release\fivem_dumper.exe`. `build.bat` picks the installed Visual
 Studio with `vswhere`, so VS 2019, 2022 and 2026 all work.
 
-`Bin/` is not in the repository (2.4 GB), but the build packs it into the exe as an RCDATA
-payload. It needs the FXServer components (`Bin/citizen/`, `Bin/*.dll`,
-`Bin/Unpacker.exe`) and `Bin/vertex-fixer/`.
+`Bin/` holds the FXServer and client binaries and is kept in the repository through Git
+LFS. The build packs it into the exe as an RCDATA payload, so the finished exe needs
+nothing else on the machine. It has to contain `Bin/citizen/`, `Bin/*.dll`,
+`Bin/Unpacker.exe` and `Bin/vertex-fixer/`. FiveM ships its own `.gitignore` files inside
+`Bin/`, so `git lfs pull` after a clone leaves out the parts the build skips anyway.
 
 ## Use
 

@@ -2,3 +2,6 @@
 # reverse/evidence/toolchain.json and cited by sha256 in the Markdown reports.
 # CRLF conversion on checkout would break those pins, so keep it LF everywhere.
 reverse/** text eol=lf
+# Bin/ is 250 MB of FXServer and client binaries, and it changes with every
+# FiveM update. LFS keeps the git objects small and leaves room for the next one.
+Bin/** filter=lfs diff=lfs merge=lfs -text
