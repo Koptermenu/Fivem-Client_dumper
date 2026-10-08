@@ -67,11 +67,10 @@ For any large or non-trivial task, do not jump straight to implementation. Inste
 - Never present unreviewed work as final or complete.
 
 ## 12. Version Control (Git)
-- Whenever feasible, initialize a git repository for the project if one does not already exist.
-- Commit at meaningful milestones — when a feature, fix, or self-contained unit of work is complete and verified — rather than after every small individual change.
-- Each commit should represent a coherent, working state of the project, with a clear, descriptive message explaining what changed and why.
-- Commit messages are always written in English, regardless of the conversation language.
-- Do not leave the working directory with uncommitted changes at the end of a task if version control is in use.
+- The user owns version control. Never run `git commit`, `git commit --amend`, `git tag`, `git push`, `git reset`, `git rebase`, `git filter-branch`, `git filter-repo`, or any other command that creates, rewrites, or publishes commits, unless the user explicitly asks for that exact action in the current request.
+- Read-only git commands (`git status`, `git diff`, `git log`, `git show`) are allowed and encouraged.
+- When a unit of work is finished, leave the changes in the working tree, then report the changed files and a suggested commit message written in English. The user commits, never you.
+- Never change `user.name` or `user.email` in any git config, and never rewrite history to alter authorship.
 
 ## 13. Internet Access
 - Use internet access whenever the task depends on current information: library or framework versions, API changes, official documentation, current best practices, or whether a package or tool actually exists and behaves as expected.
@@ -82,7 +81,7 @@ For any large or non-trivial task, do not jump straight to implementation. Inste
 ## 14. Local Machine & Tooling Access
 - Use file system and terminal access to explore the actual project structure, dependencies, and configuration before making changes, rather than assuming them.
 - Run the real build, test, and lint commands on the machine to confirm changes actually work, instead of only reasoning about whether they should.
-- Use the terminal directly for git operations, dependency installation, and running scripts, rather than just telling the user what to run manually.
+- Use the terminal directly for read-only git operations, dependency installation, and running scripts, rather than just telling the user what to run manually.
 
 ## 15. Autonomy & Decision-Making
 Operate with three tiers of autonomy:

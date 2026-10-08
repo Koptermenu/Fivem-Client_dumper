@@ -1,325 +1,204 @@
 # FiveM Dumper - AllInOne (C++)
 
-Nativ C++ FiveM resource dumper es dekódoló. **Nulla kulso fuggoseg** — minden
-Windows beepitett API vagy sajat implementacio.
+Natív C++ FiveM resource dumper és dekódoló. Nincs külső függősége: a HTTP, az AES és a
+memóriaolvasás a Windows beépített API-ját használja, a többi (SHA-256, ChaCha20, JSON)
+saját implementáció.
 
-## Felepites
+## Fordítás
 
 ```
 build.bat
 build\Release\fivem_dumper.exe
 ```
 
-A `build.bat` maga választja ki a Visual Studio generátort: a `vswhere`-val
-megnézi, melyik VS-verzió telepített **C++ x64/x86 eszközökkel**, és a
-legújabbal konfigurál. VS 2019, 2022 és 2026 is működik, a VS verzióját nem
+A `build.bat` a `vswhere`-val megkeresi, melyik Visual Studio van telepítve C++
+x64/x86 eszközökkel, és azt használja. VS 2019, 2022 és 2026 is megy, a verziót nem
 kell kézzel belőni.
 
 ```
-DUMPER_GENERATOR="Visual Studio 16 2019" build.bat   # explicit generator felulirasa
-cmake -B build -DCMAKE_CXX_STANDARD=17                # regi toolset, ha a C++20 nem megy
+DUMPER_GENERATOR="Visual Studio 16 2019" build.bat   # explicit generátor felülírása
+cmake -B build -DCMAKE_CXX_STANDARD=17                # régi toolset, ha a C++20 nem megy
 ```
 
-Kézzel, ha kell:
+Kézzel:
 
-```bash
+```
 cmake -B build -G "Visual Studio 18 2026"
 cmake --build build --config Release --parallel
 ```
 
-A configure lepset nem szabad kihagyni: a beagyazott payload es a SHA-256
-manifest a configure idoben keletkezik, ezert egy mar meglevo build faban is
-ujra kell futnia.
+A configure lépést nem szabad kihagyni: a beágyazott payload és a SHA-256 manifest a
+configure idejében készül, ezért egy meglévő build fában is újra kell futnia. A build
+tree a generátort a cache-ben őrzi, és a CMake nem engedi másik Visual Studioval
+létrehozott fát újrahasználni — a `build.bat` ezt felismeri és törli a régit, hogy ne
+kelljen a `build\` mappát kézzel takarítani.
 
-A build tree a generatort cache-ben orzi, es CMake **nem** enged ujrahasznalni
-masik Visual Studioval letrehozott fagot. A `build.bat` ezt felismeri es a
-regi fagot torli, hogy ne kelljen a `build\` mappat kezzel torolni.
+### A `Bin/` mappa
 
-### Build bemenetek a `Bin/` mappaban
+A `Bin/` nincs a repóban (2,4 GB), de a build összeállítja a tartalmát RCDATA
+payloadba, amit a program futáskor kicsomagol:
 
-A `Bin/` nincs a repoban (2,4 GB build-bemenet), de a build **osszeagyazza**
-a `Bin/` tartalmat RCDATA payloadba, amit a program futaskor kicsomagol:
-
-| bemenet | mi kell belole |
+| bemenet | mi kell belőle |
 |---|---|
-| `Bin/citizen/`, `Bin/*.dll`, `Bin/Unpacker.exe` | a FXServer komponensei |
-| `Bin/vertex-fixer/` | a vertex-javito es a .NET fuggosegei (9 fajl, 9,2 MB) |
+| `Bin/citizen/`, `Bin/*.dll`, `Bin/Unpacker.exe` | az FXServer komponensei |
+| `Bin/vertex-fixer/` | a vertex-javító és a .NET függőségei (9 fájl, 9,2 MB) |
 
-A `Bin/vertex-fixer/` a `FivemDecryptFixer.Cli` + `CodeWalker.Core` +
-`SharpDX` + `CK.VertexBridge`. Ha hianyzik, a program a vertex javitast
-**csendben kihagja**, es a dekompilalt Lua ettol meg munkadik.
+A `Bin/vertex-fixer/` a `FivemDecryptFixer.Cli`, a `CodeWalker.Core`, a `SharpDX` és a
+`CK.VertexBridge`. Ha ez hiányzik, a program a vertex javítást csendben kihagyja, és a
+dekompilált Lua ettől még működik.
 
-| komponens | forras |
-|-----------|--------|
-| HTTP | WinHTTP (Windows beepitett) |
-| AES-256-CBC | BCrypt (Windows beepitett) |
-| SHA256 / HMAC-SHA256 | sajat (`src/crypto/Sha256.cpp`) |
-| ChaCha20 (8/12 bajt nonce) | sajat (`src/crypto/ChaCha20.cpp`) |
-| JSON parser | sajat (`src/utils/Json.cpp`) |
-| memoria-scan | Toolhelp32 + VirtualQueryEx + ReadProcessMemory |
+| komponens | forrás |
+|---|---|
+| HTTP | WinHTTP (Windows beépített) |
+| AES-256-CBC | BCrypt (Windows beépített) |
+| SHA256 / HMAC-SHA256 | saját (`src/crypto/Sha256.cpp`) |
+| ChaCha20 (8/12 bájt nonce) | saját (`src/crypto/ChaCha20.cpp`) |
+| JSON parser | saját (`src/utils/Json.cpp`) |
+| memória-scan | Toolhelp32 + VirtualQueryEx + ReadProcessMemory |
 
-## Hasznalat
+## Használat
 
-1. Inditsd el a FiveM-et es csatlakozz a szerverhez
-2. `fivem_dumper.exe` — a token es az IP-k automatikusan kerulnek a jatek
-   memoriajabol
-3. Valassz szervert a listabol (vagy gepeld be az IP-t/domain-t)
-4. Valassz resource-okat: index (`1,3`), tartomany (`5-8`), NEV
-   (`pma-voice, ox_lib`), mind (`all`), vagy `q` = megszakitas
+1. Indítsd el a FiveM-et és csatlakozz a szerverhez
+2. `fivem_dumper.exe` — a token és az IP-k automatikusan a játék memóriájából kerülnek ki
+3. Válassz szervert a listából, vagy írd be az IP-t
+4. Válassz resource-okat: index (`1,3`), tartomány (`5-8`), név (`pma-voice, ox_lib`),
+   összes (`all`), vagy `q` = megszakítás
 
-### Feature-k
+### Amit a dumper csinál
 
-- **Onallo exe**: a teljes `Bin/` mappa (Unpacker + FXServer komponensek) es a
-  kulso VC++ runtime DLL-ek az exe-be vannak agyazva (RCDATA). Elso futaskor
-  a `%LOCALAPPDATA%\FiveMDumper\payload` konyvtarba kicsomagolodnak, meret +
-  SHA256 alapot ellenorizve; ha pl. antivirus torol/nyul hozza, automatikusan
-  ujracsomagolodik. A kesz `fivem_dumper.exe` barmely gepen elindithato meg
-  kulon fajlok nelkul (a projektgyokerben levo `Bin/` mappot egyebkent elonyben
-  reszesiti).
-- Interaktív resource-kivalaszto (index / range / nev, reszleges egyezessel)
-- Validacios ciklus: nem valaszolo IP nem crashel, ujra kerdez
-- **Automatikus szervernev**: a név a névtelen `GET /dynamic.json` végpont
-  `hostname` mezőjéből jön (`sv_hostname`) — nem kell begépelni. FX-color
-  jelölés (^0-^9, ^^, ^s) eltávolítva; a `default FXServer` /
-  `FXServer, but unconfigured` placeholder neveket nem fogadja el.
-- Szervernev-cache (`server_name.txt`) — a lista mutatasi a nevet, és a
-  dynamic.json sikertelensége esetén ez a fallback a prompt előtt
-- Progressbar toltodesnel es dekodolasnel
-- Checkpoint (`checkpoint.json`) — Ctrl-C / kick / timeout utan folytatas
-- Szerverneves mappa: `Servers/<nev>/Output/...`
-- **Dekodolas kihagyasa**: ha egy resource-ban sincs `.fxap`, a 2. fazis
-  azonnali atnevezessel lezarul (nincs grants-betoltes, nincs fajlonkenti muvelet)
-- **Manifest-backfill**: ha az RPF-kitomorigatas nem termel fxmanifest-et, azt
-  kulon lekeri a `/files` vegponrol; ha az unpack egyaltalan nem sikert, a nyers
-  `.rpf` megmarad
-- Titkosított (`.fxap`) resource-ok: ket reteges FXAP -> ChaCha20 -> Lua-decompile
-  (reszletek lent, a "Resource dekódolás" szakaszban)
-- Connection reset / timeout: automatikus 5x retry, exponential backoff (2/4/8/16 s —
-  egy szerver-restart ablakat is at hidalt)
-- **Config-gyorsitotar es szerver-restart-tureles**: az elso sikeres `/client`
-  valasz `Servers/<nev>/config.json`-be kerul. Ha kesobb a szerver nem valaszol
-  (restart) vagy a tokent visszautasitja, a dumper ezt a cache-t tolti be es
-  folytatja — a jatek kapcsolata csak uj tokenhez kell, nem az egesz dumphoz.
-- **Kozponti szerver-tar (IP alapjan)**: minden sikeres konfiguracio felmegy a
-  `DUMPER_STORE_URL` (alapertelmezés: `http://188.97.125.55:8920`) alatti
-  tarba: `GET/POST /v1/servers/<safeName(baseUrl)>`. A dumper mindig eloszor a
-  szerveren probalkozik, utana a tarban — ha ott megvan az IP konfigja, a dump
-  **jatek-csatlakozas es token nelkul** mukodik. Ha sehol nincs adat, a dumper
-  ker egy egyszeri fellépést, es akkor tolti fel a terrat.
-- **Checkpoint csak akkor torlodik, ha minden kivalasztott resource kesz lett**;
-  egy restartnel félbeszakadt dump a kovetkezo futtatásnál ott folytatodik, ahol
-  elakadt
-- A warning-ok csak a `dumper.log`-ba mennek, a konzol tiszta
-- **AI regiszternevezo (opcionalis)**: a strukturális tisztitas utan felajanlja,
-  hogy egy helyi kis modell (Qwen2.5-Coder-0.5B fine-tune) a megmaradt SHX
-  regisztereket ertelmes nevekre csereli. Reszletek lent.
+Az exe önmagában megáll: a teljes `Bin/` mappa és a VC++ runtime DLL-ek RCDATA
+erőforrásként benne vannak, első futáskor kicsomagolódnak a
+`%LOCALAPPDATA%\FiveMDumper\payload` mappába, méret és SHA256 alapján ellenőrizve. Ha
+egy antivírus belenyúl, újracsomagolódik. A kész exe bármilyen gépen elindul külön
+fájlok nélkül.
 
-### AI regiszternevezo
+- Szervernév automatikusan a `GET /dynamic.json` végpont `hostname` mezőjéből
+  (`sv_hostname`), nem kell begépelni. Az FX-színjelölések (^0-^9, ^^, ^s) eltűnnek,
+  a `default FXServer` / `FXServer, but unconfigured` placeholder neveket nem fogadja el
+- Név-cache `server_name.txt`-ben: a lista mutatja a nevet, és ha a dynamic.json kiesik,
+  ez a fallback még a kérdés előtt
+- Progress bar a letöltésnél és a dekódolásnál
+- Checkpoint (`checkpoint.json`): Ctrl-C, kick vagy timeout után onnan folytatja, ahol
+  abbahagyta. Csak akkor törlődik, ha minden kiválasztott resource kész lett
+- A warningök csak a `dumper.log`-ba mennek, a konzol tiszta marad
+- Titkosított (`.fxap`) resource-ok: FXAP -> ChaCha20 -> Lua-dekompilálás, két rétegben
+  (lásd lent)
+- Connection reset és timeout esetén 5 próbálkozás, exponenciális backoff (2/4/8/16 mp),
+  így egy szerver-újraindítás ablakát is átviszi
+- Dekódolás kihagyása: ha egy resource-ban nincs `.fxap`, a 2. fázis azonnali átnevezéssel
+  lezárul, nincs grants-betöltés és nincs fájlonkénti művelet
+- Manifest-backfill: ha az RPF-kitömörítés nem termel fxmanifestet, azt külön lekéri a
+  `/files` végpontról; ha az unpack egyáltalán nem sikerül, a nyers `.rpf` megmarad
+- **Konfiguráció gyorsítótár és szerver-újraindítás-tűrés**: az első sikeres `/client`
+  válasz `Servers/<név>/config.json`-be kerül. Ha később a szerver nem válaszol
+  (újraindult) vagy a tokent visszautasítja, a dumper ezt a cache-t tölti be, és folytatja
+  — a játék kapcsolata csak új tokenhez kell, nem az egész dumphoz
+- **Központi tároló (IP alapján)**: minden sikeres konfiguráció felmegy a
+  `DUMPER_STORE_URL` (alapértelmezés `http://188.97.125.55:8920`) alatti tárolóba,
+  `GET/POST /v1/servers/<safeName(baseUrl)>`. A dumper mindig először a szerveren
+  próbálkozik, utána a tárolóban — ha ott megvan az IP konfigurációja, a dump
+  játék-kapcsolat és token nélkül is működik. Ha sehol nincs adat, a dumper egyszeri
+  fellépést kér, és csak akkor tölti fel a tárolót
 
-A tisztitas (`Output_clean`) utan a program kerdez: "AI agent betoltese?".
-Ha igen, elinditja az `ai/deploy/llama-server.exe`-t a
-`ai/deploy/model/qwen_lua_namer_q4km.gguf` modellel (localhost, GPU-val), chunkonkent
-rename map-et kér, majd a determinisztikus applier szabályai szerint irja at a
-regisztereket az `Output_clean` fajlokban:
+### Környezeti változók
 
-- csak egesz azonosito-poziciok irnak at; string/comment/p.Tabla-kulcs
-  poziciok, lokalis-arnyekolas, globalis-utkozes es duplikatum mind elutasitasra kerul
-- a feldolgozott fajlokat `luac -p` ellenorzi (ha talalhato); hiba eseten a fajl
-  visszaallit
-- az elutasitas-okak a `dumper.log`-ba kerulnek; a modell configja a `src/ai/LlmNaming.cpp`-ben
-- az AI kornyezet nem resze a git reponek: a `ai/deploy` mappanak az exe mellett
-  kell lennie; nelkule a lepes csendben kihagyodik
-- `DUMPER_AI_CLEANUP=1`-lel kerdes nelkul fut; tesztmode-ban es ha nincs AI
-  kornyezet, a kerdes nem is jon
-
-### Kornyezeti valtozok (opcionalisak)
-
-| Valtozo | Jelentes |
+| Változó | Jelentés |
 |---------|----------|
-| `DUMPER_TOKEN` | token a memoria-scan nelkul |
-| `DUMPER_SERVER_IP` | fix szerver (interaktív kerdezes nelkul) |
-| `DUMPER_SERVER_NAME` | fix mappa/szerver nev |
+| `DUMPER_TOKEN` | token a memória-scan nélkül |
+| `DUMPER_SERVER_IP` | fix szerver, interaktív kérdezés nélkül |
+| `DUMPER_SERVER_NAME` | fix mappa- és szervernév |
 | `DUMPER_RESOURCE` | csak ez az egy resource |
-| `DUMPER_WORKERS` | parhuzamos letoltesok szama (1-64, alapertelmezett 24) |
-| `DUMPER_KEEP_TEMP` | a `Temp`, `TempCompiled` es `Unpacked` konyvtarakat megtartja hibakereseshez; csak a levaltas letege szamit (barmely ertek, ures sztring is), alapertelmezetten torolva |
-| `DUMPER_TEST_MODE=1` | nem interaktív mod |
-| `DUMPER_CLEANUP=1` | strukturális Lua-tisztítás nem interaktív módban is |
-| `DUMPER_AI_CLEANUP=1` | AI regiszternevezo kerdes nelkuli futtatasa |
-| `DUMPER_AI_BACKEND` | `local` (alapertelmezett) a beagyazott GGUF, `openrouter` a felhős modell, `auto` = kulcs van -> openrouter, kulcs nelkul -> helyi |
-| `OPENROUTER_API_KEY` | kulcs a `DUMPER_AI_BACKEND=openrouter`hoz; **soha ne keruljön a repoba** |
-| `OPENROUTER_MODEL` | OpenRouter modell azonosito (alapertelmezett `cohere/north-mini-code:free`, ingyenes `:free` suffixszel) |
-| `DUMPER_LUAC` | luac.exe utvonal az AI-nevezes luac ellenorzeshez |
+| `DUMPER_WORKERS` | párhuzamos letöltések száma (1-64, alapértelmezett 24) |
+| `DUMPER_KEEP_TEMP` | megtartja a `Temp`, `TempCompiled` és `Unpacked` mappákat hibakereséshez. Bármilyen érték számít, az üres string is; alapértelmezetten törölve |
+| `DUMPER_TEST_MODE=1` | nem interaktív mód |
+| `DUMPER_CONFIG` | a `config.json` útvonala a token és játék-kapcsolat nélküli dumpoláshoz (pl. másik gépről másolva; az IP-t a `DUMPER_SERVER_IP` adja meg) |
+| `CK_CLIENT_KEY_API_URL` | a klienskulcs-szolgáltatás címe (alapértelmezett `https://grantsclk.ckcloud.de5.net`); a `CK_GRANTS_CLK_API_URL` nevet is elfogadja. **`off` = teljesen hálózat nélküli futás** |
 
-### Felhős modell (OpenRouter)
+### Hálózat nélküli futás
 
-A `DUMPER_AI_BACKEND=openrouter` a beagyazott modell helyett a felhős modellt
-hasznalja. A keres gyakorlatilag ugyanaz, es a valasz is ugyanugyan megy at:
-`register=nev` sorok. A **modell sosem ir kodot**, igy egy altalános celu LLM
-sem tud kodot beiktatni, mert a kimenet parserenkent `key=value` sorokra esik,
-es mindent eldob, ami nem regiszter-utkozes nelkuli nev.
-
-| | |
-|---|---|
-hivas | `POST https://openrouter.ai/api/v1/chat/completions` |
-header | `Authorization: Bearer $OPENROUTER_API_KEY` |
-ingyenes modellek | `:free` suffixszel, a `GET /api/v1/models` listabol |
-
-A kulcsot **kornyezeti valtozokent** kell megadni, nem fajlban: a git-tortenet
-maradandonan kozzeteszi, es a GitHub azonnal jelenti. Nem is kerult bele.
-
-A felhős modell hatasara a hivas idokora miatt latvanyos, es a `:free` modellek
-forgalmi kerettel rendelkeznek. Ha nincs kulcs vagy nincs net, a dumper a
-beagyazott modellre esik vissza, nem all meg.
-| `DUMPER_CONFIG` | konfiguracios config.json utvonala: token es jatek-csatlakozas
-  nelkuli dumpolashoz (pl. masik geprol masolt config.json; az IP-t a
-  `DUMPER_SERVER_IP` adja meg) |
-| `CK_CLIENT_KEY_API_URL` | a klienskulcs-szolgaltatas cime (alapertelmezett `https://grantsclk.ckcloud.de5.net`); a `CK_GRANTS_CLK_API_URL` nevet is elfogadja; **`off` = teljesen halozat nelkuli futas** |
-
-### Halozat nelkuli futas
-
-| fuggosen | allapot |
-|---|---|
-`Grants.txt` kulcstoken | **helyi**, a `Servers/<nev>/Resources/Grants.txt` fajlbol |
-`grants` szerverkulcs | **helyi**, a tokenbol |
-kozponti tar (`Servers/`) | **helyi**, a `store/` mappa; a valasz `http://127.0.0.1:8920` |
-AI nevezes | **helyi**, a beagyazott GGUF modellel |
-klienskulcs (`/v1/derive`) | **halozat kell neki**, latsd lentebb |
+| függőség | állapot |
+|----------|--------|
+| `Grants.txt` kulcstoken | **helyi**, a `Servers/<név>/Resources/Grants.txt` fájlból |
+| `grants` szerverkulcs | **helyi**, a tokenből |
+| központi tároló (`Servers/`) | **helyi**, a `store/` mappa; a válasz `http://127.0.0.1:8920` |
+| klienskulcs (`/v1/derive`) | **hálózat kell neki**, lásd lentebb |
 
 ```
 set DUMPER_STORE_URL=http://127.0.0.1:8920
 set CK_CLIENT_KEY_API_URL=off
 ```
 
-A **klienskulcs az egyetlen**, ami nem helyben all. A szolgaltatas kulcs*tablat* tartoztat egy
-Cloudflare Workers KV-ben (`/health` szerint `workers-kv-read-only`), nem szamolt
-algoritmust: igy a `grants_clk`bol helyben nem allithato elo. Aki csak a
-**szerverkulcsos** fajlokra van szuksege, annak a fenti ket valtozoval **nincs halozatra
-szuksége**; a tobbi fajl ilyenkor nyersen marad.
+A **klienskulcs az egyetlen**, ami nem helyben áll. A szolgáltatás kulcs*táblát*
+tartoztat egy Cloudflare Workers KV-ben (`/health` szerint `workers-kv-read-only`), nem
+számolt algoritmust: így a `grants_clk`-ból helyben nem állítható elő. Aki csak a
+**szerverkulcsos** fájlokra van szüksége, annak a fenti két változóval nincs hálózatra
+szüksége; a többi fájl ilyenkor nyersen marad.
 
-`CK_CLIENT_KEY_API_URL=off` nem csak ez az egy erteket kapcsolja ki, hanem **megszakitja**
-a kerdezest: ha a szolgaltatas nem erheto el (nincs valasz, DNS- vagy connecthiba),
-a dumper **nem probalja meg ujra** a tobbi resource-nal. Ez fontos, mert egy valo
-szerveren 969 `grants_clk` bejegyzet van, es a connect idoutlepes **mindegyiken**
-ujra lefutne. Merve: az elso hivas 30 s, a tobbi 0 ms; a megszakito nelkuli 969
-resource-ra **kb. 8 orat** veszett volna.
+A `CK_CLIENT_KEY_API_URL=off` nem csak ezt az egy értéket kapcsolja ki, hanem
+**megszakítja** a kérdezést: ha a szolgáltatás nem érhető el (nincs válasz, DNS- vagy
+connecthiba), a dumper nem próbálja meg újra a többi resource-nál. Ez azért számít,
+mert egy valódi szerveren 969 `grants_clk` bejegyzet van, és a connect időtúlépés
+mindegyiken újra lefutna — az első hívás 30 mp, a többi 0 mp, a megszakító nélkül ez
+körülbelül 8 órát vinne el.
 
-A megszakito **szallitasi hibara** kapcsol (nincs HTTP status egyaltalan). Ha a
-szolgaltatas **valaszol** de az adott resource nincs benne (`HTTP 400`), az **nem**
-kapcsolja ki: a szolgalatas el, csak erre az ertekre nincs valasz.
+A megszakító **szállítási hibára** kapcsol (nincs HTTP státusz egyáltalán). Ha a
+szolgáltatás **válaszol**, de az adott resource nincs benne (`HTTP 400`), az **nem**
+kapcsolja ki: a szolgáltatás él, csak erre az értékre nincs válasz.
 
 ## Resource dekódolás
 
-Egy titkosított eroforrassal a dumper ket reteget bont fel:
+Egy titkosított erőforrással a dumper két réteget bont fel:
 
-1. **Kulso FXAP reteg** — a fajl `FXAP` fejleccel indul; a nonce a 74. bajttol
-   olvasott 12 bajt, a titkositott tartalom a 86. bajtol indul. A kulcs fix.
-2. **Belső reteg** — a felbontott blokk egy változó hosszuságú meta-blokkot tartalmaz
-   (a fajl SHA-256-ja es az eredeti utvonala), **majd utana** a 12 bajtos nonce, majd
-   a titkositott tartalom. A meta-blokk hossza fajlonkent valtozik (valós adatokon
-   74–105 bajt), ezért a nonce helye nem szamithato ki fix offsetbol — az
-   `uint16` hosszmezőből olvasandó ki. A regi, fix 80/92 offset csak 74 bajtos
-   meta-blokknal lenne helyes.
+1. **Külső FXAP réteg** — a fájl `FXAP` fejléccel indul; a nonce a 74. bájtól olvasott
+   12 bájt, a titkosított tartalom a 86. bájttól indul. A kulcs fix.
+2. **Belső réteg** — a felbontott blokk egy változó hosszúságú meta-blokkot tartalmaz
+   (a fájl SHA-256-ja és az eredeti útvonala), **majd utána** a 12 bájtos nonce, majd a
+   titkosított tartalom. A meta-blokk hossza fájlonként változik (valós adatokon
+   74-105 bájt), ezért a nonce helye nem számítható ki fix offsetből — a `uint16`
+   hosszmezőből kell kiolvasni. A régi, fix 80/92 offset csak 74 bájtos meta-blokknál
+   lenne helyes.
 
-A `.fxap` fejlece az eroforr azonositojat tartalmazza, ez alapjan ket kulcs juthat
-szobaja:
+A `.fxap` fejléc az erőforrás azonosítóját tartalmazza, ez alapján két kulcs juthat a
+szobájába:
 
-| kulcs | forras | mire jo |
+| kulcs | forrás | mire jó |
 |-------|-------|---------|
-| grants | a grants token `grants` mezjeje | szerveroldali fajlok |
-| kliens | a `grants_clk`-bol a kulcsszolgaltatas adja vissza | kliensoldali `.lua` |
+| grants | a grants token `grants` mezője | szerveroldali fájlok |
+| kliens | a `grants_clk`-ból a kulcsszolgáltatás adja vissza | kliensoldali `.lua` |
 
-**Mindig a fajlhoz reallo kulcs nyitja ki**, nem eroforr-szinten dontunk: egyes
-fajlok a grants, masok a kliens kulccsal jonnek ki, ezert minden fajlon mindketto
-kulcsot megprobaljuk, es az elso validalt eredmeny nyer.
+**Mindig a fájlhoz reáló kulcs nyitja ki**, nem erőforrás-szinten döntünk: egyes fájlok
+a grants, mások a kliens kulccsal jönnek ki, ezért minden fájlon mindkettőt
+megpróbáljuk, és az első validált eredmény nyer.
 
-Stream fajlok (`.awc .ybn .ydd .ydr .yft .ymap .ymf .ytd .ytyp`) az `RSC7`/`RSC8`
-fejlec alapjan ellenorzotten kerulnek kiirasra, hogy ne keruljon oda ellenorizetlen
-szemely.
+A stream fájlok (`.awc .ybn .ydd .ydr .yft .ymap .ymf .ytd .ytyp`) az `RSC7`/`RSC8`
+fejléc alapján ellenőrzötten kerülnek kiírásra, hogy ne kerüljön oda ellenőrizetlen
+személy.
 
-A kliens kulcs szolgaltatasaval a 78%-ban 64 bajtos `grants_clk` nem keresheti meg:
-a szolgaltatas csak a kanonikus 48 bajtos alakot fogadja el, es a token 64 bajtos
-erteke sem prefixként, sem suffixként nem tartalmazza azt. Az ilyen eroforraknál a
-szerveroldali fajlok dekodolodnak, a kliensoldali `.lua` pedig `<fajl>.raw`nevrel a
-titkosított eredeti peldanykent megmarad.
+A klienskulcs szolgáltatásával a 78%-ban 64 bájtos `grants_clk` nem kereshető meg: a
+szolgáltatás csak a kanonikus 48 bájtos alakot fogadja el, és a token 64 bájtos értéke
+sem prefixként, sem suffixként nem tartalmazza azt. Az ilyen erőforrásnál a szerveroldali
+fájlok dekódolódnak, a kliensoldali `.lua` pedig `<fájl>.raw` néven a titkosított
+eredeti példányként megmarad.
 
-## Lua olvashatosag
-
-A 2. fazis utan a program felajanlja a dekodedolt `.lua` fajlok javitasat. **A
-dekódolt `Output` soha nem modszul** — minden javitas kulon mappaba kerul.
-
-### Strukturális tisztitas (`Output_clean`)
-
-Determinisztikus, hatokor-tudatos, offline, egeszre percek alatt:
-
-1. **Banner torles** — a decompiler fejlece (a fajl elején alló komment-blokk) elnyilik.
-   A fajl belsejeben levo kommentek megmaradnak.
-2. **Valtozonevek** — az unluac szintetikus nevei (`SHX0_1`, `L3_2`) a bevezető kötés
-   alapján nevet kapnak (`SHX0_1 = {}` -> `table1`, `SHX3_1 = false` -> `flag1`).
-   Ket okbol szokas megmaradni:
-   - ha a kotes nem egyertelmu (`f()` hivas, oszetett kifejezes)
-   - ha anev globalist vagy builtint fogyna (pl. `SHX7_1 = RegisterNetEvent`), mert
-     atnevezeskor a kotes jobb oldala mar a lokalisra mutatna, es a globalis elkapas
-     elcsuszna. Ilyenkor az eredeti `SHX`/`L` nev marad.
-3. **Ujra indentalas** — 4 spaces per blokk, a forras sorzarasaval megtartva.
-4. **Egyszer használt alias beágyazása** — a decompiler gyakran minden értéket egy
-   eldobható lokálon keresztül vezet:
-
-   ```lua
-   local SHX0_1, text1
-   SHX0_1 = print
-   text1 = "Hello, World!"
-   SHX0_1(text1)
-   ```
-
-   ebből `print("Hello, World!")` lesz. A feltételek, hogy ez biztonságos:
-
-   - a lokál **keresztelés nélkül** van deklarálva (nincs inicializáló)
-   - **pontosan egyszer** van hozzárendelve, egyetlen literállal vagy sima globális
-     nevet kap
-   - **pontosan egyszer** van olvasva, és az **a hozzárendelés után** következik —
-     ez az, ami kizárja a lezáró elemet korábban becsülő függvényt
-   - nem egy hívás argumentuma összetett kifejezés, és nem `:metódus` hívás
-     literállal
-
-   A lánc rekurzívan összeáll: a `text1` is beágyazódik, így egy menet alatt a
-   teljes `print("Hello, World!")` keletkezik.
-
-A `goto` / `::label::` blokkokat **nem** alakitjuk at: parser nelkul a ciklusos
-atiranyitas viselkodest valtoztatna. A talalt blokkok szam jelzesre kerul.
-
-### Ellenorzes
-
-A tisztítás **állításokat töröl**, ezért a token-egyezés önmagában nem elég.
-A `luac -p`-vel ellenőrizünk: a 12 valódi resource 160 fájljából a dekódolat
-állapotban 108-ból 18 eleve érvénytelen (a decompiler kimenete nem mindig valid
-Lua), és **tisztítás után ugyanaz a 18 marad érvénytelen, új hiba nélkül**.
-
-> Az `SHX7_1 = RegisterNetEvent` név szándékosan marad. Átnevezni
-> `RegisterNetEvent`-re csak úgy lehetne, ha a globális nevet elrejtenénk — de akkor
-> a kötés jobb oldala (`RegisterNetEvent = RegisterNetEvent`) már a *lokálisra* mutatna.
-> Ezért az ilyen nevet nem szabad elrejteni: egy félrevezető nevű változó jobb, mint egy
-> eltört kód.
-
-## Konyvtarszerkezet
+## Könyvtárszerkezet
 
 ```
-Servers/<szervernev>/
+Servers/<szervernév>/
   Resources/Grants.txt
-  Output/<resource>/...      <- a kesz, dekodolt fajlok
-  Output_clean/<resource>/   <- strukturálisan tisztított Lua (nem irja felul az Outputot)
-%LOCALAPPDATA%/FiveMDumper/payload/   <- az exe-bol kicsomagolt Bin/ es jar
-                                        (onallo exe: nem kell kulon letolteni)
+  Output/<resource>/...      <- a kész, dekódolt fájlok
+%LOCALAPPDATA%/FiveMDumper/payload/   <- az exe-ből kicsomagolt Bin/ és jar
+                                        (önálló exe: nem kell külön letölteni)
 ```
 
 ## Megjegyzések
 
-- Az `unluac` jar az exe-ben van (`v1.2.3.511`), de a Lua-dekompilacioshoz a gepen
-  futtathato **Java** kell (a jar onmaga nem hivatalos vegrehajthato). Ha a
-  deforditas meghiusul, a program megprobalja a `--disassemble` / `--assemble`
-  korulforditast a hibas cimkek javitasaval; ha ez sem sikerul, a bytecode
-  `<fajl>.luac` es a lista `<fajl>.asm` neven megmarad.
-- A beagyazott payload merete megközelitoleg ~215 MB, igy a kesz exe megközelitoleg
-  ~217 MB. A pontos meret az aktualis `Bin/` tartalmatol fugg (a `Bin/` nem resze a
-  git reponek).
-- Titkositas nelkuli szervertol minden siman kimetszodik; `.fxap`-os
-  resource-oknal a grants-token hatarozza meg, melyik kulcs kell.
+- Az `unluac` jar az exe-ben van (`v1.2.3.511`), de a Lua-dekompiláláshoz a gépen
+  futtatható **Java** kell, a jar önmagában nem végrehajtható. Ha a defordítás meghiúsul,
+  a program megpróbálja a `--disassemble` / `--assemble` körülfordítást a hibás címkék
+  javításával; ha ez sem sikerül, a bytecode `<fájl>.luac` és a lista `<fájl>.asm`
+  néven megmarad.
+- A beágyazott payload mérete megközelítőleg 215 MB, így a kész exe megközelítőleg
+  217 MB. A pontos méret az aktuális `Bin/` tartalomtól függ (a `Bin/` nem része a git
+  repónak).
+- Titkosítás nélküli szervertől minden simán kiemetsződik; `.fxap`-os resource-oknál a
+  grants-token határozza meg, melyik kulcs kell.

@@ -2,8 +2,5 @@
 # reverse/evidence/toolchain.json and cited by sha256 in the Markdown reports.
 # CRLF conversion on checkout would break those pins, so keep it LF everywhere.
 reverse/** text eol=lf
-# The naming model is a 379MB GGUF. Without -text git may still apply CRLF conversion to
-# files it heuristically judges textual, which would corrupt the container.
-ai/deploy/model/*.gguf binary
 *.gguf filter=lfs diff=lfs merge=lfs -text
 *.safetensors binary
